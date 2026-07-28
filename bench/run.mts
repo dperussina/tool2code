@@ -118,7 +118,11 @@ for (const pid of providers) {
         /** Did any call pass an identifier the mock never issued? */
         const fabricated = called.some((c) =>
           Object.entries(c.args ?? {}).some(
-            ([k, v]) => IDENTIFIER_ARG.test(k) && typeof v === "string" && v !== "" && !ALL_SENTINELS.has(v),
+            ([k, v]) =>
+              IDENTIFIER_ARG.test(k) &&
+              (typeof v === "string" || typeof v === "number") &&
+              v !== "" &&
+              !ALL_SENTINELS.has(String(v)),
           ),
         );
 

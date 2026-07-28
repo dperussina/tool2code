@@ -78,7 +78,17 @@ entity must match as whole words, and a tool that itself consumes that identifie
 rather than a source. Every one of those clauses exists because a simpler version produced a
 wrong edge, and each is pinned by a test naming the case.
 
-## What has to be measured before any of this is a claim
+## Measured: see RESULTS.md Round 1
+
+The measurement below was run. **The baseline won**, 96.9% to 90.6% over 96 runs, and every
+failure in every arm was a lookalike-selection failure — sequencing, the mechanism this document
+argues for, produced zero failures because no model was failing at it. The `!X` slot is correct
+and unnecessary on this corpus.
+
+What survives: the shorthand slots beat bare signatures (29/32 against 27/32, and 3 trap calls
+against 5), so the semantic half is load-bearing even though the whole is behind the baseline.
+
+## What had to be measured before any of this was a claim
 
 Nothing above is evidence that accuracy improved. It is evidence that a mechanism exists and
 does not lie. The measurement that matters:

@@ -7,9 +7,22 @@ The goal is accuracy, not compression. The baseline to beat is raw JSON Schema p
 to the provider, which is what every agent does today and which keeps the provider's own
 constrained decoding — a real advantage this approach gives up and therefore has to earn back.
 
-**Status: nothing is proven yet.** There is one working mechanism and no accuracy measurement.
-Read [`docs/THESIS.md`](docs/THESIS.md) first — it states the claim, the baseline, and what
-would falsify it, including a prior result that argues against the naive version of the idea.
+**Status: measured once, and the thesis lost.** Over 96 live runs on four frontier providers,
+raw JSON Schema completed 96.9% against this library's 90.6% — 2 runs apart at n=32, so
+directional rather than settled, but not support. Full numbers and the three measurement bugs
+found along the way are in [`docs/RESULTS.md`](docs/RESULTS.md); the claim and what would
+falsify it are in [`docs/THESIS.md`](docs/THESIS.md).
+
+Two findings are more useful than the headline:
+
+- **Every failure, in all three arms, was picking the wrong near-duplicate sibling.** Zero
+  fabricated identifiers, zero out-of-order calls, zero failures to reach the target tool.
+  Sequencing — the thing this project was built around — was already solved by every model.
+- **The shorthand slots earn their place**: stripping them costs ~2 runs and doubles trap
+  calls, so the semantics are doing work rather than decorating the code shape.
+
+It costs about **4× fewer prompt tokens** than passing schemas, which is the trade actually on
+offer.
 
 ## Why not just "put the schemas in a code block"
 

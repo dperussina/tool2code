@@ -30,7 +30,10 @@ export const SENTINELS: Record<string, string[]> = {
   gdrive_list_files: ["file_2KD9PL"],
   create_article: ["art_QJ4T80"],
   get_quote: ["quote_MZ6X15"],
-  search_customers: ["partner_5QN8"],
+  // Numeric, because `get_customer_scorecard.partnerId` is `type: "number"` ("e.g., 737") and
+  // ten identifier parameters in this corpus are. A string sentinel made that scenario
+  // unsatisfiable: every model correctly sent a number, and the grader called every one wrong.
+  search_customers: ["990417"],
 };
 
 /** Flat set of every sentinel, for membership tests. */
@@ -67,13 +70,14 @@ export function execute(name: string, args: Record<string, any>): { content: str
       case "get_quote":
         return json({ quoteId: own[0], total: 412.5, currency: "USD" });
       case "search_customers":
-        return json({ customers: [{ partnerId: own[0], name: "Johnson Manufacturing", status: "active" }] });
+        return json({ customers: [{ partnerId: Number(own[0]), name: "Johnson Manufacturing", status: "active" }] });
     }
   }
 
   // A consumer: check every identifier-shaped argument it was handed.
   const supplied = Object.entries(args ?? {}).filter(([k]) => IDENTIFIER_ARG.test(k));
-  const invented = supplied.filter(([, v]) => typeof v === "string" && !ALL_SENTINELS.has(v));
+  // Compared as text, so a numeric identifier is judged the same as a string one.
+  const invented = supplied.filter(([, v]) => (typeof v === "string" || typeof v === "number") && !ALL_SENTINELS.has(String(v)));
   if (invented.length) {
     return {
       content: JSON.stringify({

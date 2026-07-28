@@ -27,9 +27,11 @@ if (!sweep) {
   process.exit(1);
 }
 
+const exclude = flag("exclude").split(",").filter(Boolean);
+
 type Row = {
   sweep: string; provider: string; arm: string; scenario: string; rep: number;
-  correct: boolean; fabricated: boolean; outOfOrder: boolean;
+  correct: boolean; fabricated: boolean; outOfOrder: boolean; trapped?: string[];
   calledProducer: boolean; calledFinal: boolean; sequence: string[];
   turns: number; unresolved: number; promptTokens: number; outputTokens: number; error: string | null;
 };
@@ -38,7 +40,7 @@ const rows: Row[] = [];
 for (const f of readdirSync("bench/results").filter((f) => f.endsWith(".jsonl"))) {
   for (const line of readFileSync(`bench/results/${f}`, "utf8").split("\n").filter(Boolean)) {
     const r = JSON.parse(line) as Row;
-    if (r.sweep === sweep) rows.push(r);
+    if (r.sweep === sweep && !exclude.includes(r.scenario)) rows.push(r);
   }
 }
 if (!rows.length) { console.error(`no rows for sweep ${sweep}`); process.exit(1); }
@@ -47,7 +49,10 @@ const arms = [...new Set(rows.map((r) => r.arm))];
 const providers = [...new Set(rows.map((r) => r.provider))];
 const pct = (n: number, d: number) => (d ? `${((n / d) * 100).toFixed(1)}%` : "—");
 
-console.log(`sweep ${sweep} — ${rows.length} runs, ${providers.length} providers, ${arms.length} arms\n`);
+console.log(
+  `sweep ${sweep} — ${rows.length} runs, ${providers.length} providers, ${arms.length} arms` +
+    (exclude.length ? `, excluding ${exclude.join(", ")}` : "") + "\n",
+);
 
 console.log("| arm | n | completed | fabricated ID | out of order | never called producer | errors | avg turns |");
 console.log("|---|--:|--:|--:|--:|--:|--:|--:|");
@@ -100,7 +105,19 @@ const failures = rows.filter((r) => !r.correct);
 if (failures.length) {
   console.log(`\n**Every failure** (${failures.length}):\n`);
   for (const r of failures) {
-    const why = r.error ? `ERROR ${r.error}` : r.fabricated ? "fabricated ID" : r.outOfOrder ? "out of order" : !r.calledFinal ? `never called ${r.scenario}'s final tool` : "wrong identifier";
+    // Trap first: a run that called the wrong sibling was mislabelled "wrong identifier",
+    // which hid the failure mode the discrimination scenarios exist to measure.
+    const why = r.error
+      ? `ERROR ${r.error}`
+      : r.trapped?.length
+        ? `called the trap (${r.trapped.join(", ")})`
+        : r.fabricated
+          ? "fabricated ID"
+          : r.outOfOrder
+            ? "out of order"
+            : !r.calledFinal
+              ? `never called the target tool`
+              : "wrong identifier";
     console.log(`- \`${r.provider}\` / \`${r.arm}\` / ${r.scenario}: ${why} — sequence: ${r.sequence.join(" → ") || "(no calls)"}`);
   }
 }
