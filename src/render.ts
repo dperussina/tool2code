@@ -106,6 +106,7 @@ export function renderTool(
   if (s) {
     if (s.returns) slots.push(`>${s.returns}`);
     if (s.supersetOf?.length) slots.push(`^${s.supersetOf.join(",")}`);
+    for (const n of s.notThis ?? []) slots.push(`vs${n.tool}(${n.why})`);
     for (const n of s.needs ?? []) slots.push(n.startsWith("?") ? n : `!${n}`);
   } else {
     slots.push("?uncompiled");

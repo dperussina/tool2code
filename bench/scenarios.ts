@@ -76,6 +76,33 @@ export const SCENARIOS: Scenario[] = [
     trapTools: ["cost_of_sales"],
   },
 
+  // Three more trap pairs, because the first round's weakness was its base: two pairs produced
+  // all nine failures. These come from other clusters `cluster.ts` finds in the same corpus.
+  {
+    id: "disc-loc-live",
+    kind: "discriminate",
+    prompt:
+      "I am planning a truck route this afternoon and need the customer sites and hubs we can route through, with their coordinates.",
+    finalTool: "get_active_locations",
+    trapTools: ["active_locations"],
+  },
+  {
+    id: "disc-loc-bulk",
+    kind: "discriminate",
+    prompt:
+      "For the Control Tower warehouse load, I need the active locations data source feed — and first just its schema so I can set up the table.",
+    finalTool: "active_locations",
+    trapTools: ["get_active_locations"],
+  },
+  {
+    id: "disc-cust-find",
+    kind: "discriminate",
+    prompt:
+      "Which of our customers in the Southeast are currently on credit hold? I need to find them, not export anything.",
+    finalTool: "search_customers",
+    trapTools: ["customers"],
+  },
+
   // ---- sequencing ----
   {
     id: "seq-place",

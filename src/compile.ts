@@ -24,6 +24,7 @@
 import type { Tool } from "./types.js";
 import { GLOSSARY } from "./shorthand.js";
 import { words } from "./graph.js";
+import { compileBatches, contradictorySupersets, subjectKey } from "./cluster.js";
 
 export type Completion = (input: { system: string; user: string }) => Promise<string>;
 
@@ -36,6 +37,13 @@ export type Semantics = {
   supersetOf?: string[];
   /** Tools to call first to obtain an argument. */
   needs?: string[];
+  /**
+   * Near-duplicate tools this one must not be mistaken for, and what each is for instead.
+   *
+   * The slot that exists because of measurement: every failure over 96 runs was calling the
+   * wrong member of a lookalike pair, and nothing else failed at all.
+   */
+  notThis?: { tool: string; why: string }[];
 };
 
 export const SYSTEM = `You are turning a tool catalogue into a Python module another model will read to decide which tool to call.
@@ -44,7 +52,7 @@ ${GLOSSARY}
 
 For each tool, output one line:
 
-<name> | >RETURNS | ^SUPERSET | !NEEDS
+<name> | >RETURNS | ^SUPERSET | !NEEDS | vsOTHER(why)
 
 - RETURNS: what comes back, in as few words as possible. This is the field that decides
   everything. Tools in a catalogue are often near-identical in name and parameters and differ
@@ -54,6 +62,17 @@ For each tool, output one line:
 - SUPERSET: names of other tools in the inventory whose results this tool's results already
   contain. Omit unless true. This is what stops a model reaching for the comprehensive tool
   every time; it is also what tells it when the comprehensive one is the right single call.
+- vsOTHER: when two tools in this batch are easy to confuse, EACH must say what it is not.
+  Write \`vsother_tool(what that one is for)\`. This is the most valuable field you can fill:
+  measured over 96 runs, every single failure was a model calling the wrong member of a
+  near-identical pair, and no other kind of failure occurred at all. The usual shape is one
+  tool being a bulk export for loading into a warehouse — date ranges, csv paths, row limits —
+  and the other answering a question about one entity by its ID. Say so on both:
+    order_notes | >bulk note rows for sync | | | vsget_order_notes(one order by tracking number)
+    get_order_notes | >notes on one order | | ?trackingNumber | vsorder_notes(bulk CSV feed for warehouse sync)
+- SUPERSET is for containment ONLY, and it is directional: use it when this tool's result
+  genuinely includes the other's. It cannot go both ways. Two tools returning the same subject
+  at different granularity are NOT a superset pair — that is \`vs\`, not \`^\`.
 - NEEDS: names of tools that must be called first to obtain one of this tool's arguments —
   a place ID comes from a place search, a task ID from the call that started the task. If an
   argument is an identifier the caller must already possess and nothing in the inventory
@@ -92,12 +111,26 @@ export type Rejection = { name: string; reason: string };
  * `^` equivalent of a wrong producer edge — it will send the model to the wrong single call).
  */
 export function verify(s: Semantics, tools: Tool[]): string | null {
+  /**
+   * A contrast is only meaningful between tools that are actually confusable.
+   *
+   * Asked for `vs`, the model wrote one for 143 of 147 tools — including tools with no
+   * lookalike anywhere — which nearly doubled the artifact (21,350 to 39,286 characters) and
+   * buried the 31 contrasts that matter under 112 that do not. Two tools are confusable here
+   * when they share a subject once access verbs are stripped, which is the definition
+   * `cluster.ts` uses to batch them in the first place.
+   */
+  if (s.notThis?.length) {
+    const mine = subjectKey(s.name);
+    s.notThis = s.notThis.filter((n) => subjectKey(n.tool) === mine && n.tool !== s.name);
+    if (!s.notThis.length) delete s.notThis;
+  }
   const known = new Map(tools.map((t) => [t.name, t]));
   const self = known.get(s.name);
   if (!self) return `not a tool in this catalogue`;
   if (!s.returns.trim()) return `empty returns slot — the field that does the work`;
 
-  for (const n of [...(s.supersetOf ?? []), ...(s.needs ?? [])]) {
+  for (const n of [...(s.supersetOf ?? []), ...(s.needs ?? []), ...(s.notThis ?? []).map((x) => x.tool)]) {
     if (n.startsWith("?")) continue;
     if (n === s.name) return `names itself`;
     if (!known.has(n)) return `names ${n}, which is not in this catalogue`;
@@ -171,7 +204,10 @@ export function parseLine(line: string): Semantics | null {
     const body = cell.slice(1).trim();
     if (cell.startsWith(">")) out.returns = body;
     else if (cell.startsWith("^")) out.supersetOf = body.split(",").map((x) => x.trim()).filter(Boolean);
-    else if (cell.startsWith("!") || cell.startsWith("?"))
+    else if (cell.startsWith("vs")) {
+      for (const m of cell.matchAll(/vs([A-Za-z_][\w]*)\s*\(([^)]*)\)/g))
+        (out.notThis ??= []).push({ tool: m[1], why: m[2].trim() });
+    } else if (cell.startsWith("!") || cell.startsWith("?"))
       out.needs = cell.split(",").map((x) => x.trim()).filter(Boolean).map((x) => (x.startsWith("!") ? x.slice(1) : x));
     else if (!out.returns) out.returns = cell; // a model that forgot the > on the first slot
   }
@@ -181,6 +217,8 @@ export function parseLine(line: string): Semantics | null {
 export type CompileResult = {
   semantics: Map<string, Semantics>;
   rejected: Rejection[];
+  /** Superset claims dropped for contradicting each other. Reported, never silently fixed. */
+  contradictions: [string, string][];
 };
 
 export async function compile(
@@ -194,6 +232,7 @@ export async function compile(
 
   const semantics = new Map<string, Semantics>();
   const rejected: Rejection[] = [];
+  const contradictions: [string, string][] = [];
 
   const ask = async (batch: Tool[]) => {
     const text = await opts.complete({
@@ -220,8 +259,11 @@ export async function compile(
     return failed;
   };
 
-  for (let i = 0; i < tools.length; i += batchSize) {
-    (await ask(tools.slice(i, i + batchSize))).forEach((f) => rejected.push(f));
+  // Lookalike clusters are compiled whole and alone, so the model can contrast members it can
+  // actually see. Compiling in corpus order is what produced two mutually contradictory
+  // superset claims: neither tool's batch contained the other.
+  for (const batch of compileBatches(tools, batchSize)) {
+    (await ask(batch)).forEach((f) => rejected.push(f));
   }
 
   // A batch occasionally drops a line; asking for that tool alone nearly always fixes it. Only
@@ -235,7 +277,23 @@ export async function compile(
       if (!still.length) rejected.splice(rejected.findIndex((r) => r.name === name), 1);
     }
   }
-  return { semantics, rejected };
+  /**
+   * A containment cycle means neither direction is trustworthy, so both claims go.
+   *
+   * Dropping rather than picking a side: the compiler has just demonstrated it does not know
+   * which contains which, and a confident wrong answer here is what tells a model the two tools
+   * are interchangeable.
+   */
+  for (const [a, b] of contradictorySupersets(semantics)) {
+    for (const [x, y] of [[a, b], [b, a]] as const) {
+      const s = semantics.get(x)!;
+      s.supersetOf = (s.supersetOf ?? []).filter((n) => n !== y);
+      if (!s.supersetOf.length) delete s.supersetOf;
+    }
+    contradictions.push([a, b]);
+  }
+
+  return { semantics, rejected, contradictions };
 }
 
 export { words };

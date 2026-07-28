@@ -17,8 +17,12 @@ const complete = async ({system,user}:{system:string;user:string}) => {
 };
 
 const t0 = Number(process.env.T0 ?? 0);
-const { semantics, rejected } = await compile(tools, { complete, batchSize: 12 });
+const { semantics, rejected, contradictions } = await compile(tools, { complete, batchSize: 12 });
 console.log(`compiled ${semantics.size}/${tools.length}`);
+for (const [a, b] of contradictions) console.log(`  DROPPED contradictory superset: ${a} <-> ${b}`);
+const vs = [...semantics.values()].filter((s: any) => s.notThis?.length);
+console.log(`  ${vs.length} tools carry a contrast slot`);
+for (const s of vs.slice(0, 8) as any[]) console.log(`    ${s.name}: ${s.notThis.map((n: any) => `vs${n.tool}(${n.why})`).join(" ")}`);
 for (const r of rejected) console.log(`  REJECTED ${r.name}: ${r.reason}`);
 writeFileSync("corpus/semantics.json", JSON.stringify(Object.fromEntries(semantics), null, 1) + "\n");
 console.log(`wrote corpus/semantics.json (${JSON.stringify(Object.fromEntries(semantics)).length} chars)`);

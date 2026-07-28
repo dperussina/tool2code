@@ -1,378 +1,177 @@
 {
- "accessorial_revenue_details": {
-  "name": "accessorial_revenue_details",
-  "returns": "one row per order+accessorial code: revenue, cost, date, order total cost, billing"
- },
- "accessorial_revenue_summary": {
-  "name": "accessorial_revenue_summary",
-  "returns": "per accessorial code/billing status/year: order count, zero count, avg charge, revenue, cost"
- },
  "active_locations": {
   "name": "active_locations",
-  "returns": "every active customer site & hub with address, lat/lng, hub/customer flags, last activity"
- },
- "analyze_blob_with_gemini": {
-  "name": "analyze_blob_with_gemini",
-  "returns": "Gemini's reading of an image/audio/PDF/spreadsheet file",
-  "needs": [
-   "?blob_container",
-   "?blob_name"
+  "returns": "bulk active site/hub rows for Control Tower sync, or column schema only",
+  "notThis": [
+   {
+    "tool": "get_active_locations",
+    "why": "live lookup of locations for route planning"
+   }
   ]
  },
- "analyze_consolidation": {
-  "name": "analyze_consolidation",
-  "returns": "shipments grouped by destination with consolidation opportunities and truck utilization",
-  "needs": [
-   "?shipments",
-   "?truckSpecs"
-  ]
- },
- "analyze_data_with_gemini": {
-  "name": "analyze_data_with_gemini",
-  "returns": "findings/insights over a big dataset you pass in, optionally schema-shaped"
- },
- "analyze_urls_with_context": {
-  "name": "analyze_urls_with_context",
-  "returns": "extracted content and comparison across the given web pages"
- },
- "append_to_article": {
-  "name": "append_to_article",
-  "returns": "confirmation that a new section was added"
- },
- "ar_summary": {
-  "name": "ar_summary",
-  "returns": "invoice-level receivables: balances, charges, volumes, POD, 0-30/31-60/61-90/91-120/120+ aging"
- },
- "batch_geocode": {
-  "name": "batch_geocode",
-  "returns": "coordinates per address, many at once",
-  "supersetOf": [
-   "geocode_address"
-  ]
- },
- "browse_articles_by_tag": {
-  "name": "browse_articles_by_tag",
-  "returns": "articles carrying a tag"
- },
- "calculate_distance_matrix": {
-  "name": "calculate_distance_matrix",
-  "returns": "distance and duration for every origin-destination pair"
- },
- "calculate_fuel_cost": {
-  "name": "calculate_fuel_cost",
-  "returns": "total trip fuel cost plus the live diesel price it fetched",
-  "supersetOf": [
-   "get_diesel_price"
-  ]
- },
- "calculate_route_distance": {
-  "name": "calculate_route_distance",
-  "returns": "driving distance and duration for one origin-destination pair"
- },
- "cancel_order": {
-  "name": "cancel_order",
-  "returns": "cancellation result or refusal reason",
-  "needs": [
-   "?trackingNumber"
+ "get_active_locations": {
+  "name": "get_active_locations",
+  "returns": "active customer sites and hubs with coordinates",
+  "notThis": [
+   {
+    "tool": "active_locations",
+    "why": "bulk/schema-mode export feed for warehouse sync"
+   }
   ]
  },
  "check_health": {
   "name": "check_health",
-  "returns": "API up/down status"
- },
- "coding_task_execute": {
-  "name": "coding_task_execute",
-  "returns": "task ID plus paths to generated code, execution output, docs, metadata"
- },
- "coding_task_result": {
-  "name": "coding_task_result",
-  "returns": "finished task's full output: code, run results, model metadata",
-  "supersetOf": [
-   "coding_task_status"
-  ],
-  "needs": [
-   "coding_task_execute"
+  "returns": "TagNext API up/down status",
+  "notThis": [
+   {
+    "tool": "health_check",
+    "why": "data-sources-mcp server version, uptime, tool categories"
+   }
   ]
  },
- "coding_task_status": {
-  "name": "coding_task_status",
-  "returns": "progress state of a running task, no output artifacts",
-  "needs": [
-   "coding_task_execute"
+ "health_check": {
+  "name": "health_check",
+  "returns": "data-sources-mcp server version, uptime, tool categories, capabilities",
+  "notThis": [
+   {
+    "tool": "check_health",
+    "why": "TagNext API reachability only"
+   }
   ]
- },
- "compare_rates": {
-  "name": "compare_rates",
-  "returns": "spot vs contract rate side by side for a lane with pricing recommendation",
-  "supersetOf": [
-   "get_spot_rate",
-   "get_contract_rate"
-  ]
- },
- "compress_large_text": {
-  "name": "compress_large_text",
-  "returns": "shortened version of the supplied text"
- },
- "compute_distance_matrix": {
-  "name": "compute_distance_matrix",
-  "returns": "all-pairs travel time and distance grid",
-  "supersetOf": [
-   "calculate_route_distance"
-  ]
- },
- "compute_route": {
-  "name": "compute_route",
-  "returns": "single route: legs, distance, duration, optional polyline and reordered stops",
-  "supersetOf": [
-   "calculate_route_distance",
-   "optimize_waypoints"
-  ]
- },
- "connect_google_drive": {
-  "name": "connect_google_drive",
-  "returns": "OAuth authorization URL to visit; unlocks the gdrive_* tools"
  },
  "cost_of_sales": {
   "name": "cost_of_sales",
-  "returns": "per-invoice revenue vs cost rows: revenue components, total expense, cost by type, facility-level crossdock/linehaul splits"
- },
- "create_article": {
-  "name": "create_article",
-  "returns": "confirmation with new article ID",
-  "needs": [
-   "search_knowledge_base"
+  "returns": "per-invoice revenue/expense rows with cost-by-type and facility-level breakouts, for warehouse sync",
+  "notThis": [
+   {
+    "tool": "get_cost_of_sales",
+    "why": "batched date-range pull returning file manifest plus aggregated heatmap"
+   }
   ]
  },
- "create_order_note": {
-  "name": "create_order_note",
-  "returns": "created note confirmation",
-  "needs": [
-   "?trackingNumber"
+ "get_cost_of_sales": {
+  "name": "get_cost_of_sales",
+  "returns": "manifest of offloaded 31-day batches with freight/carrier cost detail and aggregated heatmap data",
+  "notThis": [
+   {
+    "tool": "cost_of_sales",
+    "why": "raw invoice-level export feed for Control Tower sync"
+   }
   ]
  },
  "customers": {
   "name": "customers",
-  "returns": "customer/partner records with billing address, contacts, balances, key dates, salesperson"
- },
- "deep_consultation": {
-  "name": "deep_consultation",
-  "returns": "markdown report of multi-model debate: consensus, disagreements, citations, optional full transcript",
-  "supersetOf": [
-   "query_model",
-   "query_all_models"
-  ]
- },
- "deep_research": {
-  "name": "deep_research",
-  "returns": "synthesized multi-source research report with sources, confidence scores",
-  "supersetOf": [
-   "research_with_google_search"
-  ]
- },
- "demo_all_types": {
-  "name": "demo_all_types",
-  "returns": "5 fake sample records plus schema covering every column type"
- },
- "disconnect_google_drive": {
-  "name": "disconnect_google_drive",
-  "returns": "revocation confirmation; gdrive_* tools stop working"
- },
- "discover_api": {
-  "name": "discover_api",
-  "returns": "endpoint list, auth requirements, connectivity test result for an API URL",
-  "supersetOf": [
-   "probe_url"
-  ]
- },
- "discover_businesses_with_maps": {
-  "name": "discover_businesses_with_maps",
-  "returns": "nearby business listings with ratings, optional reviews, Maps links",
-  "needs": [
-   "geocode_address"
-  ]
- },
- "execute_report": {
-  "name": "execute_report",
-  "returns": "report result rows inline, or path to offloaded JSON if large",
-  "needs": [
-   "list_reports"
-  ]
- },
- "extract_structured_data": {
-  "name": "extract_structured_data",
-  "returns": "JSON conforming to your schema, pulled from the supplied text",
-  "needs": [
-   "?text"
-  ]
- },
- "fcp_coverage_by_zipcode": {
-  "name": "fcp_coverage_by_zipcode",
-  "returns": "full zipcode↔service-provider route coverage map with centroid lat/lng (or just schema/row count)"
- },
- "fcp_pay_charts": {
-  "name": "fcp_pay_charts",
-  "returns": "pay-rate bands per service provider: chart name, service level, weight/mileage ranges, rates"
- },
- "fifo": {
-  "name": "fifo",
-  "returns": "live on-dock freight snapshot: PRO, lane, days since onboard, last scan, parties, cube/weight/pieces, flags, ETA"
- },
- "find_optimal_truck": {
-  "name": "find_optimal_truck",
-  "returns": "smallest truck that fits the load, with weight/cube fit reasoning",
-  "needs": [
-   "?availableTrucks"
-  ]
- },
- "gdrive_connection_status": {
-  "name": "gdrive_connection_status",
-  "returns": "whether a Drive account is linked, plus account/connection details"
- },
- "gdrive_download_file": {
-  "name": "gdrive_download_file",
-  "returns": "file bytes as inline text, base64, or a saved path on disk"
- },
- "gdrive_from_link": {
-  "name": "gdrive_from_link",
-  "returns": "parsed file ID plus metadata and optionally content, from a pasted URL",
-  "supersetOf": [
-   "gdrive_read_file"
-  ],
-  "needs": [
-   "?url"
-  ]
- },
- "gdrive_list_files": {
-  "name": "gdrive_list_files",
-  "returns": "file listing for a folder or type: IDs, names, basic metadata"
- },
- "gdrive_read_file": {
-  "name": "gdrive_read_file",
-  "returns": "single file's full metadata, optionally with exported content"
- },
- "gdrive_search": {
-  "name": "gdrive_search",
-  "returns": "matching files by name/content/properties: IDs, names, basic metadata"
- },
- "gdrive_search_by_name": {
-  "name": "gdrive_search_by_name",
-  "returns": "file matches for a partial/fuzzy filename: IDs, names, types"
- },
- "gdrive_sheets_append_rows": {
-  "name": "gdrive_sheets_append_rows",
-  "returns": "append confirmation: updated range, rows/cells added, optionally the written values"
- },
- "gdrive_sheets_batch_update": {
-  "name": "gdrive_sheets_batch_update",
-  "returns": "per-request results of structural/formatting changes, optionally updated spreadsheet metadata"
- },
- "gdrive_sheets_get_range": {
-  "name": "gdrive_sheets_get_range",
-  "returns": "cell values for one range as rows or columns"
- },
- "gdrive_sheets_list_tabs": {
-  "name": "gdrive_sheets_list_tabs",
-  "returns": "tab inventory: sheetId, title, index, row/column counts"
- },
- "gdrive_sheets_update_range": {
-  "name": "gdrive_sheets_update_range",
-  "returns": "overwrite confirmation: updated range, cell/row counts, optionally new values"
- },
- "gdrive_upload_file": {
-  "name": "gdrive_upload_file",
-  "returns": "created file's ID, name, link"
- },
- "geocode_address": {
-  "name": "geocode_address",
-  "returns": "lat/lng, formatted address, place ID for an address string"
- },
- "get_active_locations": {
-  "name": "get_active_locations",
-  "returns": "every active customer site and hub with coordinates",
-  "supersetOf": [
-   "active_locations"
-  ]
- },
- "get_article_by_id": {
-  "name": "get_article_by_id",
-  "returns": "full article body plus optional metadata"
- },
- "get_call_recordings": {
-  "name": "get_call_recordings",
-  "returns": "call recordings: metadata, audio blob URLs, AI summaries/sentiment"
- },
- "get_contract_rate": {
-  "name": "get_contract_rate",
-  "returns": "52-week DAT contract rate forecast for a lane"
- },
- "get_cost_of_sales": {
-  "name": "get_cost_of_sales",
-  "returns": "batched freight/carrier cost-of-sales manifest: file refs per 31-day batch plus aggregated heatmap data",
-  "supersetOf": [
-   "cost_of_sales"
+  "returns": "bulk customer+billing rows for warehouse sync: dim weight config, COPS billing, address, balances, key dates, salesperson",
+  "notThis": [
+   {
+    "tool": "search_customers",
+    "why": "name/region lookup with pagination"
+   },
+   {
+    "tool": "get_customer_details",
+    "why": "one account by ID"
+   }
   ]
  },
  "get_customer_details": {
   "name": "get_customer_details",
-  "returns": "full account profile: brand, credit, sales rep, order/revenue stats, service config"
- },
- "get_customer_exceptions": {
-  "name": "get_customer_exceptions",
-  "returns": "controllable vs uncontrollable exception counts over recent days"
- },
- "get_customer_scorecard": {
-  "name": "get_customer_scorecard",
-  "returns": "delivery performance dashboard: milestone averages, service levels, cases, on-time %"
- },
- "get_diesel_price": {
-  "name": "get_diesel_price",
-  "returns": "national or state diesel prices with historical trend"
- },
- "get_dock_location": {
-  "name": "get_dock_location",
-  "returns": "servicing final-mile dock/facility for a zip",
+  "returns": "one account's full profile: brand, credit, sales rep, order/revenue stats, service config",
   "needs": [
-   "?zipCode"
+   "?partnerId"
+  ],
+  "notThis": [
+   {
+    "tool": "search_customers",
+    "why": "finding which customer, many results"
+   },
+   {
+    "tool": "customers",
+    "why": "bulk billing export"
+   }
   ]
  },
- "get_document": {
-  "name": "get_document",
-  "returns": "download URLs for order paperwork/labels in PDF, HTML, ZPL",
-  "needs": [
-   "?trackingNumber"
+ "search_customers": {
+  "name": "search_customers",
+  "returns": "paginated matching customers with contact info, order stats, credit status",
+  "notThis": [
+   {
+    "tool": "get_customer_details",
+    "why": "full profile of one known ID"
+   },
+   {
+    "tool": "customers",
+    "why": "bulk billing export for sync"
+   }
+  ]
+ },
+ "fifo": {
+  "name": "fifo",
+  "returns": "on-dock freight rows (PRO, lane, DSO, last scan, volumes, flags, ETA) or schema only for Control Tower sync",
+  "notThis": [
+   {
+    "tool": "get_fifo_report",
+    "why": "writes the same on-dock data to a CSV file for analysis"
+   }
   ]
  },
  "get_fifo_report": {
   "name": "get_fifo_report",
-  "returns": "on-dock freight CSV: DSO, last scan, location, routing",
-  "supersetOf": [
-   "fifo"
-  ]
- },
- "get_freight_items": {
-  "name": "get_freight_items",
-  "returns": "packages/products on the order",
-  "needs": [
-   "?trackingNumber"
+  "returns": "CSV file of on-dock freight with DSO, last scan, location, routing",
+  "notThis": [
+   {
+    "tool": "fifo",
+    "why": "real-time row/schema feed for Control Tower syncing"
+   }
   ]
  },
  "get_intransit_report": {
   "name": "get_intransit_report",
-  "returns": "freight loaded on trucks CSV: load IDs, departures, ETAs, destinations",
-  "supersetOf": [
-   "intransit"
+  "returns": "in-transit loads written to CSV file (load IDs, departure, ETA, destination)",
+  "needs": [
+   "?serviceProviderID"
+  ],
+  "notThis": [
+   {
+    "tool": "intransit",
+    "why": "row-level feed for Control Tower sync"
+   }
   ]
  },
- "get_label_data": {
-  "name": "get_label_data",
-  "returns": "per-handling-unit item IDs and QR codes for building your own labels",
+ "intransit": {
+  "name": "intransit",
+  "returns": "in-transit snapshot rows: load/PRO, lane, provider, departure, DSO, last scan, ETAs, shipper/consignee, volume, flags",
   "needs": [
-   "?trackingNumber"
+   "?service_provider_id"
+  ],
+  "notThis": [
+   {
+    "tool": "get_intransit_report",
+    "why": "saves a CSV report file for analysis"
+   }
   ]
  },
  "get_load_details": {
   "name": "get_load_details",
-  "returns": "one load's origin, destination, carrier, planned/actual dates, load type"
+  "returns": "origin, destination, carrier, planned/actual departure & arrival, load type for one load",
+  "needs": [
+   "?loadId"
+  ],
+  "notThis": [
+   {
+    "tool": "load_report",
+    "why": "bulk denormalized load export for Control Tower sync"
+   }
+  ]
+ },
+ "load_report": {
+  "name": "load_report",
+  "returns": "bulk load rows: IDs, unload dates/weeks, lane & crossdock dimensions, carrier, cost",
+  "notThis": [
+   {
+    "tool": "get_load_details",
+    "why": "one load's routing by its ID"
+   }
+  ]
  },
  "get_order_details": {
   "name": "get_order_details",
@@ -386,39 +185,542 @@
   ],
   "needs": [
    "?trackingNumber"
+  ],
+  "notThis": [
+   {
+    "tool": "quick_search_orders",
+    "why": "finding the tracking number from a name or reference"
+   }
+  ]
+ },
+ "quick_search_orders": {
+  "name": "quick_search_orders",
+  "returns": "matching order stubs with identifiers",
+  "needs": [
+   "?query"
+  ],
+  "notThis": [
+   {
+    "tool": "get_order_details",
+    "why": "full record once you have the tracking number"
+   }
   ]
  },
  "get_order_notes": {
   "name": "get_order_notes",
-  "returns": "notes only",
-  "supersetOf": [
-   "order_notes"
+  "returns": "notes on one order",
+  "needs": [
+   "?trackingNumber"
   ],
+  "notThis": [
+   {
+    "tool": "order_notes",
+    "why": "bulk note/communication feed for Control Tower sync"
+   }
+  ]
+ },
+ "order_notes": {
+  "name": "order_notes",
+  "returns": "bulk note/communication rows with order, delivery, authorship, geography context",
+  "notThis": [
+   {
+    "tool": "get_order_notes",
+    "why": "notes for one order by tracking number"
+   }
+  ]
+ },
+ "get_place_details": {
+  "name": "get_place_details",
+  "returns": "full profile of one place: address, contact, hours, ratings, geometry",
+  "notThis": [
+   {
+    "tool": "search_places",
+    "why": "finds candidate places from a text query when you have no ID"
+   }
+  ]
+ },
+ "search_places": {
+  "name": "search_places",
+  "returns": "ranked list of matching places with IDs and summary fields",
+  "notThis": [
+   {
+    "tool": "get_place_details",
+    "why": "deep detail on a single already-identified place"
+   }
+  ]
+ },
+ "query_all_models": {
+  "name": "query_all_models",
+  "returns": "parallel responses from all four models plus combined usage stats",
+  "supersetOf": [
+   "query_model"
+  ],
+  "notThis": [
+   {
+    "tool": "query_model",
+    "why": "one chosen model only"
+   }
+  ]
+ },
+ "query_model": {
+  "name": "query_model",
+  "returns": "single model's answer with usage and citations",
+  "notThis": [
+   {
+    "tool": "query_all_models",
+    "why": "fan out to all four for comparison"
+   }
+  ]
+ },
+ "scorecard_booties_gloves": {
+  "name": "scorecard_booties_gloves",
+  "returns": "per-SP weekly booties/gloves compliance counts and percentages",
+  "notThis": [
+   {
+    "tool": "scorecard_booties_gloves_detail",
+    "why": "per-order photo rows behind the rollup"
+   }
+  ]
+ },
+ "scorecard_booties_gloves_detail": {
+  "name": "scorecard_booties_gloves_detail",
+  "returns": "one row per order/photo document with dates",
+  "notThis": [
+   {
+    "tool": "scorecard_booties_gloves",
+    "why": "aggregated weekly per-SP percentages"
+   }
+  ]
+ },
+ "scorecard_edemand": {
+  "name": "scorecard_edemand",
+  "returns": "weekly per-FC eDemand%, OFD%, Precall% rollup rows",
+  "supersetOf": [
+   "scorecard_edemand_detail"
+  ],
+  "notThis": [
+   {
+    "tool": "scorecard_edemand_detail",
+    "why": "order-level rows behind the percentages"
+   }
+  ]
+ },
+ "scorecard_edemand_detail": {
+  "name": "scorecard_edemand_detail",
+  "returns": "one row per order/date/route/driver/window with eDemand fields",
+  "notThis": [
+   {
+    "tool": "scorecard_edemand",
+    "why": "weekly aggregated percentages per FC"
+   }
+  ]
+ },
+ "scorecard_nps": {
+  "name": "scorecard_nps",
+  "returns": "weekly per-SP NPS rollup: survey counts, score, detractor/passive/promoter buckets",
+  "notThis": [
+   {
+    "tool": "scorecard_nps_detail",
+    "why": "individual survey responses"
+   }
+  ]
+ },
+ "scorecard_nps_detail": {
+  "name": "scorecard_nps_detail",
+  "returns": "one row per order/date/response option — raw survey responses",
+  "notThis": [
+   {
+    "tool": "scorecard_nps",
+    "why": "aggregated weekly score per SP"
+   }
+  ]
+ },
+ "scorecard_timely_resource": {
+  "name": "scorecard_timely_resource",
+  "returns": "weekly per-FC timely-resource counts, pct, per-thousand, score",
+  "notThis": [
+   {
+    "tool": "scorecard_timely_resource_detail",
+    "why": "individual order rows behind the metric"
+   }
+  ]
+ },
+ "scorecard_timely_resource_detail": {
+  "name": "scorecard_timely_resource_detail",
+  "returns": "one row per order/scheduled_on with timeliness",
+  "notThis": [
+   {
+    "tool": "scorecard_timely_resource",
+    "why": "aggregated weekly per-FC scores"
+   }
+  ]
+ },
+ "accessorial_revenue_details": {
+  "name": "accessorial_revenue_details",
+  "returns": "one row per order+accessorial code: accessorial revenue, cost, date, order total cost, billing status"
+ },
+ "accessorial_revenue_summary": {
+  "name": "accessorial_revenue_summary",
+  "returns": "per accessorial code/billing status/year buckets: order counts, zero counts, avg charge, revenue, cost"
+ },
+ "analyze_blob_with_gemini": {
+  "name": "analyze_blob_with_gemini",
+  "returns": "Gemini's reading of one stored or linked file (image, audio, PDF, spreadsheet)",
+  "needs": [
+   "?blob_container",
+   "?blob_name or ?external_url"
+  ]
+ },
+ "analyze_consolidation": {
+  "name": "analyze_consolidation",
+  "returns": "shipments grouped by destination with consolidation opportunities and utilization gains",
+  "needs": [
+   "?shipments"
+  ]
+ },
+ "analyze_data_with_gemini": {
+  "name": "analyze_data_with_gemini",
+  "returns": "structured findings/patterns from a large JSON payload you pass in"
+ },
+ "analyze_urls_with_context": {
+  "name": "analyze_urls_with_context",
+  "returns": "extracted content and comparison across up to 20 named web pages, with URL metadata",
+  "needs": [
+   "?urls"
+  ]
+ },
+ "append_to_article": {
+  "name": "append_to_article",
+  "returns": "confirmation of a new section added at the end, existing text untouched"
+ },
+ "ar_summary": {
+  "name": "ar_summary",
+  "returns": "invoice-level AR rows: parties, PRO, locations, service level, POD, volumes, charges, outstanding balance, 0-30/31-60/61-90/91-120/120+ aging buckets"
+ },
+ "batch_geocode": {
+  "name": "batch_geocode",
+  "returns": "coordinates for many addresses at once",
+  "supersetOf": [
+   "geocode_address"
+  ],
+  "needs": [
+   "?addresses"
+  ]
+ },
+ "browse_articles_by_tag": {
+  "name": "browse_articles_by_tag",
+  "returns": "paged article list for one tag"
+ },
+ "calculate_distance_matrix": {
+  "name": "calculate_distance_matrix",
+  "returns": "distance and duration for every origin-destination pair"
+ },
+ "calculate_fuel_cost": {
+  "name": "calculate_fuel_cost",
+  "returns": "total trip fuel cost from live diesel price, distance and MPG",
+  "supersetOf": [
+   "get_diesel_price"
+  ]
+ },
+ "calculate_route_distance": {
+  "name": "calculate_route_distance",
+  "returns": "driving miles + duration for one origin/destination pair"
+ },
+ "calculate_trip_cost": {
+  "name": "calculate_trip_cost",
+  "returns": "itemized trip cost: fuel, driver time, maintenance, total",
+  "supersetOf": [
+   "calculate_fuel_cost"
+  ],
+  "needs": [
+   "calculate_route_distance"
+  ]
+ },
+ "cancel_order": {
+  "name": "cancel_order",
+  "returns": "cancellation confirmation or refusal reason",
+  "needs": [
+   "?trackingNumber"
+  ]
+ },
+ "coding_task_execute": {
+  "name": "coding_task_execute",
+  "returns": "taskId plus paths of generated code, run output, docs",
+  "needs": [
+   "?task"
+  ]
+ },
+ "coding_task_result": {
+  "name": "coding_task_result",
+  "returns": "finished task's full output: code, execution results, metadata",
+  "supersetOf": [
+   "coding_task_status"
+  ],
+  "needs": [
+   "coding_task_execute"
+  ]
+ },
+ "coding_task_status": {
+  "name": "coding_task_status",
+  "returns": "progress/state of a running task",
+  "needs": [
+   "coding_task_execute"
+  ]
+ },
+ "compare_rates": {
+  "name": "compare_rates",
+  "returns": "spot vs contract rate side by side with pricing recommendation",
+  "supersetOf": [
+   "get_spot_rate",
+   "get_contract_rate"
+  ]
+ },
+ "compress_large_text": {
+  "name": "compress_large_text",
+  "returns": "shortened text preserving key facts",
+  "needs": [
+   "?text"
+  ]
+ },
+ "compute_distance_matrix": {
+  "name": "compute_distance_matrix",
+  "returns": "grid of durations and distances for all origin/destination combinations"
+ },
+ "compute_route": {
+  "name": "compute_route",
+  "returns": "route with distance, duration, legs, optional polyline and optimized stop order",
+  "supersetOf": [
+   "calculate_route_distance"
+  ]
+ },
+ "connect_google_drive": {
+  "name": "connect_google_drive",
+  "returns": "authorization URL to grant Drive access"
+ },
+ "create_article": {
+  "name": "create_article",
+  "returns": "new article record with id",
+  "needs": [
+   "search_knowledge_base"
+  ]
+ },
+ "create_order_note": {
+  "name": "create_order_note",
+  "returns": "created note confirmation (w)",
+  "needs": [
+   "?trackingNumber"
+  ]
+ },
+ "deep_consultation": {
+  "name": "deep_consultation",
+  "returns": "markdown report of multi-model debate: consensus, disagreements, optional full transcript, citations",
+  "supersetOf": [
+   "query_all_models"
+  ]
+ },
+ "deep_research": {
+  "name": "deep_research",
+  "returns": "synthesized multi-source research findings with sources, dedup and confidence scores",
+  "supersetOf": [
+   "research_with_google_search",
+   "discover_businesses_with_maps"
+  ]
+ },
+ "demo_all_types": {
+  "name": "demo_all_types",
+  "returns": "sample records covering every Control Tower column type plus schema, for format testing"
+ },
+ "disconnect_google_drive": {
+  "name": "disconnect_google_drive",
+  "returns": "revocation confirmation, stored tokens removed (d)"
+ },
+ "discover_api": {
+  "name": "discover_api",
+  "returns": "endpoint inventory, auth requirements and connectivity test result for an API URL",
+  "supersetOf": [
+   "probe_url"
+  ],
+  "needs": [
+   "?url"
+  ]
+ },
+ "discover_businesses_with_maps": {
+  "name": "discover_businesses_with_maps",
+  "returns": "local businesses with ratings, reviews, Maps links near coordinates",
+  "needs": [
+   "?latitude",
+   "?longitude"
+  ]
+ },
+ "execute_report": {
+  "name": "execute_report",
+  "returns": "report result rows as JSON inline, or path to offloaded file when large"
+ },
+ "extract_structured_data": {
+  "name": "extract_structured_data",
+  "returns": "JSON conforming to your supplied schema, pulled from supplied text",
+  "needs": [
+   "?text",
+   "?extraction_schema"
+  ]
+ },
+ "fcp_coverage_by_zipcode": {
+  "name": "fcp_coverage_by_zipcode",
+  "returns": "full zipcode-to-service-provider route coverage map with centroid coordinates, for sync"
+ },
+ "fcp_pay_charts": {
+  "name": "fcp_pay_charts",
+  "returns": "every pay-rate band per service provider: chart name, service level, weight range"
+ },
+ "find_optimal_truck": {
+  "name": "find_optimal_truck",
+  "returns": "smallest truck meeting weight and cube of the shipments"
+ },
+ "gdrive_connection_status": {
+  "name": "gdrive_connection_status",
+  "returns": "whether Drive is linked and account/connection details"
+ },
+ "gdrive_download_file": {
+  "name": "gdrive_download_file",
+  "returns": "file content inline, base64, or written to an output path"
+ },
+ "gdrive_from_link": {
+  "name": "gdrive_from_link",
+  "returns": "file id plus metadata (optionally content) parsed out of a pasted Google URL",
+  "needs": [
+   "?url"
+  ]
+ },
+ "gdrive_list_files": {
+  "name": "gdrive_list_files",
+  "returns": "file listing for a folder or type, unfiltered by text"
+ },
+ "gdrive_read_file": {
+  "name": "gdrive_read_file",
+  "returns": "metadata for one file, optionally its exported text"
+ },
+ "gdrive_search": {
+  "name": "gdrive_search",
+  "returns": "matching files via Drive query syntax over name, content, properties, dates",
+  "supersetOf": [
+   "gdrive_search_by_name"
+  ]
+ },
+ "gdrive_search_by_name": {
+  "name": "gdrive_search_by_name",
+  "returns": "files whose name partially matches a string"
+ },
+ "gdrive_sheets_append_rows": {
+  "name": "gdrive_sheets_append_rows",
+  "returns": "confirmation of rows added and the updated range"
+ },
+ "gdrive_sheets_batch_update": {
+  "name": "gdrive_sheets_batch_update",
+  "returns": "replies for each structural request: tabs created, columns resized, formatting applied"
+ },
+ "gdrive_sheets_get_range": {
+  "name": "gdrive_sheets_get_range",
+  "returns": "cell values from one A1 range"
+ },
+ "gdrive_sheets_list_tabs": {
+  "name": "gdrive_sheets_list_tabs",
+  "returns": "tab ids, titles, order, row/column counts in a spreadsheet"
+ },
+ "gdrive_sheets_update_range": {
+  "name": "gdrive_sheets_update_range",
+  "returns": "write confirmation: updated range, cell/row counts, optionally new values",
+  "needs": [
+   "gdrive_search",
+   "gdrive_list_files"
+  ]
+ },
+ "gdrive_upload_file": {
+  "name": "gdrive_upload_file",
+  "returns": "created Drive file: id, name, link, mime type"
+ },
+ "geocode_address": {
+  "name": "geocode_address",
+  "returns": "coordinates plus formatted address and place identifier for one address string"
+ },
+ "get_article_by_id": {
+  "name": "get_article_by_id",
+  "returns": "full article body, optionally metadata",
+  "needs": [
+   "search_knowledge_base",
+   "browse_articles_by_tag"
+  ]
+ },
+ "get_call_recordings": {
+  "name": "get_call_recordings",
+  "returns": "phone call list with call metadata, audio blob URLs, AI summaries/sentiment",
+  "needs": [
+   "?orderId"
+  ]
+ },
+ "get_contract_rate": {
+  "name": "get_contract_rate",
+  "returns": "52-week long-term contract lane pricing forecast"
+ },
+ "get_customer_exceptions": {
+  "name": "get_customer_exceptions",
+  "returns": "controllable vs uncontrollable exception counts for one partner over N days",
+  "needs": [
+   "search_customers"
+  ]
+ },
+ "get_customer_scorecard": {
+  "name": "get_customer_scorecard",
+  "returns": "delivery stats, milestone averages, service-level breakdown, cases, on-time % over a date range",
+  "needs": [
+   "search_customers"
+  ]
+ },
+ "get_diesel_price": {
+  "name": "get_diesel_price",
+  "returns": "national or state diesel price with historical trend"
+ },
+ "get_dock_location": {
+  "name": "get_dock_location",
+  "returns": "servicing final-mile dock/facility for a zip"
+ },
+ "get_document": {
+  "name": "get_document",
+  "returns": "download URLs for order paperwork and labels in PDF/HTML/ZPL",
+  "needs": [
+   "?trackingNumber"
+  ]
+ },
+ "get_freight_items": {
+  "name": "get_freight_items",
+  "returns": "packages/products on the order with dimensions and descriptions",
+  "needs": [
+   "?trackingNumber"
+  ]
+ },
+ "get_label_data": {
+  "name": "get_label_data",
+  "returns": "item IDs for Code128 barcodes plus QR codes per handling unit",
   "needs": [
    "?trackingNumber"
   ]
  },
  "get_order_timeline": {
   "name": "get_order_timeline",
-  "returns": "chronological movements, status changes and events",
+  "returns": "chronological movement/status/event history as recorded internally",
   "needs": [
    "?trackingNumber"
   ]
  },
  "get_order_tracking": {
   "name": "get_order_tracking",
-  "returns": "EDI and scan events with timestamps, locations, status codes",
+  "returns": "EDI events plus scan events with timestamps, locations, status codes",
   "needs": [
    "?trackingNumber"
   ]
  },
- "get_place_details": {
-  "name": "get_place_details",
-  "returns": "address, contact, hours and attributes for one place"
- },
  "get_quote": {
   "name": "get_quote",
-  "returns": "priced freight quote for the described shipment"
+  "returns": "priced FragilePAK freight quote for the described shipment"
  },
  "get_scheduling_options": {
   "name": "get_scheduling_options",
@@ -429,108 +731,86 @@
  },
  "get_spot_rate": {
   "name": "get_spot_rate",
-  "returns": "current market spot rate plus forecast for the lane"
+  "returns": "current DAT market spot rate with forecast for a lane"
  },
  "get_transit_time": {
   "name": "get_transit_time",
   "returns": "transit days between two zips"
  },
- "health_check": {
-  "name": "health_check",
-  "returns": "server version, uptime, tool categories, capabilities"
- },
  "identify_patterns": {
   "name": "identify_patterns",
-  "returns": "trends, anomalies, clusters or relationships found in supplied data"
- },
- "intransit": {
-  "name": "intransit",
-  "returns": "live snapshot of freight on trucks: load/PRO IDs, lane, provider, departure, DSO, last scan, ETAs, parties, volume, flags",
-  "supersetOf": [
-   "get_intransit_report"
+  "returns": "trends, anomalies, clusters and relationships found in supplied data",
+  "needs": [
+   "?text"
   ]
  },
  "job_financial": {
   "name": "job_financial",
-  "returns": "per-job residential P&D records: job/partner IDs, completion date, FCP + consignee addresses with geocodes, zip-based vs geocode-calculated zone/distance"
+  "returns": "bulk per-job residential P&D rows comparing system vs geocoded zone/distance, for warehouse sync"
  },
  "list_reports": {
   "name": "list_reports",
-  "returns": "catalogue of report definitions: ID, name, description, query text, parsed parameter specs"
- },
- "load_report": {
-  "name": "load_report",
-  "returns": "denormalized load-level rows: load/master load IDs, unload date + week anchor, linehaul/vendor lane type, origin/destination codes & markets, carrier, cost"
+  "returns": "catalogue of report IDs, names, descriptions, queries and parameter definitions"
  },
  "lovesac_deliveries": {
   "name": "lovesac_deliveries",
-  "returns": "LoveSac delivery rows: record key, tracking number, delivery date, service provider, status fields (all filtering fixed inside the procedure)"
+  "returns": "bulk LoveSac delivery rows straight from the stored procedure"
  },
  "nearby_search": {
   "name": "nearby_search",
-  "returns": "places near a point: names, addresses, place IDs, ratings"
+  "returns": "places within a radius of a point, ranked by distance or prominence",
+  "needs": [
+   "geocode_address"
+  ]
  },
  "nps_survey": {
   "name": "nps_survey",
-  "returns": "survey responses: sales order, response/delivery dates, brand, carrier/hub, promoter-passive-detractor class, score, reason, verbatim comment",
-  "supersetOf": [
-   "scorecard_nps",
-   "scorecard_nps_detail"
-  ]
+  "returns": "unified NPS survey rows: score, promoter/passive/detractor, reason, free-text comments, brand, carrier, hub, dates"
  },
  "nsd_orders": {
   "name": "nsd_orders",
-  "returns": "one row per order: partner, customer, dates, service level, return and final-mile flags"
+  "returns": "one row per partner order: partner, customer, dates, service level, return flag, final-mile flag (~6mo fact export)"
  },
  "open_orders": {
   "name": "open_orders",
-  "returns": "every currently open order: identity, job/status, pickup & delivery geography, service provider/zone/miles, key dates, movement fields, 29 status event counts",
-  "supersetOf": [
-   "quick_search_orders"
-  ]
+  "returns": "all currently open orders: identity, job/status, pickup+delivery geography, routing, key dates, movement, 29 status event counts"
  },
  "optimize_load": {
   "name": "optimize_load",
-  "returns": "fit check, weight/cube utilization percentages, consolidation recommendations",
-  "supersetOf": [
-   "analyze_consolidation",
-   "find_optimal_truck"
-  ]
+  "returns": "fit/no-fit verdict, weight+cube utilization, consolidation recommendations"
  },
  "optimize_multi_stop_route": {
   "name": "optimize_multi_stop_route",
-  "returns": "reordered stop sequence plus per-leg distances and durations for the whole route",
+  "returns": "optimized stop order plus full driving route with legs, distance, duration",
   "supersetOf": [
-   "optimize_waypoints",
-   "calculate_route_distance"
+   "optimize_waypoints"
   ]
  },
  "optimize_waypoints": {
   "name": "optimize_waypoints",
-  "returns": "best stop ordering with total travel time/distance only"
- },
- "order_notes": {
-  "name": "order_notes",
-  "returns": "bulk note/communication records across orders: note codes, text, dates, visibility, author, order and delivery context, zone/distance",
-  "supersetOf": [
-   "get_order_notes"
-  ]
+  "returns": "best visiting order for stops with per-leg travel times, round-trip capable"
  },
  "order_path": {
   "name": "order_path",
-  "returns": "per-order full lifecycle rows: IDs, pickup/attempt/delivery dates+carriers+cost+revenue, LH1-LH10 & crossdock legs, geo coords; or schema/count only"
+  "returns": "per-order lifecycle: pickups, attempts, deliveries, LH1-LH10 and crossdock legs, carriers, load IDs, geo coords, costs and revenue"
  },
  "order_path_financial": {
   "name": "order_path_financial",
-  "returns": "same lifecycle rows but from the financial reporting table, with aggregated COS financials and inter-leg distances"
+  "returns": "same order-path lifecycle and legs but with financial-table COS/revenue figures"
  },
  "place_autocomplete": {
   "name": "place_autocomplete",
-  "returns": "ranked place predictions with place IDs for partial text"
+  "returns": "as-you-type place predictions with place IDs",
+  "needs": [
+   "?input"
+  ]
  },
  "probe_url": {
   "name": "probe_url",
-  "returns": "status code, headers, content type, response time, redirect chain, body preview"
+  "returns": "status code, headers, content type, response time, redirect chain, body preview",
+  "needs": [
+   "?url"
+  ]
  },
  "profile_file": {
   "name": "profile_file",
@@ -539,197 +819,127 @@
    "?filepath"
   ]
  },
- "query_all_models": {
-  "name": "query_all_models",
-  "returns": "four models' answers side by side plus combined usage stats",
-  "supersetOf": [
-   "query_model"
-  ]
- },
- "query_model": {
-  "name": "query_model",
-  "returns": "one model's answer with usage stats and citations"
- },
- "quick_search_orders": {
-  "name": "quick_search_orders",
-  "returns": "matching order stubs with tracking numbers for an exact identifier or name"
- },
  "register_order": {
   "name": "register_order",
-  "returns": "new tracking number, per-item label IDs, and quote"
+  "returns": "new tracking number, per-item IDs for labels, and quote"
  },
  "replace_article": {
   "name": "replace_article",
-  "returns": "confirmation of the fully overwritten article",
+  "returns": "confirmation of full-body overwrite",
   "needs": [
-   "create_article",
-   "browse_articles_by_tag",
-   "search_knowledge_base"
+   "?article_id"
   ]
  },
  "research_with_google_search": {
   "name": "research_with_google_search",
-  "returns": "web research findings with cited source links"
+  "returns": "web findings with citations and source links",
+  "needs": [
+   "?query"
+  ]
  },
  "revenue_and_costs": {
   "name": "revenue_and_costs",
-  "returns": "per-order revenue vs itemized cost, volume metrics, delivery location, billing status and key dates"
+  "returns": "bulk per-order revenue vs cost rows with delivery details, dates, billing status for warehouse sync"
  },
  "reverse_geocode": {
   "name": "reverse_geocode",
-  "returns": "formatted address(es) for coordinates"
- },
- "schedule_order": {
-  "name": "schedule_order",
-  "returns": "scheduling confirmation for the order"
- },
- "scorecard_booties_gloves": {
-  "name": "scorecard_booties_gloves",
-  "returns": "weekly per-service-provider booties/gloves compliance counts and percentages"
+  "returns": "address for a coordinate pair"
  },
  "scorecard_booties_gloves_daily": {
   "name": "scorecard_booties_gloves_daily",
-  "returns": "daily per-service-provider booties/gloves compliance percentages, no medal"
- },
- "scorecard_booties_gloves_detail": {
-  "name": "scorecard_booties_gloves_detail",
-  "returns": "one row per order/photo document behind the compliance numbers"
- },
- "scorecard_edemand": {
-  "name": "scorecard_edemand",
-  "returns": "weekly per-FC eDemand%, OFD%, Precall%, summary%"
+  "returns": "daily-snapshot booties/gloves compliance % per service provider, no medals"
  },
  "scorecard_edemand_daily": {
   "name": "scorecard_edemand_daily",
-  "returns": "daily per-FC eDemand%, OFD%, Precall%, summary%"
- },
- "scorecard_edemand_detail": {
-  "name": "scorecard_edemand_detail",
-  "returns": "one row per order/date/jobtype/route/driver/window behind eDemand"
+  "returns": "daily-snapshot eDemand%, OFD%, Precall%, summary% per FC"
  },
  "scorecard_fa": {
   "name": "scorecard_fa",
-  "returns": "weekly per-FC first-available metrics split by mileage range"
+  "returns": "weekly First Available rows per FC and mileage range"
  },
  "scorecard_fa_daily": {
   "name": "scorecard_fa_daily",
-  "returns": "daily per-FC first-available metrics split by mileage range"
+  "returns": "daily-snapshot First Available rows per FC and mileage range"
  },
  "scorecard_leaderboard": {
   "name": "scorecard_leaderboard",
-  "returns": "weekly per-FC all 7 category scores, overall score, medal, deliveries, region",
-  "supersetOf": [
-   "scorecard_booties_gloves",
-   "scorecard_edemand",
-   "scorecard_fa"
-  ]
+  "returns": "weekly per-FC overall score, medal, deliveries and all 7 category scores"
  },
  "scorecard_leaderboard_daily": {
   "name": "scorecard_leaderboard_daily",
-  "returns": "daily per-FC all 7 category scores, overall score, medal, deliveries",
-  "supersetOf": [
-   "scorecard_booties_gloves_daily",
-   "scorecard_edemand_daily",
-   "scorecard_fa_daily"
-  ]
+  "returns": "daily-snapshot per-FC overall score, medal, deliveries and all 7 category scores"
  },
  "scorecard_lf": {
   "name": "scorecard_lf",
-  "returns": "weekly per-FC lost-freight counts, rates, score"
+  "returns": "weekly per-FC lost-freight counts, pct, per-thousand and score"
  },
  "scorecard_lf_daily": {
   "name": "scorecard_lf_daily",
-  "returns": "daily-snapshot per-FC lost-freight counts, rates, score"
- },
- "scorecard_nps": {
-  "name": "scorecard_nps",
-  "returns": "weekly per-SP survey counts, NPS, detractor/passive/promoter split"
+  "returns": "daily lost-freight rows per FC: deliveries, lf_count, pct_lost_freight, lf_per_thousand, lf_score by snapshot_date"
  },
  "scorecard_nps_daily": {
   "name": "scorecard_nps_daily",
-  "returns": "daily-snapshot per-SP survey counts and NPS, unscored"
- },
- "scorecard_nps_detail": {
-  "name": "scorecard_nps_detail",
-  "returns": "one row per survey response per order/date",
-  "supersetOf": [
-   "scorecard_nps",
-   "scorecard_nps_daily"
-  ]
+  "returns": "daily NPS rows per FC by snapshot_date, sparse/step-function scores, no medals"
  },
  "scorecard_perfectpartner_detail": {
   "name": "scorecard_perfectpartner_detail",
-  "returns": "append-only daily PPR snapshot rows per in-flight order"
+  "returns": "row-level append-only PPR snapshots, one row per in-flight order per ingestion, keyed by row_key/added_to_table"
  },
  "scorecard_reschedules": {
   "name": "scorecard_reschedules",
-  "returns": "weekly per-FC reschedule counts, rates, score"
+  "returns": "weekly per-FC reschedule rows: deliveries, resched_count, resched_pct, resched_per_thousand, resched_score"
  },
  "scorecard_reschedules_daily": {
   "name": "scorecard_reschedules_daily",
-  "returns": "daily-snapshot per-FC reschedule counts, rates, score"
+  "returns": "daily per-FC reschedule counts, pct, per-thousand and score by snapshot_date"
  },
  "scorecard_service_failures": {
   "name": "scorecard_service_failures",
-  "returns": "weekly per-FC service failures with NC/DS breakdown"
+  "returns": "weekly per-FC service-failure rollup with NC/DS/Service-Failure breakdown"
  },
  "scorecard_service_failures_daily": {
   "name": "scorecard_service_failures_daily",
-  "returns": "daily-snapshot per-FC service failures with NC/DS breakdown"
- },
- "scorecard_timely_resource": {
-  "name": "scorecard_timely_resource",
-  "returns": "weekly per-FC scheduled orders, timely counts, rate, score"
+  "returns": "daily per-FC service-failure rows with NC/DS/Service-Failure breakdown by snapshot_date"
  },
  "scorecard_timely_resource_daily": {
   "name": "scorecard_timely_resource_daily",
-  "returns": "daily-snapshot per-FC timely-resource counts, rate, score"
- },
- "scorecard_timely_resource_detail": {
-  "name": "scorecard_timely_resource_detail",
-  "returns": "per-order timeliness rows, one per order and scheduled date"
+  "returns": "daily per-FC timely-resource flag rollup and score by snapshot_date"
  },
  "scorecard_tps": {
   "name": "scorecard_tps",
-  "returns": "weekly per-FC perfect-partner-days rollup: deliveries, avg PPR days, TPS score"
+  "returns": "weekly per-FC rows: deliveries, avg_ppr_days, tps_score"
  },
  "scorecard_tps_daily": {
   "name": "scorecard_tps_daily",
-  "returns": "daily snapshot of deliveries, avg PPR days, TPS score"
- },
- "search_customers": {
-  "name": "search_customers",
-  "returns": "paginated customer list with contacts, order stats, credit status"
+  "returns": "daily per-FC rows: deliveries, avg_ppr_days, tps_score by snapshot_date"
  },
  "search_knowledge_base": {
   "name": "search_knowledge_base",
-  "returns": "semantically matched knowledge-base article excerpts with relevance"
+  "returns": "semantically ranked knowledge-base article matches with relevance",
+  "needs": [
+   "?query"
+  ]
  },
  "search_multistop_routes": {
   "name": "search_multistop_routes",
-  "returns": "manifest of batch files containing multistop routes in range (data offloaded, not inline)"
- },
- "search_places": {
-  "name": "search_places",
-  "returns": "places matching free-text query with place IDs"
+  "returns": "manifest of offloaded batch files holding existing multistop routes in a date range"
  },
  "send_email_with_attachments": {
   "name": "send_email_with_attachments",
-  "returns": "send confirmation",
+  "returns": "send confirmation for plain-text/HTML email carrying files",
   "needs": [
    "?attachments"
   ]
  },
  "send_markdown_email": {
   "name": "send_markdown_email",
-  "returns": "send confirmation"
+  "returns": "send confirmation for markdown-rendered styled HTML email, no files"
  },
  "send_markdown_email_with_attachments": {
   "name": "send_markdown_email_with_attachments",
-  "returns": "send confirmation",
+  "returns": "send confirmation for markdown-rendered styled HTML email plus attached files",
   "supersetOf": [
-   "send_markdown_email",
-   "send_email_with_attachments"
+   "send_markdown_email"
   ],
   "needs": [
    "?attachments"
@@ -737,36 +947,39 @@
  },
  "summarize_document": {
   "name": "summarize_document",
-  "returns": "bulleted, paragraph, or executive summary of supplied text",
+  "returns": "bullets, paragraphs, or executive summary of supplied text",
   "needs": [
    "?text"
   ]
  },
  "test_api_call": {
   "name": "test_api_call",
-  "returns": "HTTP status, headers and body of the probed endpoint"
+  "returns": "live HTTP status, headers and response body for an authenticated request",
+  "needs": [
+   "?url"
+  ]
  },
  "time_on_site_events": {
   "name": "time_on_site_events",
-  "returns": "one row per GPS validation event (order × start time × driver × reading) with ISO-week rollup columns"
+  "returns": "one row per GPS validation event with week rollup columns"
  },
  "time_on_site_fcp_summary": {
   "name": "time_on_site_fcp_summary",
-  "returns": "weekly distinct order counts + latest event per service partner/region/validation status"
+  "returns": "per-week distinct order counts by partner, region and validation status with latest event"
  },
  "time_on_site_status_breakdown": {
   "name": "time_on_site_status_breakdown",
-  "returns": "weekly distinct order counts and share of total per validation status"
+  "returns": "per-week validation status order counts and percent of week total"
  },
  "update_article": {
   "name": "update_article",
-  "returns": "confirmation of full-body replacement",
+  "returns": "confirmation of full-body replacement with revision info",
   "needs": [
    "get_article_by_id"
   ]
  },
  "zipcode_zone": {
   "name": "zipcode_zone",
-  "returns": "cached origin-destination zipcode pairs with zone letter and mileage"
+  "returns": "cached origin-destination zipcode rows with zone letter and mileage for sync"
  }
 }

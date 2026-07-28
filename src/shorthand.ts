@@ -36,7 +36,7 @@ import type { Tool } from "./types.js";
  * providers send the integer 1 for a boolean, because a numeric default reads as a type.
  */
 export const GLOSSARY = `# KEY  r=read w=write d=destructive  >X=returns X  !X=call X first
-#      ^X=superset of X  ?X=X is yours to supply, nothing here makes one`;
+#      ^X=superset of X  vsX(why)=NOT X; X is for why  ?X=X is yours to supply`;
 
 const WRITE = new Set([
   "create", "update", "append", "add", "register", "schedule", "upload", "submit", "send",
