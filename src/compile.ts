@@ -103,12 +103,25 @@ export function verify(s: Semantics, tools: Tool[]): string | null {
     if (!known.has(n)) return `names ${n}, which is not in this catalogue`;
   }
 
-  // A superset must plausibly be reachable from the same inputs. `get_order_details` and
-  // `get_order_notes` both take trackingNumber, so one can contain the other; a tool sharing
-  // no argument at all cannot be answering the same question.
+  /**
+   * A superset claim is checked only when there is something to check it against.
+   *
+   * The first version required the two tools to share an argument, which rejected six of 149
+   * and two of those wrongly: `get_active_locations` takes **no parameters at all**, so the
+   * test could never pass, and `compute_distance_matrix` really is a superset of
+   * `calculate_route_distance` despite naming its inputs in the plural. Absence of overlap is
+   * not evidence of unrelatedness when one side has nothing to overlap with, and a check that
+   * fires on missing evidence rejects correct work.
+   *
+   * It still catches the real error: `get_order_details` claimed to be a superset of
+   * `order_notes`, a bulk CSV export tool, when it meant `get_order_notes`. Both have
+   * arguments, and they share none.
+   */
   for (const n of s.supersetOf ?? []) {
     const other = known.get(n)!;
-    if (!sharesAnArgument(self, other)) return `claims to be a superset of ${n}, which takes none of its arguments`;
+    if (!propsOf(self).length || !propsOf(other).length) continue; // nothing to compare
+    if (!sharesAnArgument(self, other) && !sharesANameWord(self, other))
+      return `claims to be a superset of ${n}, which takes none of its arguments and shares no name`;
   }
 
   // A `needs` edge pointing at a tool that requires the very same identifier is a peer, not a
@@ -125,6 +138,13 @@ export function verify(s: Semantics, tools: Tool[]): string | null {
 
 const propsOf = (t: Tool) =>
   Object.keys(((t as any).input_schema ?? (t as any).inputSchema ?? {}).properties ?? {});
+
+/** Do the names share a content word? `compute_distance_matrix` / `calculate_route_distance`. */
+function sharesANameWord(a: Tool, b: Tool): boolean {
+  const stop = new Set(["get", "list", "search", "compute", "calculate", "all", "data", "info"]);
+  const wa = new Set(words(a.name).filter((w) => !stop.has(w) && w.length > 3));
+  return words(b.name).some((w) => wa.has(w));
+}
 
 function sharesAnArgument(a: Tool, b: Tool): boolean {
   const pa = new Set(propsOf(a).map((p) => p.toLowerCase()));
@@ -165,7 +185,7 @@ export type CompileResult = {
 
 export async function compile(
   tools: Tool[],
-  opts: { complete: Completion; batchSize?: number },
+  opts: { complete: Completion; batchSize?: number; retryDropped?: boolean },
 ): Promise<CompileResult> {
   const batchSize = opts.batchSize ?? 12;
   const roster = `Inventory (every tool you may name, spelled exactly):\n${tools
@@ -175,27 +195,44 @@ export async function compile(
   const semantics = new Map<string, Semantics>();
   const rejected: Rejection[] = [];
 
-  for (let i = 0; i < tools.length; i += batchSize) {
-    const batch = tools.slice(i, i + batchSize);
+  const ask = async (batch: Tool[]) => {
     const text = await opts.complete({
       system: SYSTEM,
       user: roster + batch.map(describe).join("\n\n"),
     });
     const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+    const failed: Rejection[] = [];
     for (const t of batch) {
       const line = lines.find((l) => l.split("|")[0].trim() === t.name);
       if (!line) {
-        rejected.push({ name: t.name, reason: "no line returned" });
+        failed.push({ name: t.name, reason: "no line returned" });
         continue;
       }
       const parsed = parseLine(line);
       if (!parsed) {
-        rejected.push({ name: t.name, reason: "unparseable line" });
+        failed.push({ name: t.name, reason: "unparseable line" });
         continue;
       }
       const problem = verify(parsed, tools);
-      if (problem) rejected.push({ name: t.name, reason: problem });
+      if (problem) failed.push({ name: t.name, reason: problem });
       else semantics.set(t.name, parsed);
+    }
+    return failed;
+  };
+
+  for (let i = 0; i < tools.length; i += batchSize) {
+    (await ask(tools.slice(i, i + batchSize))).forEach((f) => rejected.push(f));
+  }
+
+  // A batch occasionally drops a line; asking for that tool alone nearly always fixes it. Only
+  // the dropped ones are retried — a verification failure is a judgement, not a hiccup, and
+  // retrying it just spends money to be told the same thing.
+  if (opts.retryDropped !== false) {
+    const dropped = rejected.filter((r) => r.reason === "no line returned").map((r) => r.name);
+    for (const name of dropped) {
+      const t = tools.find((x) => x.name === name)!;
+      const still = await ask([t]);
+      if (!still.length) rejected.splice(rejected.findIndex((r) => r.name === name), 1);
     }
   }
   return { semantics, rejected };
