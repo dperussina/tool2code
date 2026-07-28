@@ -28,7 +28,7 @@
 export type Scenario = {
   id: string;
   prompt: string;
-  kind: "sequence" | "discriminate";
+  kind: "sequence" | "discriminate" | "arguments";
   /** sequence: the call that completes the task. discriminate: the only right choice. */
   finalTool?: string;
   /** sequence: any one of these legitimately supplies the identifier. */
@@ -37,6 +37,15 @@ export type Scenario = {
   identifierArg?: string;
   /** discriminate: the tempting wrong sibling(s). Calling one is a failure. */
   trapTools?: string[];
+  /**
+   * arguments: the nested parameter the task cannot be done without.
+   *
+   * These scenarios exist because nothing measured argument construction. The module used to
+   * render `cost_of_sales(filters:list[dict])` when `filters` is a filter DSL — an array of
+   * `{column, operator, value}` with an eleven-value operator enum — and no model can build one
+   * from `list[dict]`. Selection scenarios cannot see that failure at all.
+   */
+  requireArg?: string;
 };
 
 export const SCENARIOS: Scenario[] = [
@@ -101,6 +110,32 @@ export const SCENARIOS: Scenario[] = [
       "Which of our customers in the Southeast are currently on credit hold? I need to find them, not export anything.",
     finalTool: "search_customers",
     trapTools: ["customers"],
+  },
+
+  // ---- argument construction: nested shapes, graded against the real schema ----
+  {
+    id: "args-filtered-export",
+    kind: "arguments",
+    prompt:
+      "From the invoice-level cost of sales feed, I only want the rows where the carrier is exactly FedEx and the total expense is greater than 500. Write it out as a CSV rather than returning it inline.",
+    finalTool: "cost_of_sales",
+    requireArg: "filters",
+  },
+  {
+    id: "args-filtered-notes",
+    kind: "arguments",
+    prompt:
+      "Pull the order notes feed but narrow it down to notes whose note code is DEL, and give me just a row count rather than the rows.",
+    finalTool: "order_notes",
+    requireArg: "filters",
+  },
+  {
+    id: "args-route",
+    kind: "arguments",
+    prompt:
+      "Work out the driving route from 33 Vine St, Cincinnati OH 45202 to 500 Terry Ave, Seattle WA 98109.",
+    finalTool: "compute_route",
+    requireArg: "origin",
   },
 
   // ---- sequencing ----

@@ -20,6 +20,8 @@
  * not a rerun.
  */
 
+import { validateArgs } from "./validate.js";
+
 /** Every identifier this mock will ever hand out, by the tool that hands it out. */
 export const SENTINELS: Record<string, string[]> = {
   quick_search_orders: ["TN-4417-QX"],
@@ -51,6 +53,27 @@ export const IDENTIFIER_ARG =
  * ID gets an error, exactly as a real API would, so the model has the chance to recover and
  * the transcript records that it needed to.
  */
+/**
+ * Bind the mock to the real catalogue so arguments can be checked against real schemas.
+ *
+ * Without this the mock accepted anything, and only tool *selection* was ever measured.
+ */
+export function makeExecutor(tools: { name: string; input_schema?: any; inputSchema?: any }[]) {
+  const schemas = new Map(tools.map((t) => [t.name, t.input_schema ?? t.inputSchema ?? {}]));
+  return (name: string, args: Record<string, any>) => {
+    const schema = schemas.get(name);
+    const problems = schema ? validateArgs(args ?? {}, schema) : [];
+    if (problems.length) {
+      return {
+        content: JSON.stringify({ error: problems.slice(0, 3).join("; ") }),
+        isError: true,
+        malformed: problems,
+      };
+    }
+    return { ...execute(name, args), malformed: [] as string[] };
+  };
+}
+
 export function execute(name: string, args: Record<string, any>): { content: string; isError?: boolean } {
   const own = SENTINELS[name];
   if (own) {

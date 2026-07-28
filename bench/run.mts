@@ -17,7 +17,7 @@ import { xaiProvider } from "./providers/xai.js";
 import type { ChatMessage, Provider, ToolResult } from "./providers/types.js";
 import { schemasArm, codeArm, leanSchemasArm, hybridArm, type Arm } from "./arms.js";
 import { SCENARIOS } from "./scenarios.js";
-import { execute, ALL_SENTINELS, IDENTIFIER_ARG } from "./mock.js";
+import { makeExecutor, ALL_SENTINELS, IDENTIFIER_ARG } from "./mock.js";
 import type { Tool } from "../src/types.js";
 import type { Semantics } from "../src/compile.js";
 
@@ -54,6 +54,7 @@ const reps = Number(flag("reps", "1"));
 const scenarios = only ? SCENARIOS.filter((s) => only.split(",").includes(s.id)) : SCENARIOS;
 const sweep = flag("sweep") || new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
 const MAX_TURNS = 8;
+const execute = makeExecutor(TOOLS as any);
 
 const SYSTEM =
   "You are a logistics and operations assistant with access to a large internal tool catalogue. " +
@@ -75,6 +76,8 @@ for (const pid of providers) {
         const messages: ChatMessage[] = [{ role: "user", content: scenario.prompt }];
         const called: { name: string; args: Record<string, any> }[] = [];
         const resultBodies: string[] = [];
+        /** Every schema violation the run committed, across all calls. */
+        const malformed: string[] = [];
         let turns = 0;
         let unresolved = 0;
         let error: string | null = null;
@@ -105,6 +108,7 @@ for (const pid of providers) {
               }
               called.push(resolved);
               const out = execute(resolved.name, resolved.args);
+              if (out.malformed?.length) malformed.push(`${resolved.name}: ${out.malformed[0]}`);
               resultBodies.push(out.content);
               results.push({ id: c.id, name: c.name, content: out.content, isError: out.isError });
             }
@@ -144,7 +148,21 @@ for (const pid of providers) {
         let correct: boolean;
         let outOfOrder = false;
 
-        if (scenario.kind === "discriminate") {
+        if (scenario.kind === "arguments") {
+          /**
+           * Right answer: the target tool, the required nested argument actually supplied, and
+           * not one schema violation anywhere in the run. Malformed-then-retried still fails:
+           * a model that needed the error message to learn the shape did not know it.
+           */
+          const supplied = called.some(
+            (c) =>
+              c.name === scenario.finalTool &&
+              c.args?.[scenario.requireArg!] !== undefined &&
+              c.args?.[scenario.requireArg!] !== null &&
+              (!Array.isArray(c.args[scenario.requireArg!]) || c.args[scenario.requireArg!].length > 0),
+          );
+          correct = supplied && malformed.length === 0;
+        } else if (scenario.kind === "discriminate") {
           // Right answer: the correct sibling, and never the tempting one.
           const hitFinal = finalIdx !== -1;
           const needsId = Boolean(scenario.identifierArg);
@@ -175,6 +193,8 @@ for (const pid of providers) {
           sequence: called.map((c) => c.name),
           // The arguments of the graded call, so a failure can be diagnosed without a rerun.
           finalArgs: called.filter((c) => c.name === scenario.finalTool).map((c) => c.args),
+          malformedCalls: malformed.length,
+          malformedFirst: malformed[0] ?? null,
           turns, unresolved, promptTokens, outputTokens, error,
         };
         appendFileSync(file, JSON.stringify(row) + "\n");

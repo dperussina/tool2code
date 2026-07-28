@@ -89,15 +89,49 @@ Example:
   get_order_notes | >notes only | | ?trackingNumber
   get_order_details | >everything: header, partner, freight, refs, notes, children, gallery | ^get_order_notes,get_order_timeline | ?trackingNumber`;
 
-/** How a tool is shown to the model: contract first, prose second, no schema noise. */
+/**
+ * How a tool is shown to the model: the full contract, then the prose.
+ *
+ * The first version showed parameter *names* only. That hid 30,287 characters of per-parameter
+ * description across 573 of 799 parameters, plus every type and every nested structure — and then
+ * asked the model to say what the tool returns and how it differs from its neighbours. The single
+ * most discriminating fact about `cost_of_sales` is that it takes `csv_mode`, `csv_path` and
+ * `schema_only`, which is what a warehouse export looks like; `get_cost_of_sales` takes a date
+ * range and a partner. Shape is the evidence, and it was being withheld.
+ */
 export function describe(t: Tool): string {
   const schema: any = (t as any).input_schema ?? (t as any).inputSchema ?? {};
   const required = new Set<string>(schema.required ?? []);
-  const params = Object.keys(schema.properties ?? {})
-    .map((p) => `${p}${required.has(p) ? "*" : ""}`)
-    .join(", ");
+  const lines = Object.entries(schema.properties ?? {}).map(([p, raw]) => {
+    const v: any = raw ?? {};
+    const type = typeSummary(v);
+    const note = (v.description ?? "").replace(/\s+/g, " ").slice(0, 160);
+    return `    ${p}${required.has(p) ? "*" : ""}: ${type}${note ? ` — ${note}` : ""}`;
+  });
   const prose = (t.description ?? "").replace(/\s+/g, " ").slice(0, 600);
-  return `${t.name} — "${prose}" params: ${params || "(none)"}`;
+  const out: string[] = [`${t.name} — "${prose}"`];
+  out.push(lines.length ? `  params:\n${lines.join("\n")}` : "  params: (none)");
+
+  // An output schema, where a catalogue provides one, is the direct answer to the `>returns`
+  // slot rather than an inference from prose. This corpus has none; MCP allows them.
+  const output = (t as any).outputSchema ?? (t as any).output_schema;
+  if (output) out.push(`  returns: ${typeSummary(output)}`);
+  return out.join("\n");
+}
+
+/** A compact but complete type, including nested fields and enum values. */
+function typeSummary(v: any, depth = 0): string {
+  if (!v || typeof v !== "object") return "any";
+  if (Array.isArray(v.enum)) return v.enum.map((e: unknown) => JSON.stringify(e)).join("|");
+  const t = Array.isArray(v.type) ? v.type[0] : v.type;
+  if (t === "array") return `${v.items ? typeSummary(v.items, depth + 1) : "any"}[]`;
+  if (t === "object" && v.properties && depth < 2) {
+    const fields = Object.entries(v.properties).map(
+      ([k, spec]) => `${k}:${typeSummary(spec, depth + 1)}`,
+    );
+    return `{${fields.join(", ")}}`;
+  }
+  return t ?? "any";
 }
 
 export type Rejection = { name: string; reason: string };

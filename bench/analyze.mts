@@ -32,6 +32,7 @@ const exclude = flag("exclude").split(",").filter(Boolean);
 type Row = {
   sweep: string; provider: string; arm: string; scenario: string; rep: number;
   correct: boolean; fabricated: boolean; outOfOrder: boolean; trapped?: string[];
+  malformedCalls?: number; malformedFirst?: string | null;
   calledProducer: boolean; calledFinal: boolean; sequence: string[];
   turns: number; unresolved: number; promptTokens: number; outputTokens: number; error: string | null;
 };
@@ -54,15 +55,17 @@ console.log(
     (exclude.length ? `, excluding ${exclude.join(", ")}` : "") + "\n",
 );
 
-console.log("| arm | n | completed | fabricated ID | out of order | never called producer | errors | avg turns |");
-console.log("|---|--:|--:|--:|--:|--:|--:|--:|");
+console.log("| arm | n | completed | malformed calls | runs w/ malformed | fabricated ID | trap calls | errors | avg turns |");
+console.log("|---|--:|--:|--:|--:|--:|--:|--:|--:|");
 for (const arm of arms) {
   const a = rows.filter((r) => r.arm === arm);
   const ok = a.filter((r) => r.correct).length;
   console.log(
     `| \`${arm}\` | ${a.length} | **${pct(ok, a.length)}** (${ok}/${a.length}) | ` +
-      `${a.filter((r) => r.fabricated).length} | ${a.filter((r) => r.outOfOrder).length} | ` +
-      `${a.filter((r) => !r.calledProducer).length} | ${a.filter((r) => r.error).length} | ` +
+      `${a.reduce((s, r) => s + (r.malformedCalls ?? 0), 0)} | ` +
+      `${a.filter((r) => (r.malformedCalls ?? 0) > 0).length} | ` +
+      `${a.filter((r) => r.fabricated).length} | ` +
+      `${a.filter((r) => r.trapped?.length).length} | ${a.filter((r) => r.error).length} | ` +
       `${(a.reduce((s, r) => s + r.turns, 0) / a.length).toFixed(1)} |`,
   );
 }

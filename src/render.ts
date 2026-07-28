@@ -15,6 +15,7 @@
  */
 import type { JsonSchema, Tool } from "./types.js";
 import { GLOSSARY, accessClass, hoistedFormats } from "./shorthand.js";
+import { collectShapes, shapeNameOf, type NamedShape } from "./shapes.js";
 import type { Semantics } from "./compile.js";
 
 const schemaOf = (t: Tool): JsonSchema => (t as any).input_schema ?? (t as any).inputSchema ?? {};
@@ -32,15 +33,18 @@ const isIdentifier = (n: string) => /^[A-Za-z_]\w*$/.test(n) && !PYTHON_KEYWORDS
  * bare name gives a model no way to know it wants `[{…}]` rather than a string, and that was
  * measured as the single cause of container-type rejections.
  */
-function typeOf(v: JsonSchema, alias?: string): string {
+function typeOf(v: JsonSchema, alias?: string, shapes?: Map<string, NamedShape>): string {
   if (alias) return alias;
   if (v.enum) return `Literal[${v.enum.map((e) => JSON.stringify(e)).join(",")}]`;
   const t = Array.isArray(v.type) ? v.type[0] : v.type;
+  // A named shape beats `dict` and `list[dict]`, which tell a model nothing it can act on.
+  const named = shapes ? shapeNameOf(v, shapes) : null;
   if (t === "array") {
     const items = v.items;
     if (!items) return "list";
-    return `list[${items.properties ? "dict" : typeOf(items)}]`;
+    return `list[${named ?? (items.properties ? "dict" : typeOf(items, undefined, shapes))}]`;
   }
+  if (named) return named;
   if (t === "object") return "dict";
   if (t === "integer") return "int";
   if (t === "number") return "float";
@@ -59,6 +63,7 @@ export function renderTool(
   options: RenderOptions = {},
   aliases = new Map<string, string>(),
   kwAliases = new Map<string, string>(),
+  shapes?: Map<string, NamedShape>,
 ): string {
   const schema = schemaOf(t);
   const props = schema.properties ?? {};
@@ -77,7 +82,7 @@ export function renderTool(
   const opt: string[] = [];
   const kwargs: string[] = [];
   for (const [name, spec] of Object.entries(props)) {
-    const type = typeOf(spec, aliases.get(name));
+    const type = typeOf(spec, aliases.get(name), shapes);
     if (!isIdentifier(name)) {
       // A parameter named `from` cannot be a parameter at all. `def send(from=None)` is a
       // SyntaxError, and so — checked with a real parser, not by eye — is
@@ -141,13 +146,39 @@ export function renderModule(tools: Tool[], options: RenderOptions = {}): string
     }
   }
 
+  /**
+   * Nested shapes, defined before anything uses them.
+   *
+   * Descriptions are kept as field comments. Tokens are not the objective here — a model that
+   * knows `operator` accepts eleven specific comparisons can construct the call, and one that
+   * sees `dict` cannot.
+   */
+  const shapes = collectShapes(tools);
+  const shapeLines: string[] = [];
+  for (const { name, schema } of shapes.values()) {
+    const props = schema.properties ?? {};
+    const required = new Set(schema.required ?? []);
+    shapeLines.push(`${name} = TypedDict("${name}", {`);
+    for (const [field, spec] of Object.entries(props)) {
+      const note = [
+        required.has(field) ? "required" : "",
+        ((spec as any)?.description ?? "").replace(/\s+/g, " ").slice(0, 90),
+      ]
+        .filter(Boolean)
+        .join(" — ");
+      shapeLines.push(`  "${field}": ${typeOf(spec as JsonSchema, undefined, shapes)},${note ? `  # ${note}` : ""}`);
+    }
+    shapeLines.push(`}, total=False)`);
+  }
+
   const kwAliases = new Map<string, string>();
-  for (const t of tools) body.push(renderTool(t, options, aliases, kwAliases));
+  for (const t of tools) body.push(renderTool(t, options, aliases, kwAliases, shapes));
 
   const imports: string[] = [];
-  if (body.some((l) => l.includes("Literal["))) imports.push("Literal");
-  if (kwAliases.size) imports.push("TypedDict");
+  if ([...body, ...shapeLines].some((l) => l.includes("Literal["))) imports.push("Literal");
+  if (kwAliases.size || shapeLines.length) imports.push("TypedDict");
   if (imports.length) lines.splice(1, 0, `from typing import ${imports.sort().join(", ")}`);
+  if (shapeLines.length) lines.push("", ...shapeLines);
   if (kwAliases.size) {
     lines.push("");
     for (const [alias, fields] of kwAliases) lines.push(`${alias} = TypedDict("${alias}", {${fields}}, total=False)`);
