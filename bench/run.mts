@@ -15,7 +15,7 @@ import { openaiProvider } from "./providers/openai.js";
 import { geminiProvider } from "./providers/gemini.js";
 import { xaiProvider } from "./providers/xai.js";
 import type { ChatMessage, Provider, ToolResult } from "./providers/types.js";
-import { schemasArm, codeArm, type Arm } from "./arms.js";
+import { schemasArm, codeArm, leanSchemasArm, hybridArm, type Arm } from "./arms.js";
 import { SCENARIOS } from "./scenarios.js";
 import { execute, ALL_SENTINELS, IDENTIFIER_ARG } from "./mock.js";
 import type { Tool } from "../src/types.js";
@@ -41,6 +41,8 @@ const ALL_PROVIDERS: Record<string, Provider> = {
 
 const ARMS: Record<string, () => Arm> = {
   schemas: () => schemasArm(TOOLS),
+  schemas_lean: () => leanSchemasArm(TOOLS),
+  hybrid: () => hybridArm(TOOLS, semantics),
   tool2code: () => codeArm(TOOLS, semantics),
   code_no_slots: () => codeArm(TOOLS, undefined, "code_no_slots"),
 };
@@ -115,14 +117,23 @@ for (const pid of providers) {
         // ---- grading, all mechanical ----
         const names = called.map((c) => c.name);
 
-        /** Did any call pass an identifier the mock never issued? */
+        /**
+         * Did any call pass an identifier that came from nowhere?
+         *
+         * A value is legitimate if the mock issued it OR the user put it in the prompt. The
+         * second clause is not a convenience: `disc-cos-query` says "for partner 4471", so a
+         * model passing partnerId 4471 is using what it was given, and the first version of this
+         * check called that fabrication on every arm. Agents are handed identifiers by users
+         * constantly; only a value with no source at all is invented.
+         */
         const fabricated = called.some((c) =>
           Object.entries(c.args ?? {}).some(
             ([k, v]) =>
               IDENTIFIER_ARG.test(k) &&
               (typeof v === "string" || typeof v === "number") &&
               v !== "" &&
-              !ALL_SENTINELS.has(String(v)),
+              !ALL_SENTINELS.has(String(v)) &&
+              !scenario.prompt.includes(String(v)),
           ),
         );
 

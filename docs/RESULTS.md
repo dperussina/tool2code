@@ -6,6 +6,109 @@ never edited in place.
 
 ---
 
+## Round 2 — the contrast slot wins, and the code shape is worth nothing without it
+
+Sweep `2026-07-28T18-32-04`. 180 runs: 4 providers × 5 arms × 9 scenarios × 1 rep. Seven
+discrimination scenarios over seven trap pairs, two sequencing scenarios as a regression check.
+
+Round 1's scenario set was easier, so **the baseline's own score moved** (96.9% → 75.0%) and the
+two rounds must not be compared. Everything below is within this sweep.
+
+### Headline
+
+| arm | n | strict | lenient | trap calls | mean turns |
+|---|--:|--:|--:|--:|--:|
+| `schemas` (baseline) | 36 | 75.0% (27/36) | 32/36 | 8 | 2.9 |
+| `schemas_lean` | 36 | 66.7% (24/36) | 34/36 | 12 | 3.0 |
+| `hybrid` | 36 | 91.7% (33/36) | 34/36 | **1** | 2.4 |
+| **`tool2code`** | 36 | **97.2% (35/36)** | **36/36** | **1** | 2.4 |
+| `code_no_slots` | 36 | 72.2% (26/36) | 35/36 | 10 | 2.9 |
+
+**The code representation now beats raw JSON Schema by 22 points**, and it wins under the lenient
+grading too (36/36 against 32/36) — which Round 1's result did not. It also uses fewer turns.
+
+### The attribution is clean, and it is not the code
+
+`code_no_slots` is the same module with the model-written semantics stripped: identical derived
+signatures, identical calling convention. It scores **72.2%, statistically indistinguishable from
+the baseline's 75.0%**, with 10 trap calls against the baseline's 8.
+
+So the code shape, on its own, is worth nothing. The entire 22-point gain is the semantic slots —
+above all `vsX(why)`, which states what a tool is *not*:
+
+```python
+def get_order_notes(trackingNumber:TrackingNumber):
+    "r >notes on one order vsorder_notes(bulk note/communication feed for Control Tower sync)"
+def order_notes(date_column:...,csv_path:str=None):
+    "r >bulk note/communication rows... vsget_order_notes(notes for one order by tracking number)"
+```
+
+The single number that matters: **trap calls fell from 8 to 1.** Every arm without contrast slots
+sits at 8–12; both arms with them sit at 1. That is the mechanism working, measured directly, and
+it is the only failure mode this corpus produces.
+
+Two scenarios show it starkly. `disc-cust-find` (`search_customers` against the `customers` bulk
+export) went 1/4 on the baseline and 4/4 with slots. `disc-loc-live` went 1/4 to 4/4.
+
+### Prose carries real signal — and the module replaces more than it
+
+`schemas_lean` is the baseline with every `description`, `title` and `example` stripped and all
+types, enums and required lists intact. It drops to 66.7% with 12 trap calls, so the English in a
+tool definition is not decoration.
+
+But the module beats *full* prose, not just its absence. The discriminating fact exists in the
+source descriptions — `order_notes` says "data source for syncing into Control Tower" — and the
+baseline has it. What the baseline does not do is put it **where the choice is made**, one line
+long, beside the tool it distinguishes. Condensation is the win, not new information.
+
+### A hypothesis of mine that the data refuted
+
+I expected the dispatcher to be a handicap: `tool2code` routes every call through one generic
+`call(name, args)` tool, giving up the provider's native tool selection and constrained decoding.
+`hybrid` was built to remove that confound — native tools with pruned schemas *plus* the module.
+
+It scored **91.7% against `tool2code`'s 97.2%, for 2.5× the prompt tokens** (156,726 against
+61,900 on Anthropic). Two runs apart is not a real difference in accuracy, but the token cost is
+unambiguous, and the direction is the opposite of what I predicted. Carrying the schemas
+alongside the module buys nothing. **The dispatcher was not the handicap.**
+
+### Cost, per provider because these differ ~10×
+
+Mean prompt tokens per run:
+
+| provider | `schemas` | `schemas_lean` | `hybrid` | `tool2code` | `code_no_slots` |
+|---|--:|--:|--:|--:|--:|
+| anthropic | 261,435 | 102,486 | 156,726 | **61,900** | 55,299 |
+| gemini | 126,810 | 59,513 | 86,746 | **31,791** | 30,957 |
+| openai | 137,389 | 45,211 | 80,096 | **38,314** | 33,826 |
+| xai | 201,334 | 107,634 | 117,446 | **43,523** | 39,608 |
+
+**About 4× fewer prompt tokens and 22 points more accurate**, on every provider.
+
+### The limitation that matters most
+
+**The scenarios and the mechanism were derived from the same reading of the corpus.** I found the
+bulk-export-versus-single-lookup pattern, wrote prompts that target it, and then built a slot that
+states exactly that distinction. That is a real risk of teaching to the test, and it is not
+answered by more reps.
+
+What would answer it: trap pairs and prompts written by someone who has not seen the compiled
+module, or a second corpus from a different organisation. Until then the honest claim is narrow —
+**the contrast slot fixes the confusions I was able to identify**, which is weaker than "fixes
+lookalike confusion".
+
+Also unresolved:
+
+- **One rep per cell.** 36 runs per arm; a 22-point gap is 8 runs and safe, but the
+  `tool2code`-versus-`hybrid` difference is 2 runs and is not.
+- **Six of seven trap pairs are the same shape** (bulk feed against per-entity lookup). One
+  pattern, repeated.
+- **`get_order_notes` compiled as `?trackingNumber`** — "yours to supply" — when
+  `quick_search_orders` produces one. Wrong, and harmless only because sequencing never failed.
+- One `gemini`/`hybrid` run died on provider-side invalid JSON and is counted as a failure.
+
+---
+
 ## Round 1 — the thesis does not survive first contact
 
 Sweep `2026-07-28T15-18-17`. 108 runs: 4 providers × 3 arms × 9 scenarios × 1 rep.
