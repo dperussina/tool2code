@@ -70,6 +70,24 @@ for (const arm of arms) {
   );
 }
 
+/**
+ * A trap called BEFORE the right tool is a wrong decision. A trap called after is a wasted
+ * extra call. Both are failures, but only the first means the model did not know which tool it
+ * wanted, so they are worth separating rather than pooling.
+ */
+console.log("\n**Trap timing** (of runs that touched a trap):\n");
+console.log("| arm | trap first | trap after the right call |");
+console.log("|---|--:|--:|");
+for (const arm of arms) {
+  const a = rows.filter((r) => r.arm === arm && r.trapped?.length);
+  const first = a.filter((r) => {
+    const ti = r.sequence.findIndex((n) => r.trapped!.includes(n));
+    const fi = r.sequence.findIndex((n) => !r.trapped!.includes(n) && n !== "");
+    return ti !== -1 && (fi === -1 || ti < fi);
+  }).length;
+  console.log(`| \`${arm}\` | ${first} | ${a.length - first} |`);
+}
+
 console.log("\n**Per provider** (completed):\n");
 console.log(`| arm | ${providers.join(" | ")} |`);
 console.log(`|---|${providers.map(() => "--:").join("|")}|`);

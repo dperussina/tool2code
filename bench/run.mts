@@ -31,6 +31,15 @@ const TOOLS: Tool[] = Array.isArray(raw) ? raw : raw.tools;
 const semantics = new Map<string, Semantics>(
   Object.entries(JSON.parse(readFileSync("corpus/semantics.json", "utf8"))) as [string, Semantics][],
 );
+/**
+ * The previous artifact, kept so a prompt change can be measured instead of assumed.
+ *
+ * Comparing two artifacts across two sweeps is exactly the pooling this project forbids: the
+ * scenario set, the providers and the day would all differ. Both go in one sweep as two arms.
+ */
+const semanticsPrev = new Map<string, Semantics>(
+  Object.entries(JSON.parse(readFileSync("corpus/semantics-prev.json", "utf8"))) as [string, Semantics][],
+);
 
 const ALL_PROVIDERS: Record<string, Provider> = {
   anthropic: anthropicProvider,
@@ -45,6 +54,7 @@ const ARMS: Record<string, () => Arm> = {
   hybrid: () => hybridArm(TOOLS, semantics),
   tool2code: () => codeArm(TOOLS, semantics),
   code_no_slots: () => codeArm(TOOLS, undefined, "code_no_slots"),
+  tool2code_prev: () => codeArm(TOOLS, semanticsPrev, "tool2code_prev"),
 };
 
 const providers = flag("providers", "anthropic,openai,gemini,xai").split(",").filter(Boolean);

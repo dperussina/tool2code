@@ -44,7 +44,25 @@ export type Semantics = {
    * wrong member of a lookalike pair, and nothing else failed at all.
    */
   notThis?: { tool: string; why: string }[];
+  /**
+   * Structure recovered from a schema that does not declare it.
+   *
+   * The reason this project exists. A well-formed catalogue needs none of this: types come from
+   * the schema and are derived, never guessed. A badly-formed one — generated from an OpenAPI
+   * spec, or grown endpoint by endpoint — routinely declares no `type` at all, documents its
+   * allowed values in English, and ships no `required` array. On such a catalogue there is
+   * nothing to derive, and a renderer that guesses `str` is confidently wrong on every array.
+   *
+   * So a strong model reads the mess once, offline, and writes the structure down. Every claim is
+   * then **grounded**: an inferred enum value must literally appear in that parameter's own
+   * description, or it is dropped. Inference that cannot be checked against the source is
+   * invention, and this project has already shipped one invented tool reference.
+   */
+  params?: { name: string; type?: string; enum?: string[]; required?: boolean }[];
 };
+
+/** Types an inference is allowed to claim. Anything else is rejected. */
+export const INFERABLE_TYPES = new Set(["str", "int", "float", "bool", "list", "dict", "Any"]);
 
 export const SYSTEM = `You are turning a tool catalogue into a Python module another model will read to decide which tool to call.
 
@@ -54,14 +72,35 @@ For each tool, output one line:
 
 <name> | >RETURNS | ^SUPERSET | !NEEDS | vsOTHER(why)
 
-- RETURNS: what comes back, in as few words as possible. This is the field that decides
-  everything. Tools in a catalogue are often near-identical in name and parameters and differ
+- RETURNS: what comes back. **Lead with the SUBJECT MATTER — what the data is about — and only
+  then how it arrives.** This is the field that decides everything, and getting the order wrong
+  loses the decision.
+  A measured failure: get_cost_of_sales is described as "detailed cost of sales data for a date
+  range with optional filters. Includes freight costs, carrier charges, and heatmap data...
+  Results are offloaded to files and returned as manifest with batch metadata." It was compiled
+  as ">file manifest of batched cost rows with batch metadata and aggregated heatmap data" --
+  every word about delivery, not one about freight or carrier charges. A user asking "what did
+  freight and carrier charges come to for partner 4471" could not match that, and the model
+  reached for the bulk export instead. Correct: ">freight and carrier charges per invoice for a
+  date range, delivered as batched files plus heatmap aggregates".
+  Name the nouns a person would use when they want this tool. Delivery mechanism, pagination and
+  batching go last and only when they change how you would use it. Tools in a catalogue are often near-identical in name and parameters and differ
   ONLY in what they return — four tools may all be "get X for an order" taking the same
   tracking number, where one returns notes, one a chronological timeline, one EDI scan events
   and one everything at once. Say which. Never restate the tool's name back to me.
 - SUPERSET: names of other tools in the inventory whose results this tool's results already
   contain. Omit unless true. This is what stops a model reaching for the comprehensive tool
   every time; it is also what tells it when the comprehensive one is the right single call.
+- Some parameters below arrive with NO declared type, shown as \`type: any\`. For each of those,
+  add a separate line AFTER the tool's line, inferring the structure from the parameter name, its
+  description and the tool's purpose:
+      @<tool>.<param> | <type> | <allowed,values,if,any> | required
+  <type> must be exactly one of: str int float bool list dict Any. Use Any when you genuinely
+  cannot tell — that is a real answer and better than a confident wrong one.
+  List allowed values ONLY when the parameter's own description states them; they are checked
+  against it and dropped if they do not appear. Mark \`required\` only when the description or the
+  tool's purpose makes the call impossible without it.
+  Do not emit these lines for parameters whose type is already declared.
 - vsOTHER: when two tools in this batch are easy to confuse, EACH must say what it is not.
   Write \`vsother_tool(what that one is for)\`. This is the most valuable field you can fill:
   measured over 96 runs, every single failure was a model calling the wrong member of a
@@ -228,6 +267,44 @@ function sharedIdentifierArgs(a: Tool, b: Tool): string[] {
   return ids(b).filter((p) => ia.has(p));
 }
 
+/**
+ * Attach `@tool.param | type | values | required` lines, keeping only what the source supports.
+ *
+ * Three checks, each of which has a counterpart failure in this project's history:
+ *   - the parameter must exist on the tool (invented parameters were a real defect);
+ *   - the type must be one the vocabulary allows (a free-text type is unusable downstream);
+ *   - every claimed enum value must appear in that parameter's own description (invented tool
+ *     names shipped once already, and an invented enum value is the same error class).
+ */
+export function attachInferredParams(s: Semantics, paramLines: string[], tool: Tool): void {
+  const schema: any = (tool as any).input_schema ?? (tool as any).inputSchema ?? {};
+  const props: Record<string, any> = schema.properties ?? {};
+
+  for (const line of paramLines) {
+    const [head, typeCell, valuesCell, flagCell] = line.slice(1).split("|").map((c) => c.trim());
+    const dot = head.lastIndexOf(".");
+    if (dot < 0) continue;
+    if (head.slice(0, dot) !== tool.name) continue;
+
+    const param = head.slice(dot + 1);
+    const spec = props[param];
+    if (!spec) continue;                       // not a parameter of this tool
+    if (spec.type) continue;                   // the schema already says; never override it
+    if (!INFERABLE_TYPES.has(typeCell)) continue;
+
+    const haystack = String(spec.description ?? "").toLowerCase();
+    const claimed = (valuesCell ?? "").split(",").map((v) => v.trim()).filter(Boolean);
+    const grounded = claimed.filter((v) => haystack.includes(v.toLowerCase()));
+
+    (s.params ??= []).push({
+      name: param,
+      type: typeCell,
+      ...(grounded.length ? { enum: grounded } : {}),
+      ...(/required/i.test(flagCell ?? "") ? { required: true } : {}),
+    });
+  }
+}
+
 /** Parse `name | >returns | ^a,b | !c` — tolerant of missing slots and stray spaces. */
 export function parseLine(line: string): Semantics | null {
   const cells = line.split("|").map((c) => c.trim());
@@ -273,7 +350,9 @@ export async function compile(
       system: SYSTEM,
       user: roster + batch.map(describe).join("\n\n"),
     });
-    const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+    const allLines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+    const lines = allLines.filter((l) => !l.startsWith("@"));
+    const paramLines = allLines.filter((l) => l.startsWith("@"));
     const failed: Rejection[] = [];
     for (const t of batch) {
       const line = lines.find((l) => l.split("|")[0].trim() === t.name);
@@ -286,6 +365,7 @@ export async function compile(
         failed.push({ name: t.name, reason: "unparseable line" });
         continue;
       }
+      attachInferredParams(parsed, paramLines, t);
       const problem = verify(parsed, tools);
       if (problem) failed.push({ name: t.name, reason: problem });
       else semantics.set(t.name, parsed);

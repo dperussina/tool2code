@@ -49,7 +49,19 @@ function typeOf(v: JsonSchema, alias?: string, shapes?: Map<string, NamedShape>)
   if (t === "integer") return "int";
   if (t === "number") return "float";
   if (t === "boolean") return "bool";
-  return "str";
+  if (t === "string") return "str";
+  /**
+   * No declared type.
+   *
+   * This used to fall through to `str`, which is the worst available answer: confidently wrong on
+   * every untyped array and object, and indistinguishable from a parameter the schema really did
+   * declare as a string. Badly-structured catalogues — the ones this project exists for — omit
+   * `type` constantly.
+   *
+   * `Any` is honest. A model reading `Any` knows to look at the name and the docstring; a model
+   * reading `str` has been told something false.
+   */
+  return "Any";
 }
 
 export type RenderOptions = {
@@ -81,8 +93,18 @@ export function renderTool(
   const req: string[] = [];
   const opt: string[] = [];
   const kwargs: string[] = [];
+  const inferred = new Map(
+    (options.semantics?.get(t.name)?.params ?? []).map((p) => [p.name, p]),
+  );
   for (const [name, spec] of Object.entries(props)) {
-    const type = typeOf(spec, aliases.get(name), shapes);
+    const guess = inferred.get(name);
+    // Only where the schema is silent. A declared type always wins over an inference.
+    const type =
+      !spec.type && guess
+        ? guess.enum?.length
+          ? `Literal[${guess.enum.map((e) => JSON.stringify(e)).join(",")}]`
+          : guess.type ?? "Any"
+        : typeOf(spec, aliases.get(name), shapes);
     if (!isIdentifier(name)) {
       // A parameter named `from` cannot be a parameter at all. `def send(from=None)` is a
       // SyntaxError, and so — checked with a real parser, not by eye — is
@@ -95,9 +117,8 @@ export function renderTool(
       kwargs.push(`"${name}":${type}`);
       continue;
     }
-    (required.has(name) ? req : opt).push(
-      required.has(name) ? `${name}:${type}` : `${name}:${type}=None`,
-    );
+    const isRequired = required.has(name) || guess?.required === true;
+    (isRequired ? req : opt).push(isRequired ? `${name}:${type}` : `${name}:${type}=None`);
   }
   const positional = [...req, ...opt];
   if (kwargs.length) {
@@ -175,6 +196,7 @@ export function renderModule(tools: Tool[], options: RenderOptions = {}): string
   for (const t of tools) body.push(renderTool(t, options, aliases, kwAliases, shapes));
 
   const imports: string[] = [];
+  if ([...body, ...shapeLines].some((l) => /\bAny\b/.test(l))) imports.push("Any");
   if ([...body, ...shapeLines].some((l) => l.includes("Literal["))) imports.push("Literal");
   if (kwAliases.size || shapeLines.length) imports.push("TypedDict");
   if (imports.length) lines.splice(1, 0, `from typing import ${imports.sort().join(", ")}`);

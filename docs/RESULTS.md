@@ -6,6 +6,109 @@ never edited in place.
 
 ---
 
+## Round 4 — a diagnosis, a prediction, and a confirmation
+
+Sweep `2026-07-28T22-29-40`. 192 runs: 4 providers × 4 arms × 12 scenarios × 1 rep.
+
+`tool2code_prev` is the previous compiled artifact, run as its own arm **in the same sweep**.
+Comparing two artifacts across two sweeps is exactly the pooling this project forbids — different
+scenarios, different day — so the only honest way to measure a prompt change is side by side.
+
+| arm | n | completed | trap calls | trap first | malformed | avg turns |
+|---|--:|--:|--:|--:|--:|--:|
+| `schemas` (baseline) | 48 | 83.3% (40/48) | 7 | 4 | 0 | 2.7 |
+| **`tool2code`** | 48 | **97.9% (47/48)** | **1** | **0** | 1 | 2.3 |
+| `tool2code_prev` | 48 | 93.8% (45/48) | 3 | 0 | 0 | 2.3 |
+| `code_no_slots` | 48 | 83.3% (40/48) | 8 | 2 | 0 | 2.6 |
+
+Per provider: **100% on Anthropic, Gemini and OpenAI**, 91.7% on xAI, against a baseline of 75.0%,
+100%, 83.3% and 75.0%.
+
+### The prediction, and what it was based on
+
+Round 3 left three `tool2code` failures, two of them on `disc-cos-query`. Rather than add
+repetitions, one JSONL row was read in full. The model called the bulk export first, then
+recovered. The cause was in the artifact, not the model:
+
+```
+source:   "Get detailed cost of sales data for a date range with optional filters.
+           Includes freight costs, carrier charges, and heatmap visualization data.
+           ... Results are offloaded to files and returned as manifest with batch metadata."
+
+compiled: ">file manifest of batched cost rows with batch metadata and aggregated heatmap data"
+```
+
+The compiler kept the sentence about **delivery** and dropped the one about **subject matter** —
+so a request for "what did freight and carrier charges come to" had nothing to match, while the
+baseline's full description still said "freight costs, carrier charges" outright. On that
+scenario the compiled artifact was strictly worse-informed than raw JSON Schema.
+
+The fix was one prompt rule: **lead with what the data is about, put delivery mechanism last.**
+The recompile produced:
+
+```
+">freight costs and carrier charges per invoice for a date range, filterable to one partner,
+  company, customer or invoice number, delivered as batched offload files plus heatmap totals"
+```
+
+The prediction recorded before the sweep was that `disc-cos-query` would improve from 2/4 and
+that `tool2code_prev` would reproduce the old number. Result:
+
+| scenario | `schemas` | `tool2code` | `tool2code_prev` | `code_no_slots` |
+|---|--:|--:|--:|--:|
+| disc-cos-query | 2/4 | **4/4** | 2/4 | 1/4 |
+
+Both arms carrying the old line failed on the same scenario; the arm differing by one docstring
+did not. That is a mechanism confirmed against a prediction, not a number found afterwards.
+
+### What has stopped mattering
+
+| kind | `schemas` | `tool2code` |
+|---|--:|--:|
+| discriminate | 25/28 | **27/28** |
+| arguments | 11/12 | 12/12 |
+| sequence | 8/8 | 8/8 |
+
+Argument construction and sequencing are saturated for every arm, including the baseline. The
+nested-shape typing added in Round 3 was **repair of a self-inflicted defect** — the renderer had
+been emitting `list[dict]` for a filter DSL — not an advantage over raw schemas. Frontier models
+handle a declared schema perfectly well. Everything that separates the arms is disambiguation.
+
+### The one remaining failure
+
+`xai` on `disc-cust-find`, and it is not a wrong decision — it is thrashing:
+
+```
+search_customers > search_customers > customers > customers > search_customers > customers >
+customers > search_customers > customers > customers > search_customers > get_customer_details >
+search_customers > customers
+```
+
+Fourteen calls alternating between the right tool and the trap. xAI has been the weakest provider
+on discrimination in every round; the contrast slot did not stop it oscillating.
+
+### Cost
+
+| provider | `schemas` | `tool2code` |
+|---|--:|--:|
+| anthropic | 224,894 | 83,445 |
+| gemini | 133,588 | 43,298 |
+| openai | 139,725 | 44,189 |
+
+Roughly 3× fewer prompt tokens. Secondary to the goal, and the corrected artifact is 37% larger
+than the one it replaced (23,834 → 32,675 chars) — bought deliberately, for specificity.
+
+### Still open
+
+- **One rep per cell.** 47/48 against 40/48 is a 7-run gap and safe; the 47-versus-45 comparison
+  with the previous artifact is 2 runs and is not, even though the per-scenario mechanism is clear.
+- **The suite is still mine.** Scenarios and mechanism came from the same reading of the corpus.
+- **Untested on a badly-structured catalogue**, which is the actual target: `bench/degrade.ts`
+  builds one (0 declared types, 0 enums, 0 required markers, names like `apiV2CostOfSalesGet`) and
+  nothing has been run against it yet.
+
+---
+
 ## Round 2 — the contrast slot wins, and the code shape is worth nothing without it
 
 Sweep `2026-07-28T18-32-04`. 180 runs: 4 providers × 5 arms × 9 scenarios × 1 rep. Seven

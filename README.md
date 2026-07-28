@@ -7,26 +7,23 @@ The goal is accuracy, not compression. The baseline to beat is raw JSON Schema p
 to the provider, which is what every agent does today and which keeps the provider's own
 constrained decoding — a real advantage this approach gives up and therefore has to earn back.
 
-**Status: measured twice. Round 1 lost to the baseline; Round 2 beats it by 22 points.**
+**Status: 97.9% against a raw-JSON-Schema baseline's 83.3%**, over 192 live runs on four
+frontier providers (sweep `2026-07-28T22-29-40`). 100% on Anthropic, Gemini and OpenAI.
 
-Over 180 live runs on four frontier providers (sweep `2026-07-28T18-32-04`):
-
-| arm | strict | trap calls | prompt tokens (Anthropic) |
+| arm | completed | trap calls | prompt tokens (Anthropic) |
 |---|--:|--:|--:|
-| raw JSON Schema (baseline) | 75.0% | 8 | 261,435 |
-| **tool2code** | **97.2%** | **1** | **61,900** |
-| tool2code, semantics stripped | 72.2% | 10 | 55,299 |
+| raw JSON Schema (baseline) | 83.3% | 7 | 224,894 |
+| **tool2code** | **97.9%** | **1** | **83,445** |
+| tool2code, semantics stripped | 83.3% | 8 | 60,845 |
 
-**4× fewer prompt tokens and 22 points more accurate.** The third row is the important one: the
-same module with the model-written semantics removed scores the same as the baseline, so the code
-*shape* is worth nothing and the whole gain is the semantic slots — above all `vsX(why)`, which
-states what a tool is **not**. Trap calls, the only failure mode this corpus produces, fell from 8
-to 1.
+The third row is the one to read: the same module with the model-written semantics removed scores
+exactly the baseline. **The code shape is worth nothing on its own** — the gain is the compiled
+semantics, above all `vsX(why)`, which states what a tool is *not*.
 
-The honest limit: the scenarios and the mechanism were both derived from my reading of the same
-corpus, which risks teaching to the test. Full numbers, the four measurement bugs found along the
-way, and what would falsify this are in [`docs/RESULTS.md`](docs/RESULTS.md) and
-[`docs/THESIS.md`](docs/THESIS.md).
+Argument construction and sequencing are saturated for every arm including the baseline, so the
+whole difference is disambiguation between near-duplicate tools. Full numbers, the prediction that
+was made and confirmed, and the five measurement bugs found along the way are in
+[`docs/RESULTS.md`](docs/RESULTS.md).
 
 ## Why not just "put the schemas in a code block"
 

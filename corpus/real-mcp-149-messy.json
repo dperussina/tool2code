@@ -1,0 +1,4344 @@
+[
+ {
+  "name": "apiV2RevenueDetailsAccessorial",
+  "description": "[Financial] Accessorial revenue details for syncing into Con",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "schema_only": {
+     "description": "If true, return only schema"
+    },
+    "count_only": {
+     "description": "If true, only return estimated record co"
+    },
+    "csv_mode": {
+     "description": "If true, stream results to CSV file and "
+    },
+    "csv_path": {
+     "description": "Directory to write CSV file to"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2RevenueSummaryAccessorial",
+  "description": "[Financial] Per-year roll-up of accessorial charges for sync",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "schema_only": {
+     "description": "If true, return only schema"
+    },
+    "count_only": {
+     "description": "If true, only return estimated record co"
+    },
+    "csv_mode": {
+     "description": "If true, stream results to CSV file and "
+    },
+    "csv_path": {
+     "description": "Directory to write CSV file to"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2LocationsActive",
+  "description": "[Operations] Active Locations data source for syncing into C",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "schema_only": {
+     "description": "If true, return only schema"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2BlobWithGeminiAnalyze",
+  "description": "Analyze content from Azure Blob Storage OR external URL usin",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "blob_container": {
+     "description": "Azure Blob container name"
+    },
+    "blob_name": {
+     "description": "Azure Blob file path/name"
+    },
+    "external_url": {
+     "description": "External HTTPS URL to image/document"
+    },
+    "analysis_type": {
+     "description": "Type of analysis: vision"
+    },
+    "prompt": {
+     "description": "Analysis instructions for Gemini"
+    },
+    "auto_cleanup": {
+     "description": "Auto-delete from Google Files after anal",
+     "default": true
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2ConsolidationAnalyze",
+  "description": "Analyze shipments by destination and identify consolidation ",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "shipments": {},
+    "truckSpecs": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2DataWithGeminiAnalyze",
+  "description": "Offload large-scale data analysis to Gemini 2",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "data": {
+     "description": "Large JSON data - accepts both plain obj"
+    },
+    "analysis_instructions": {
+     "description": "What to find, analyze, or synthesize fro"
+    },
+    "output_schema": {
+     "description": "Optional: Expected output structure - ac"
+    },
+    "context": {
+     "description": "Optional: Additional context about the d"
+    },
+    "max_output_tokens": {
+     "description": "Maximum output tokens for Gemini",
+     "default": 100000
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2UrlsWithContextAnalyze",
+  "description": "Analyze and extract information from specific URLs using URL",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "urls": {
+     "items": {},
+     "description": "URLs to analyze"
+    },
+    "analysis_goal": {
+     "description": "What to analyze or extract from the URLs"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2ToArticleAppend",
+  "description": "Append new content to an existing article without replacing ",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "article_id": {
+     "description": "ID of the article to append to"
+    },
+    "section_title": {
+     "description": "Title for the new section"
+    },
+    "content": {
+     "description": "Content to append in Markdown format"
+    },
+    "append_reason": {
+     "description": "Why this content is being added"
+    },
+    "confidence": {
+     "minimum": 0,
+     "maximum": 1,
+     "description": "Your confidence in this additional conte"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2SummaryAr",
+  "description": "[Financial] Accounts receivable aging summary for syncing in",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "date_column": {
+     "description": "Column to use for date filtering"
+    },
+    "start_date": {
+     "description": "Start date for filtering"
+    },
+    "end_date": {
+     "description": "End date for filtering"
+    },
+    "limit": {
+     "description": "Maximum records to return"
+    },
+    "filters": {
+     "description": "Array of filter conditions to apply",
+     "items": {
+      "properties": {
+       "column": {
+        "description": "Column name to filter"
+       },
+       "operator": {
+        "description": "Filter operator Allowed values: equals, "
+       },
+       "value": {
+        "description": "Filter value"
+       }
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "How to combine multiple filters"
+    },
+    "schema_only": {
+     "description": "If true, return only schema"
+    },
+    "count_only": {
+     "description": "If true, only return estimated record co"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2GeocodeBatch",
+  "description": "Geocode multiple addresses in a single request (max 100 addr",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "addresses": {
+     "items": {},
+     "minItems": 1,
+     "maxItems": 100
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2ArticlesByTagBrowse",
+  "description": "Browse knowledge base articles by tag",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "tag": {
+     "description": "Tag to filter by"
+    },
+    "limit": {
+     "default": 10,
+     "description": "Maximum number of articles to return"
+    },
+    "offset": {
+     "default": 0,
+     "description": "Offset for pagination"
+    },
+    "include_inactive": {
+     "default": false,
+     "description": "Include deactivated articles"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2DistanceMatrixCalculate",
+  "description": "Calculate distances and durations between multiple origins a",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "origins": {
+     "minItems": 1,
+     "maxItems": 25,
+     "description": "Array of location objects",
+     "items": {
+      "properties": {
+       "latitude": {
+        "description": "Latitude coordinate"
+       },
+       "longitude": {
+        "description": "Longitude coordinate"
+       },
+       "city": {
+        "description": "City name"
+       },
+       "state": {
+        "description": "State code"
+       },
+       "address": {
+        "description": "Full street address"
+       },
+       "zipCode": {
+        "description": "Optional ZIP code"
+       }
+      }
+     }
+    },
+    "destinations": {
+     "minItems": 1,
+     "maxItems": 25,
+     "description": "Array of location objects",
+     "items": {
+      "properties": {
+       "latitude": {
+        "description": "Latitude coordinate"
+       },
+       "longitude": {
+        "description": "Longitude coordinate"
+       },
+       "city": {
+        "description": "City name"
+       },
+       "state": {
+        "description": "State code"
+       },
+       "address": {
+        "description": "Full street address"
+       },
+       "zipCode": {
+        "description": "Optional ZIP code"
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2FuelCostCalculate",
+  "description": "Calculate fuel cost for a trip using live EIA diesel prices",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "distanceMiles": {
+     "minimum": 0
+    },
+    "mpg": {
+     "minimum": 0.1
+    },
+    "state": {
+     "minLength": 2,
+     "maxLength": 2,
+     "description": "Two-letter state code for regional prici"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2RouteDistanceCalculate",
+  "description": "Calculate driving distance and duration between two location",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "origin": {
+     "description": "Starting location",
+     "properties": {
+      "latitude": {},
+      "longitude": {},
+      "city": {},
+      "state": {},
+      "address": {}
+     }
+    },
+    "destination": {
+     "description": "Ending location",
+     "properties": {
+      "latitude": {},
+      "longitude": {},
+      "city": {},
+      "state": {},
+      "address": {}
+     }
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2TripCostCalculate",
+  "description": "Calculate comprehensive trip costs including fuel, driver ti",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "distanceMiles": {},
+    "durationHours": {},
+    "cubicFeet": {},
+    "truckSpecs": {
+     "properties": {
+      "maxWeightLbs": {},
+      "maxCubicFeet": {},
+      "mpg": {},
+      "costPerMile": {},
+      "costPerHour": {}
+     }
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2OrderCancel",
+  "description": "Cancel an order",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "trackingNumber": {
+     "description": "FragilePAK tracking number to cancel"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2HealthCheck",
+  "description": "Check the health status of the TagNext API",
+  "input_schema": {
+   "type": "object",
+   "properties": {}
+  }
+ },
+ {
+  "name": "apiV2TaskExecuteCoding",
+  "description": "Execute a complex coding task using multi-model ensemble",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "task": {
+     "description": "Detailed description of the coding task"
+    },
+    "inputFiles": {
+     "items": {
+      "properties": {
+       "path": {
+        "description": "Full path to the file"
+       },
+       "name": {
+        "description": "Display name"
+       },
+       "description": {
+        "description": "What the file contains"
+       }
+      }
+     },
+     "description": "Input files to process"
+    },
+    "outputDir": {
+     "description": "Directory for output files"
+    },
+    "options": {
+     "properties": {
+      "complexity": {
+       "default": "medium",
+       "description": "Allowed values: low, medium, high"
+      },
+      "skipValidation": {
+       "default": false
+      },
+      "generateDocs": {
+       "default": false,
+       "description": "Generate README"
+      },
+      "saveAllSolutions": {
+       "default": false,
+       "description": "Save both Codex and Grok solutions"
+      }
+     }
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2TaskResultCoding",
+  "description": "Get the full result of a completed coding task",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "taskId": {
+     "description": "The task ID"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2TaskStatusCoding",
+  "description": "Check the status of a coding task by ID",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "taskId": {
+     "description": "The task ID"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2RatesCompare",
+  "description": "Compare spot vs contract rates for a lane to help determine ",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "originPostalCode": {
+     "minLength": 5,
+     "description": "Origin ZIP/postal code"
+    },
+    "originCity": {
+     "description": "Origin city name"
+    },
+    "originState": {
+     "minLength": 2,
+     "maxLength": 2,
+     "description": "Origin state code"
+    },
+    "destinationPostalCode": {
+     "minLength": 5,
+     "description": "Destination ZIP/postal code"
+    },
+    "destinationCity": {
+     "description": "Destination city name"
+    },
+    "destinationState": {
+     "minLength": 2,
+     "maxLength": 2,
+     "description": "Destination state code"
+    },
+    "equipmentType": {
+     "default": "VAN",
+     "description": "Equipment type Allowed values: VAN, REEF"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2LargeTextCompress",
+  "description": "Compress large text (>200K tokens) into a smaller format whi",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "text": {
+     "description": "Large text to compress"
+    },
+    "target_token_count": {
+     "description": "Target output size in tokens",
+     "default": 5000
+    },
+    "focus": {
+     "description": "Optional: What aspects to focus on durin"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2DistanceMatrixCompute",
+  "description": "Compute distance and duration between multiple origins and d",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "origins": {
+     "description": "List of origin locations",
+     "minItems": 1,
+     "maxItems": 25
+    },
+    "destinations": {
+     "description": "List of destination locations",
+     "minItems": 1,
+     "maxItems": 25
+    },
+    "travelMode": {
+     "default": "DRIVE",
+     "description": "Allowed values: DRIVE, BICYCLE, WALK, TW"
+    },
+    "routingPreference": {
+     "default": "TRAFFIC_AWARE",
+     "description": "Allowed values: TRAFFIC_UNAWARE, TRAFFIC"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2RouteCompute",
+  "description": "Compute a route between origin and destination",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "origin": {
+     "description": "Starting location - REQUIRED: provide ad",
+     "properties": {
+      "address": {
+       "description": "Full address or city, state"
+      },
+      "placeId": {},
+      "latLng": {
+       "properties": {
+        "latitude": {},
+        "longitude": {}
+       }
+      }
+     }
+    },
+    "destination": {
+     "description": "Ending location - REQUIRED: provide addr",
+     "properties": {
+      "address": {
+       "description": "Full address or city, state"
+      },
+      "placeId": {},
+      "latLng": {
+       "properties": {
+        "latitude": {},
+        "longitude": {}
+       }
+      }
+     }
+    },
+    "travelMode": {
+     "default": "DRIVE",
+     "description": "Allowed values: DRIVE, BICYCLE, WALK, TW"
+    },
+    "routingPreference": {
+     "default": "TRAFFIC_AWARE",
+     "description": "Allowed values: TRAFFIC_UNAWARE, TRAFFIC"
+    },
+    "intermediates": {
+     "description": "Waypoints between origin and destination"
+    },
+    "optimizeWaypointOrder": {
+     "default": false,
+     "description": "Optimize the order of waypoints"
+    },
+    "routeModifiers": {
+     "properties": {
+      "avoidTolls": {},
+      "avoidHighways": {},
+      "avoidFerries": {}
+     }
+    },
+    "includePolyline": {
+     "default": false,
+     "description": "Include encoded polyline geometry"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2GoogleDriveConnect",
+  "description": "Connect your Google Drive account to Athena",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "scopes": {
+     "items": {},
+     "description": "Optional: specific OAuth scopes to reque"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2OfSalesCost",
+  "description": "[Financial] Invoice-level cost of sales data source for sync",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "date_column": {
+     "description": "Column to use for date filtering"
+    },
+    "start_date": {
+     "description": "Start date for filtering"
+    },
+    "end_date": {
+     "description": "End date for filtering"
+    },
+    "limit": {
+     "description": "Maximum records to return"
+    },
+    "filters": {
+     "description": "Array of filter conditions to apply",
+     "items": {
+      "properties": {
+       "column": {
+        "description": "Column name to filter"
+       },
+       "operator": {
+        "description": "Filter operator Allowed values: equals, "
+       },
+       "value": {
+        "description": "Filter value"
+       }
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "How to combine multiple filters"
+    },
+    "schema_only": {
+     "description": "If true, return only schema"
+    },
+    "count_only": {
+     "description": "If true, only return estimated record co"
+    },
+    "csv_mode": {
+     "description": "If true, stream results to CSV file and "
+    },
+    "csv_path": {
+     "description": "Directory to write CSV file to"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2ArticleCreate",
+  "description": "Create a new knowledge base article to document learnings, p",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "subject": {
+     "maxLength": 500,
+     "description": "Article title"
+    },
+    "body": {
+     "description": "Article content in Markdown format"
+    },
+    "tags": {
+     "description": "Comma-separated tags for categorization"
+    },
+    "confidence": {
+     "minimum": 0,
+     "maximum": 1,
+     "description": "Your confidence in this information"
+    },
+    "source_context": {
+     "description": "Brief explanation of where this knowledg"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2OrderNoteCreate",
+  "description": "Create a new note for an order",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "trackingNumber": {
+     "description": "Order tracking number"
+    },
+    "noteCode": {
+     "description": "Note code"
+    },
+    "note": {
+     "description": "Note content/text"
+    },
+    "jobType": {
+     "description": "Job type"
+    },
+    "isVisibleToCustomer": {
+     "description": "Whether note is visible to customer"
+    },
+    "isVisibleToServicePartner": {
+     "description": "Whether note is visible to service partn"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2Customers",
+  "description": "[Operations] Customer accounts with billing details for sync",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "limit": {
+     "description": "Maximum records to return"
+    },
+    "filters": {
+     "description": "Array of filter conditions to apply",
+     "items": {
+      "properties": {
+       "column": {
+        "description": "Column name to filter"
+       },
+       "operator": {
+        "description": "Filter operator Allowed values: equals, "
+       },
+       "value": {
+        "description": "Filter value"
+       }
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "How to combine multiple filters"
+    },
+    "schema_only": {
+     "description": "If true, return only schema"
+    },
+    "count_only": {
+     "description": "If true, only return record count"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2ConsultationDeep",
+  "description": "Deep multi-AI consultation with full debate workflow",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "topic": {
+     "description": "The topic to deeply analyze through mult"
+    },
+    "preset": {
+     "description": "Preset consultation mode"
+    },
+    "debateStyle": {
+     "description": "How models should interact: aggressive_c"
+    },
+    "productivityLevel": {
+     "description": "Depth level: quick"
+    },
+    "collaborationPattern": {
+     "description": "How models collaborate: iterative_buildi"
+    },
+    "agreementExpectation": {
+     "description": "Expected agreement level: high_agreement"
+    },
+    "focusArea": {
+     "description": "Focus area: strategic_analysis, technica"
+    },
+    "externalResources": {
+     "description": "External resources: always_search, initi"
+    },
+    "customRounds": {
+     "description": "Override default round count"
+    },
+    "responseLength": {
+     "description": "Response length: short"
+    },
+    "enableSearch": {
+     "description": "Enable web search/grounding for research",
+     "default": true
+    },
+    "maxTokens": {
+     "description": "Maximum tokens per model response - over"
+    },
+    "temperature": {
+     "minimum": 0,
+     "maximum": 2,
+     "description": "Temperature setting for all models"
+    },
+    "includeTranscript": {
+     "description": "Include full debate transcript in respon",
+     "default": true
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2ResearchDeep",
+  "description": "Conduct deep, multi-source research on any topic using AI-po",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "query": {
+     "description": "The research question or topic to invest"
+    },
+    "mode": {
+     "default": "comprehensive",
+     "description": "Research mode: quick"
+    },
+    "depth": {
+     "default": 2,
+     "description": "Research depth: 1"
+    },
+    "sources": {
+     "items": {},
+     "description": "Preferred sources to search"
+    },
+    "focusAreas": {
+     "items": {},
+     "description": "Specific aspects to focus on"
+    },
+    "excludeSources": {
+     "items": {},
+     "description": "Sources to exclude"
+    },
+    "timeRange": {
+     "properties": {
+      "from": {
+       "description": "Start date"
+      },
+      "to": {
+       "description": "End date"
+      }
+     },
+     "description": "Limit research to a specific time period"
+    },
+    "maxSources": {
+     "default": 30,
+     "description": "Maximum number of sources to return"
+    },
+    "location": {
+     "properties": {
+      "country": {
+       "description": "ISO 3166-1 alpha-2 country code"
+      },
+      "city": {
+       "description": "City name"
+      },
+      "region": {
+       "description": "State/region"
+      },
+      "timezone": {
+       "description": "IANA timezone"
+      },
+      "latitude": {
+       "description": "Latitude in decimal degrees"
+      },
+      "longitude": {
+       "description": "Longitude in decimal degrees"
+      }
+     },
+     "description": "User location for geo-specific queries"
+    },
+    "geoResearch": {
+     "properties": {
+      "enabled": {
+       "description": "Enable local business research"
+      },
+      "includeWebsiteAnalysis": {
+       "description": "Analyze company websites for details"
+      },
+      "includeReviews": {
+       "description": "Include Google reviews"
+      },
+      "maxBusinesses": {
+       "description": "Max businesses to return"
+      }
+     },
+     "description": "Settings for local business research"
+    },
+    "_meta": {
+     "properties": {
+      "progressToken": {
+       "oneOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "number"
+        }
+       ],
+       "description": "Token for receiving progress notificatio"
+      }
+     },
+     "description": "MCP metadata for progress tracking"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2AllTypesDemo",
+  "description": "[System] Demo tool that returns sample records demonstrating",
+  "input_schema": {
+   "type": "object",
+   "properties": {}
+  }
+ },
+ {
+  "name": "apiV2GoogleDriveDisconnect",
+  "description": "Disconnect your Google Drive account from Athena",
+  "input_schema": {
+   "type": "object",
+   "properties": {}
+  }
+ },
+ {
+  "name": "apiV2ApiDiscover",
+  "description": "Discover and analyze an API from a URL",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "url": {
+     "description": "URL of the API or its documentation page"
+    },
+    "apiKey": {
+     "description": "API key or token to test"
+    },
+    "authType": {
+     "description": "Type of authentication to test Allowed v"
+    },
+    "authHeaderName": {
+     "description": "Header name for api_key_header auth"
+    },
+    "authParamName": {
+     "description": "Query param name for api_key_query auth"
+    },
+    "skipRegistry": {
+     "default": false,
+     "description": "Skip registry lookup"
+    },
+    "skipConnectivityTest": {
+     "default": false,
+     "description": "Skip connectivity/auth testing"
+    },
+    "offloadToPrometheus": {
+     "default": true,
+     "description": "Offload large specs to Prometheus"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2BusinessesWithMapsDiscover",
+  "description": "Find and analyze location-based businesses using Google Maps",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "query": {
+     "description": "Business search query"
+    },
+    "latitude": {
+     "description": "Latitude of the search location"
+    },
+    "longitude": {
+     "description": "Longitude of the search location"
+    },
+    "rating_filter": {
+     "description": "Optional: Minimum rating filter"
+    },
+    "include_reviews": {
+     "description": "Optional: Include review summaries",
+     "default": false
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2ReportExecute",
+  "description": "Execute a specific report by ReportID with parameter values",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "reportId": {
+     "description": "Report ID"
+    },
+    "parameters": {
+     "description": "Parameter values keyed by parameter name",
+     "additionalProperties": true
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2StructuredDataExtract",
+  "description": "Extract structured data from unstructured text using a defin",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "text": {
+     "description": "Unstructured text to extract from"
+    },
+    "extraction_schema": {
+     "description": "JSON schema defining fields to extract"
+    },
+    "instructions": {
+     "description": "Optional: Additional extraction instruct"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2CoverageByZipcodeFcp",
+  "description": "[Operations] FCP Coverage By Zipcode — full sync of the per-",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "schema_only": {
+     "description": "If true, return only schema without runn"
+    },
+    "count_only": {
+     "description": "If true, run the query but only return t"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2PayChartsFcp",
+  "description": "[Financial] FCP pay-rate bands per service provider for sync",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "limit": {
+     "description": "Maximum records to return per page"
+    },
+    "filters": {
+     "description": "Array of filter conditions",
+     "items": {
+      "properties": {
+       "column": {
+        "description": "Column name to filter"
+       },
+       "operator": {
+        "description": "Filter operator Allowed values: equals, "
+       },
+       "value": {
+        "description": "Filter value"
+       }
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "How to combine multiple filters"
+    },
+    "schema_only": {
+     "description": "If true, return only schema without data"
+    },
+    "count_only": {
+     "description": "If true, only return record count"
+    },
+    "offset": {
+     "description": "Keyset cursor for pagination"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2Fifo",
+  "description": "[Operations] FIFO (First-In-First-Out) on-dock report data s",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "service_provider_id": {
+     "description": "Filter by service provider ID"
+    },
+    "lane": {
+     "description": "Filter by lane identifier"
+    },
+    "schema_only": {
+     "description": "If true, return only schema"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2OptimalTruckFind",
+  "description": "Find the smallest truck that can accommodate all shipments b",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "shipments": {},
+    "availableTrucks": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2AnalysisFreight",
+  "description": "Comprehensive freight pricing analysis using multi-AI sub-or",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "query": {
+     "description": "Natural language freight question or req"
+    },
+    "lanes": {
+     "description": "Specific lanes to analyze",
+     "items": {
+      "properties": {
+       "origin": {
+        "properties": {
+         "postalCode": {},
+         "city": {},
+         "state": {}
+        }
+       },
+       "destination": {
+        "properties": {
+         "postalCode": {},
+         "city": {},
+         "state": {}
+        }
+       }
+      }
+     }
+    },
+    "shipments": {
+     "description": "Shipment details for load planning",
+     "items": {
+      "properties": {
+       "id": {},
+       "weightLbs": {},
+       "cubicFeet": {},
+       "pallets": {}
+      }
+     }
+    },
+    "duckdbSource": {
+     "description": "Single table analysis",
+     "properties": {
+      "tableId": {
+       "description": "Convex table ID"
+      },
+      "tableName": {
+       "description": "Human-readable table name"
+      },
+      "sqlFilter": {
+       "description": "Optional WHERE clause filter"
+      }
+     }
+    },
+    "viewSource": {
+     "description": "Analyze a pre-built view with custom SQL",
+     "properties": {
+      "viewId": {
+       "description": "Convex view ID"
+      },
+      "tableId": {
+       "description": "Parent table ID for the view"
+      },
+      "sqlQuery": {
+       "description": "The view's SQL query"
+      },
+      "joinedTableIds": {
+       "items": {},
+       "description": "Additional table IDs for cross-table JOI"
+      },
+      "viewName": {
+       "description": "Human-readable view name"
+      }
+     }
+    },
+    "primaryTable": {
+     "description": "Primary table to analyze",
+     "properties": {
+      "tableId": {
+       "description": "Convex table ID"
+      },
+      "alias": {
+       "description": "Table alias for SQL"
+      }
+     }
+    },
+    "referenceTables": {
+     "description": "Reference tables for enrichment via auto",
+     "items": {
+      "properties": {
+       "tableId": {
+        "description": "Convex table ID"
+       },
+       "alias": {
+        "description": "Table alias for SQL"
+       },
+       "role": {
+        "description": "Role of this table Allowed values: enric"
+       },
+       "joinHint": {
+        "description": "Optional hint about join relationship"
+       }
+      }
+     }
+    },
+    "mode": {
+     "description": "Analysis mode: auto"
+    },
+    "options": {
+     "properties": {
+      "equipmentType": {
+       "default": "VAN",
+       "description": "Allowed values: VAN, REEFER, FLATBED"
+      },
+      "outputFormat": {
+       "default": "text",
+       "description": "Allowed values: text, voice"
+      },
+      "skipValidation": {
+       "default": false
+      }
+     }
+    },
+    "outputDir": {
+     "description": "Directory path to write raw analysis out"
+    },
+    "_meta": {
+     "description": "MCP metadata for progress notifications",
+     "properties": {
+      "progressToken": {
+       "oneOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "number"
+        }
+       ]
+      }
+     }
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2ConnectionStatusGdrive",
+  "description": "Check if you have an active Google Drive connection and view",
+  "input_schema": {
+   "type": "object",
+   "properties": {}
+  }
+ },
+ {
+  "name": "apiV2DownloadFileGdrive",
+  "description": "Download a file as inline text, base64, or save it to MCP_SH",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "file_id": {
+     "description": "Google Drive file ID"
+    },
+    "mode": {
+     "default": "base64",
+     "description": "Delivery mode Allowed values: inline, ba"
+    },
+    "export_format": {
+     "default": "auto",
+     "description": "Export format for Google Workspace files"
+    },
+    "file_name": {
+     "description": "Optional filename when saving to disk"
+    },
+    "output_dir": {
+     "description": "Optional subdirectory under MCP_SHARED_O"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2FromLinkGdrive",
+  "description": "Parse a Google Drive, Docs, Sheets, or Slides URL and return",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "url": {
+     "description": "Google Drive/Docs/Sheets/Slides URL"
+    },
+    "include_content": {
+     "description": "If true, also fetch and return file cont",
+     "default": false
+    },
+    "export_format": {
+     "description": "Export format for Google Workspace files",
+     "default": "auto"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2ListFilesGdrive",
+  "description": "List files in Google Drive",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "folder_id": {
+     "description": "Folder ID to list files from"
+    },
+    "page_size": {
+     "description": "Number of files to return",
+     "default": 25
+    },
+    "file_type": {
+     "default": "all",
+     "description": "Allowed values: all, folder, document, s"
+    },
+    "order_by": {
+     "default": "modifiedTime",
+     "description": "Allowed values: name, modifiedTime, crea"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2ReadFileGdrive",
+  "description": "Get detailed metadata for a file",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "file_id": {
+     "description": "Google Drive file ID"
+    },
+    "include_content": {
+     "description": "Include file content",
+     "default": false
+    },
+    "export_format": {
+     "default": "text",
+     "description": "Allowed values: text, html, pdf, docx, x"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2SearchGdrive",
+  "description": "Search for files in Google Drive by name, content, or proper",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "query": {
+     "description": "Search query"
+    },
+    "file_type": {
+     "default": "all",
+     "description": "Allowed values: all, folder, document, s"
+    },
+    "in_folder": {
+     "description": "Limit search to specific folder ID"
+    },
+    "modified_after": {
+     "description": "ISO date string - only files modified af"
+    },
+    "page_size": {
+     "default": 25
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2SearchByNameGdrive",
+  "description": "Find files by partial name match",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "description": "Partial file name to search for"
+    },
+    "match_type": {
+     "description": "How to match the name Allowed values: co",
+     "default": "contains"
+    },
+    "file_type": {
+     "default": "all",
+     "description": "Allowed values: all, folder, document, s"
+    },
+    "case_sensitive": {
+     "default": false
+    },
+    "page_size": {
+     "default": 25
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2SheetsAppendRowsGdrive",
+  "description": "Append new rows to a sheet or table range (ideal for tracker",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "spreadsheet_id": {
+     "description": "Google Sheets spreadsheet ID"
+    },
+    "range": {
+     "description": "Target range/table, e"
+    },
+    "values": {
+     "description": "Rows to append",
+     "items": {
+      "items": {}
+     }
+    },
+    "value_input_option": {
+     "default": "USER_ENTERED",
+     "description": "Allowed values: RAW, USER_ENTERED"
+    },
+    "insert_data_option": {
+     "default": "INSERT_ROWS",
+     "description": "Allowed values: OVERWRITE, INSERT_ROWS"
+    },
+    "include_values_in_response": {
+     "default": false
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2SheetsBatchUpdateGdrive",
+  "description": "Execute advanced Google Sheets BatchUpdate requests (create ",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "spreadsheet_id": {
+     "description": "Google Sheets spreadsheet ID"
+    },
+    "requests": {
+     "description": "Array of BatchUpdateRequest objects",
+     "items": {}
+    },
+    "include_spreadsheet_in_response": {
+     "description": "Include full spreadsheet in response"
+    },
+    "response_ranges": {
+     "items": {},
+     "description": "Restrict response to specific ranges"
+    },
+    "response_include_grid_data": {
+     "description": "Include grid data in response"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2SheetsGetRangeGdrive",
+  "description": "Read values from a Google Sheets range (A1 notation)",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "spreadsheet_id": {
+     "description": "Google Sheets spreadsheet ID"
+    },
+    "range": {
+     "description": "Range in A1 notation"
+    },
+    "major_dimension": {
+     "default": "ROWS",
+     "description": "Allowed values: ROWS, COLUMNS"
+    },
+    "value_render_option": {
+     "default": "FORMATTED_VALUE",
+     "description": "Allowed values: FORMATTED_VALUE, UNFORMA"
+    },
+    "date_time_render_option": {
+     "default": "FORMATTED_STRING",
+     "description": "Allowed values: SERIAL_NUMBER, FORMATTED"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2SheetsListTabsGdrive",
+  "description": "List all sheets (tabs) inside a Google Spreadsheet, includin",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "spreadsheet_id": {
+     "description": "Google Sheets spreadsheet ID"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2SheetsUpdateRangeGdrive",
+  "description": "Overwrite an A1 range in Google Sheets",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "spreadsheet_id": {
+     "description": "Google Sheets spreadsheet ID"
+    },
+    "range": {
+     "description": "Range in A1 notation to overwrite"
+    },
+    "values": {
+     "description": "2D array of rows to write",
+     "items": {
+      "items": {}
+     }
+    },
+    "value_input_option": {
+     "default": "USER_ENTERED",
+     "description": "Allowed values: RAW, USER_ENTERED"
+    },
+    "include_values_in_response": {
+     "default": false
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2UploadFileGdrive",
+  "description": "Upload or create files in Google Drive using text, base64 pa",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "file_name": {
+     "description": "Target filename"
+    },
+    "folder_id": {
+     "description": "Optional parent folder ID"
+    },
+    "mime_type": {
+     "description": "MIME type for upload"
+    },
+    "google_type": {
+     "description": "Create a native Google Doc/Sheet/Slide A"
+    },
+    "source": {
+     "default": "text",
+     "description": "How content is provided Allowed values: "
+    },
+    "text_content": {
+     "description": "UTF-8 text content"
+    },
+    "base64_content": {
+     "description": "Base64 payload"
+    },
+    "file_path": {
+     "description": "Path when source=file_path"
+    },
+    "description": {
+     "description": "Optional Drive description"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2AddressGeocode",
+  "description": "Convert an address into geographic coordinates (latitude/lon",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "address": {
+     "description": "Address to geocode"
+    },
+    "region": {
+     "description": "Country code for biasing"
+    },
+    "language": {
+     "description": "Language code"
+    },
+    "componentFilters": {
+     "properties": {
+      "route": {},
+      "locality": {},
+      "administrativeArea": {},
+      "postalCode": {},
+      "country": {}
+     }
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2ActiveLocationsGet",
+  "description": "Get all active locations (customer sites and hubs) with coor",
+  "input_schema": {
+   "type": "object",
+   "properties": {}
+  }
+ },
+ {
+  "name": "apiV2ArticleByIdGet",
+  "description": "Get the complete content of a knowledge base article by its ",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "article_id": {
+     "description": "The unique identifier of the article to "
+    },
+    "include_metadata": {
+     "default": true,
+     "description": "Include AI metadata"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2CallRecordingsGet",
+  "description": "Get call recordings for an order",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "orderId": {
+     "description": "Order ID"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2ContractRateGet",
+  "description": "Get 52-week contract freight rates from DAT for a lane",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "originPostalCode": {
+     "minLength": 5,
+     "description": "Origin ZIP/postal code"
+    },
+    "originCity": {
+     "description": "Origin city name"
+    },
+    "originState": {
+     "minLength": 2,
+     "maxLength": 2,
+     "description": "Origin state code"
+    },
+    "destinationPostalCode": {
+     "minLength": 5,
+     "description": "Destination ZIP/postal code"
+    },
+    "destinationCity": {
+     "description": "Destination city name"
+    },
+    "destinationState": {
+     "minLength": 2,
+     "maxLength": 2,
+     "description": "Destination state code"
+    },
+    "equipmentType": {
+     "default": "VAN",
+     "description": "Equipment type Allowed values: VAN, REEF"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2CostOfSalesGet",
+  "description": "Get detailed cost of sales data for a date range with option",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "startDate": {
+     "description": "Start date in YYYY-MM-DD format"
+    },
+    "endDate": {
+     "description": "End date in YYYY-MM-DD format"
+    },
+    "partnerId": {
+     "description": "Filter by partner ID"
+    },
+    "companyNumber": {
+     "description": "Filter by company number"
+    },
+    "customerNumber": {
+     "description": "Filter by customer number"
+    },
+    "hiInvoiceNo": {
+     "description": "Filter by invoice number"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2CustomerDetailsGet",
+  "description": "Get comprehensive details for a specific customer/partner by",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "partnerId": {
+     "description": "Partner/Customer ID"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2CustomerExceptionsGet",
+  "description": "Get exception summary for a customer over a time period",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "partnerId": {
+     "description": "Partner/Customer ID"
+    },
+    "days": {
+     "description": "Number of days to look back",
+     "minimum": 1,
+     "maximum": 365
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2CustomerScorecardGet",
+  "description": "Get customer scorecard dashboard with comprehensive performa",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "startDate": {
+     "description": "Start date"
+    },
+    "endDate": {
+     "description": "End date"
+    },
+    "partnerId": {
+     "description": "Optional single partner/customer ID to f"
+    },
+    "partnerIds": {
+     "items": {},
+     "description": "Optional array of partner IDs to filter "
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2DieselPriceGet",
+  "description": "Get current U",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "state": {
+     "minLength": 2,
+     "maxLength": 2,
+     "description": "Two-letter state code"
+    },
+    "limit": {
+     "minimum": 1,
+     "maximum": 52,
+     "default": 1,
+     "description": "Number of recent data points to return"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2DockLocationGet",
+  "description": "Find the FragilePAK final mile dock/facility location that s",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "zipCode": {
+     "description": "5-digit delivery zip code"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2DocumentGet",
+  "description": "Get URLs for order documents and labels (PDF, HTML, ZPL form",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "trackingNumber": {
+     "description": "FragilePAK tracking number"
+    },
+    "documentType": {
+     "description": "Type of document: label"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2FifoReportGet",
+  "description": "Get FIFO (First-In-First-Out) report showing what freight is",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "serviceProviderID": {
+     "description": "Service provider ID to filter by"
+    },
+    "lane": {
+     "description": "Lane identifier to filter by"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2FreightItemsGet",
+  "description": "Get freight items (packages/products) for an order by tracki",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "trackingNumber": {
+     "description": "Order tracking number"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2IntransitReportGet",
+  "description": "Get in-transit report showing what freight is currently load",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "serviceProviderID": {
+     "description": "Service provider ID to filter by"
+    },
+    "lane": {
+     "description": "Lane identifier to filter by"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2LabelDataGet",
+  "description": "Get electronic label data for custom label generation",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "trackingNumber": {
+     "description": "FragilePAK tracking number"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2LoadDetailsGet",
+  "description": "Get comprehensive details for a trigger-based load by Load I",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "loadId": {
+     "description": "Load ID to retrieve details for"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2OrderDetailsGet",
+  "description": "Get comprehensive order details including all data: header, ",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "trackingNumber": {
+     "description": "Order tracking number"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2OrderNotesGet",
+  "description": "Get all notes for an order using the tracking number (format",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "trackingNumber": {
+     "description": "Order tracking number"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2OrderTimelineGet",
+  "description": "Get chronological timeline of movements, status changes, and",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "trackingNumber": {
+     "description": "Order tracking number"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2OrderTrackingGet",
+  "description": "Get tracking information for an order including EDI events a",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "trackingNumber": {
+     "description": "FragilePAK tracking number"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2PlaceDetailsGet",
+  "description": "Get detailed information about a specific place using its pl",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "placeId": {
+     "description": "Google Place ID"
+    },
+    "language": {},
+    "fields": {
+     "items": {},
+     "description": "Specific fields to return"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2QuoteGet",
+  "description": "Get a freight quote from FragilePAK based on service level, ",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "serviceLevel": {
+     "description": "Service level for the shipment Allowed v"
+    },
+    "cubicFeet": {
+     "description": "Total cubic feet of shipment"
+    },
+    "weight": {
+     "description": "Total weight in pounds"
+    },
+    "originZip": {
+     "description": "Origin 5-digit zip code"
+    },
+    "destinationZip": {
+     "description": "Destination 5-digit zip code"
+    },
+    "value": {
+     "description": "Declared value for insurance calculation"
+    },
+    "pieceCount": {
+     "description": "Number of pieces for piece surcharge cal"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2SchedulingOptionsGet",
+  "description": "Get available delivery time slots for scheduling an order",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "orderIdentifier": {
+     "description": "Can be PRO, Reference1, or Reference2"
+    },
+    "zipCode": {
+     "description": "Delivery zip code"
+    },
+    "numberOfResources": {
+     "description": "Number of scheduling slots to return"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2SpotRateGet",
+  "description": "Get real-time spot freight rates from DAT for a lane",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "originPostalCode": {
+     "minLength": 5,
+     "description": "Origin ZIP/postal code"
+    },
+    "originCity": {
+     "description": "Origin city name"
+    },
+    "originState": {
+     "minLength": 2,
+     "maxLength": 2,
+     "description": "Origin state code"
+    },
+    "destinationPostalCode": {
+     "minLength": 5,
+     "description": "Destination ZIP/postal code"
+    },
+    "destinationCity": {
+     "description": "Destination city name"
+    },
+    "destinationState": {
+     "minLength": 2,
+     "maxLength": 2,
+     "description": "Destination state code"
+    },
+    "equipmentType": {
+     "default": "VAN",
+     "description": "Equipment type Allowed values: VAN, REEF"
+    },
+    "forecastPeriod": {
+     "default": "35DAYS",
+     "description": "Forecast time horizon Allowed values: 8D"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2TransitTimeGet",
+  "description": "Calculate transit time in days between two zip codes",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "fromZip": {
+     "description": "Origin 5-digit zip code"
+    },
+    "toZip": {
+     "description": "Destination 5-digit zip code"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2CheckHealth",
+  "description": "[System] Check the health and status of the data-sources-mcp",
+  "input_schema": {
+   "type": "object",
+   "properties": {}
+  }
+ },
+ {
+  "name": "apiV2PatternsIdentify",
+  "description": "Analyze large datasets to identify trends, anomalies, cluste",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "text": {
+     "description": "Data or text to analyze"
+    },
+    "pattern_type": {
+     "description": "Type of patterns to identify Allowed val"
+    },
+    "context": {
+     "description": "Optional: Additional context about the d"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2Intransit",
+  "description": "[Operations] In-Transit report data source for syncing into ",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "service_provider_id": {
+     "description": "Filter by service provider ID"
+    },
+    "lane": {
+     "description": "Filter by lane identifier"
+    },
+    "schema_only": {
+     "description": "If true, return only schema"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2FinancialJob",
+  "description": "[Financial] Residential pickup and delivery data source for ",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "date_column": {
+     "description": "Column to use for date filtering"
+    },
+    "start_date": {
+     "description": "Start date"
+    },
+    "end_date": {
+     "description": "End date"
+    },
+    "limit": {
+     "description": "Maximum records to return"
+    },
+    "offset": {
+     "description": "Keyset cursor: RowID to resume after"
+    },
+    "filters": {
+     "description": "Array of filter conditions to apply",
+     "items": {
+      "properties": {
+       "column": {
+        "description": "Column name to filter"
+       },
+       "operator": {
+        "description": "Filter operator Allowed values: equals, "
+       },
+       "value": {
+        "description": "Filter value"
+       }
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "How to combine multiple filters"
+    },
+    "schema_only": {
+     "description": "If true, return only schema without data"
+    },
+    "count_only": {
+     "description": "If true, only return estimated record co"
+    },
+    "csv_mode": {
+     "description": "If true, stream results to CSV file on d"
+    },
+    "csv_path": {
+     "description": "Directory to write CSV file to"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2ReportsList",
+  "description": "List all available reports with their metadata and parameter",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "activeOnly": {
+     "description": "Filter to only active reports"
+    },
+    "favoritesOnly": {
+     "description": "Filter to only favorite reports"
+    },
+    "search": {
+     "description": "Search reports by name or description"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2ReportLoad",
+  "description": "[Operations] Load-level logistics data for syncing into Cont",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "limit": {
+     "description": "Maximum records per page"
+    },
+    "schema_only": {
+     "description": "If true, return only schema without data"
+    },
+    "count_only": {
+     "description": "If true, only return record count"
+    },
+    "csv_mode": {
+     "description": "If true, stream entire result to CSV fil"
+    },
+    "csv_path": {
+     "description": "Directory to write CSV file to"
+    },
+    "offset": {
+     "description": "Row offset for pagination"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2DeliveriesLovesac",
+  "description": "[Operations] LoveSac Deliveries Report — direct passthrough ",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "schema_only": {
+     "description": "If true, return only schema without runn"
+    },
+    "count_only": {
+     "description": "If true, run the SP but only return the "
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2SearchNearby",
+  "description": "Search for places near a specific location",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "location": {
+     "properties": {
+      "latitude": {},
+      "longitude": {}
+     }
+    },
+    "radius": {
+     "description": "Search radius in meters"
+    },
+    "type": {},
+    "keyword": {},
+    "language": {},
+    "minPrice": {
+     "minimum": 0,
+     "maximum": 4
+    },
+    "maxPrice": {
+     "minimum": 0,
+     "maximum": 4
+    },
+    "openNow": {},
+    "rankBy": {
+     "default": "prominence",
+     "description": "Allowed values: prominence, distance"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2SurveyNps",
+  "description": "[Operations] Unified NPS Survey results for syncing into Con",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "date_column": {
+     "description": "Date column to filter on"
+    },
+    "start_date": {
+     "description": "Start date"
+    },
+    "end_date": {
+     "description": "End date"
+    },
+    "limit": {
+     "description": "Maximum records to return"
+    },
+    "filters": {
+     "description": "Array of filter conditions to apply",
+     "items": {
+      "properties": {
+       "column": {
+        "description": "Column name to filter"
+       },
+       "operator": {
+        "description": "Filter operator Allowed values: equals, "
+       },
+       "value": {
+        "description": "Filter value"
+       }
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "How to combine multiple filters"
+    },
+    "schema_only": {
+     "description": "If true, return only schema without data"
+    },
+    "count_only": {
+     "description": "If true, only return record count for th"
+    },
+    "offset": {
+     "description": "Keyset cursor for pagination"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2OrdersNsd",
+  "description": "[Operations] Network Summary Data (NSD Orders) - order-level",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "date_added_from": {
+     "description": "Inclusive lower bound on DateAdded"
+    },
+    "date_added_to": {
+     "description": "Inclusive upper bound on DateAdded"
+    },
+    "limit": {
+     "description": "Max records per page"
+    },
+    "offset": {
+     "description": "Pagination offset"
+    },
+    "filters": {
+     "description": "Filterable columns: partner_primary_orde",
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {
+        "description": "Allowed values: equals, not_equals, cont"
+       },
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2OrdersOpen",
+  "description": "[Operations] All open orders in the system, sourced from a T",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "schema_only": {
+     "description": "If true, return only schema without data"
+    },
+    "csv_mode": {
+     "description": "Always true for this source"
+    },
+    "csv_path": {
+     "description": "Directory to write CSV file to"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2LoadOptimize",
+  "description": "Analyze shipment loading, calculate utilization, and provide",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "shipments": {
+     "items": {
+      "properties": {
+       "id": {},
+       "origin": {},
+       "destination": {},
+       "weightLbs": {},
+       "cubicFeet": {},
+       "priority": {
+        "description": "Allowed values: standard, expedited, cri"
+       }
+      }
+     }
+    },
+    "truckSpecs": {
+     "properties": {
+      "maxWeightLbs": {},
+      "maxCubicFeet": {},
+      "mpg": {},
+      "costPerMile": {},
+      "costPerHour": {},
+      "maxDrivingHoursPerDay": {}
+     }
+    },
+    "origin": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2MultiStopRouteOptimize",
+  "description": "Optimize a multi-stop delivery route using Google Maps",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "origin": {
+     "description": "Starting location",
+     "properties": {
+      "latitude": {},
+      "longitude": {},
+      "city": {},
+      "state": {},
+      "address": {}
+     }
+    },
+    "destination": {
+     "description": "Ending location",
+     "properties": {
+      "latitude": {},
+      "longitude": {},
+      "city": {},
+      "state": {},
+      "address": {}
+     }
+    },
+    "waypoints": {
+     "description": "Intermediate stops",
+     "items": {
+      "properties": {
+       "latitude": {},
+       "longitude": {},
+       "city": {},
+       "state": {},
+       "address": {}
+      }
+     }
+    },
+    "optimizeOrder": {
+     "default": true
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2WaypointsOptimize",
+  "description": "Optimize the order of waypoints to minimize travel time/dist",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "start": {
+     "description": "Starting location"
+    },
+    "end": {
+     "description": "Ending location"
+    },
+    "waypoints": {
+     "description": "Waypoints to optimize",
+     "minItems": 1,
+     "maxItems": 25
+    },
+    "travelMode": {
+     "default": "DRIVE",
+     "description": "Allowed values: DRIVE, BICYCLE, WALK, TW"
+    },
+    "roundTrip": {
+     "default": false,
+     "description": "Return to starting location"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2NotesOrder",
+  "description": "[Operations] Order notes and communication cache data source",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "date_column": {
+     "description": "Column to use for date filtering"
+    },
+    "start_date": {
+     "description": "Start date"
+    },
+    "end_date": {
+     "description": "End date"
+    },
+    "limit": {
+     "description": "Maximum records to return"
+    },
+    "offset": {
+     "description": "Keyset cursor: RowID to resume after"
+    },
+    "filters": {
+     "description": "Array of filter conditions to apply",
+     "items": {
+      "properties": {
+       "column": {
+        "description": "Column name to filter"
+       },
+       "operator": {
+        "description": "Filter operator Allowed values: equals, "
+       },
+       "value": {
+        "description": "Filter value"
+       }
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "How to combine multiple filters"
+    },
+    "schema_only": {
+     "description": "If true, return only schema without data"
+    },
+    "count_only": {
+     "description": "If true, only return estimated record co"
+    },
+    "csv_mode": {
+     "description": "If true, stream results to CSV file on d"
+    },
+    "csv_path": {
+     "description": "Directory to write CSV file to"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2PathOrder",
+  "description": "[Operations] Network planning prepared order path data sourc",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "date_column": {
+     "description": "Column to use for date filtering"
+    },
+    "start_date": {
+     "description": "Start date"
+    },
+    "end_date": {
+     "description": "End date"
+    },
+    "limit": {
+     "description": "Maximum records to return"
+    },
+    "offset": {
+     "description": "Keyset cursor: RowID to resume after"
+    },
+    "filters": {
+     "description": "Array of filter conditions to apply",
+     "items": {
+      "properties": {
+       "column": {
+        "description": "Column name to filter"
+       },
+       "operator": {
+        "description": "Filter operator Allowed values: equals, "
+       },
+       "value": {
+        "description": "Filter value"
+       }
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "How to combine multiple filters"
+    },
+    "schema_only": {
+     "description": "If true, return only schema without data"
+    },
+    "count_only": {
+     "description": "If true, only return estimated record co"
+    },
+    "csv_mode": {
+     "description": "If true, stream results to CSV file on d"
+    },
+    "csv_path": {
+     "description": "Directory to write CSV file to"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2PathFinancialOrder",
+  "description": "[Financial] Financial variant of the network planning order ",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "date_column": {
+     "description": "Column to use for date filtering"
+    },
+    "start_date": {
+     "description": "Start date"
+    },
+    "end_date": {
+     "description": "End date"
+    },
+    "limit": {
+     "description": "Maximum records to return"
+    },
+    "offset": {
+     "description": "Keyset cursor: RowID to resume after"
+    },
+    "filters": {
+     "description": "Array of filter conditions to apply",
+     "items": {
+      "properties": {
+       "column": {
+        "description": "Column name to filter"
+       },
+       "operator": {
+        "description": "Filter operator Allowed values: equals, "
+       },
+       "value": {
+        "description": "Filter value"
+       }
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "How to combine multiple filters"
+    },
+    "schema_only": {
+     "description": "If true, return only schema without data"
+    },
+    "count_only": {
+     "description": "If true, only return estimated record co"
+    },
+    "csv_mode": {
+     "description": "If true, stream results to CSV file on d"
+    },
+    "csv_path": {
+     "description": "Directory to write CSV file to"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2AutocompletePlace",
+  "description": "Get place predictions based on user input",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "input": {
+     "description": "Search input text"
+    },
+    "location": {
+     "properties": {
+      "latitude": {},
+      "longitude": {}
+     }
+    },
+    "radius": {},
+    "language": {},
+    "types": {},
+    "components": {},
+    "strictBounds": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2UrlProbe",
+  "description": "Probe a URL to inspect its response",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "url": {
+     "description": "URL to probe"
+    },
+    "method": {
+     "default": "GET",
+     "description": "HTTP method to use Allowed values: GET, "
+    },
+    "headers": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "description": "Additional headers to send"
+    },
+    "followRedirects": {
+     "default": true,
+     "description": "Whether to follow redirects"
+    },
+    "timeout": {
+     "description": "Request timeout in milliseconds"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2FileProfile",
+  "description": "Quick file profiling without the full coding pipeline",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "filepath": {
+     "description": "Full path to the file to profile"
+    },
+    "profile_depth": {
+     "default": "standard",
+     "description": "Level of profiling detail Allowed values"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2AllModelsQuery",
+  "description": "Query all 4 AI models in parallel with the same prompt",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "prompt": {
+     "description": "The question or prompt to send to all mo"
+    },
+    "temperature": {
+     "minimum": 0,
+     "maximum": 2,
+     "description": "Temperature setting for all models"
+    },
+    "maxTokens": {
+     "description": "Maximum tokens in response"
+    },
+    "enableSearch": {
+     "description": "Enable web search/grounding"
+    },
+    "systemPrompt": {
+     "description": "System prompt/instructions for all model"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2ModelQuery",
+  "description": "Query a single AI model (Grok, Gemini, Claude, or OpenAI)",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "model": {
+     "description": "Which AI model to query Allowed values: "
+    },
+    "prompt": {
+     "description": "The question or prompt to send to the mo"
+    },
+    "temperature": {
+     "minimum": 0,
+     "maximum": 2,
+     "description": "Temperature setting"
+    },
+    "maxTokens": {
+     "description": "Maximum tokens in response"
+    },
+    "enableSearch": {
+     "description": "Enable web search/grounding"
+    },
+    "systemPrompt": {
+     "description": "System prompt/instructions for the model"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2SearchOrdersQuick",
+  "description": "Fast lookup by exact tracking number, order number, customer",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "query": {
+     "description": "Exact tracking number"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2OrderRegister",
+  "description": "Register a new order with FragilePAK",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "registrationType": {
+     "description": "1=Door-to-Door"
+    },
+    "salesOrder": {
+     "description": "Main order identifier"
+    },
+    "purchaseOrder": {
+     "description": "Secondary order identifier"
+    },
+    "quoteId": {
+     "description": "Previous quote identifier"
+    },
+    "serviceLevel": {
+     "description": "2=Threshold, 3=WG Install, 4=White Glove"
+    },
+    "destinationName": {
+     "description": "Destination location/person name"
+    },
+    "destinationAddress": {
+     "description": "Destination street address"
+    },
+    "destinationCity": {
+     "description": "Destination city"
+    },
+    "destinationState": {
+     "description": "Destination state"
+    },
+    "destinationZipCode": {
+     "description": "Destination zip code"
+    },
+    "destinationPhone": {
+     "description": "Destination phone number"
+    },
+    "freightItems": {
+     "description": "Array of freight items",
+     "items": {
+      "properties": {
+       "description": {},
+       "quantity": {},
+       "weight": {},
+       "height": {},
+       "width": {},
+       "length": {},
+       "sku": {},
+       "serialNumber": {},
+       "handlingUnit": {},
+       "value": {}
+      }
+     }
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2ArticleReplace",
+  "description": "Completely replace an article with new content",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "article_id": {
+     "description": "ID of the article to replace"
+    },
+    "new_body": {
+     "description": "Complete new article body in Markdown"
+    },
+    "new_subject": {
+     "description": "New subject/title"
+    },
+    "new_tags": {
+     "description": "New tags as comma-separated string"
+    },
+    "reason": {
+     "description": "Why this article is being replaced"
+    },
+    "confidence": {
+     "minimum": 0,
+     "maximum": 1,
+     "description": "Your confidence in this replacement"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2WithGoogleSearchResearch",
+  "description": "Perform real-time web research using Google Search grounding",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "query": {
+     "description": "Research query or question to investigat"
+    },
+    "focus": {
+     "description": "Optional: Specific aspect to focus on"
+    },
+    "max_sources": {
+     "description": "Maximum number of sources to return",
+     "default": 10
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2AndCostsRevenue",
+  "description": "[Financial] Order-level revenue and costs data source for sy",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "date_column": {
+     "description": "Column to use for date filtering"
+    },
+    "start_date": {
+     "description": "Start date for filtering"
+    },
+    "end_date": {
+     "description": "End date for filtering"
+    },
+    "limit": {
+     "description": "Maximum records to return"
+    },
+    "filters": {
+     "description": "Array of filter conditions to apply",
+     "items": {
+      "properties": {
+       "column": {
+        "description": "Column name to filter"
+       },
+       "operator": {
+        "description": "Filter operator Allowed values: equals, "
+       },
+       "value": {
+        "description": "Filter value"
+       }
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "How to combine multiple filters"
+    },
+    "schema_only": {
+     "description": "If true, return only schema"
+    },
+    "count_only": {
+     "description": "If true, only return estimated record co"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2GeocodeReverse",
+  "description": "Convert geographic coordinates into a human-readable address",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "latitude": {
+     "minimum": -90,
+     "maximum": 90
+    },
+    "longitude": {
+     "minimum": -180,
+     "maximum": 180
+    },
+    "resultType": {
+     "items": {}
+    },
+    "locationType": {
+     "items": {}
+    },
+    "language": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2OrderSchedule",
+  "description": "Schedule an order for delivery using a resource ID from avai",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "orderIdentifier": {
+     "description": "Can be PRO, Reference1, or Reference2"
+    },
+    "resourceId": {
+     "description": "Resource ID from scheduling options"
+    },
+    "zipCode": {
+     "description": "Delivery zip code"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2BootiesGlovesScorecard",
+  "description": "[FCP Scorecard] Booties / Gloves compliance - per-SP weekly ",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "week_starting_date": {
+     "description": "Exact Monday of target week"
+    },
+    "week_starting_date_from": {
+     "description": "Inclusive lower bound on week Monday"
+    },
+    "week_starting_date_to": {
+     "description": "Inclusive upper bound on week Monday"
+    },
+    "current_week_only": {
+     "description": "If true, filter to the current ISO week "
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2BootiesGlovesDailyScorecard",
+  "description": "[FCP Scorecard] Booties / Gloves (Daily) - daily-grain twin ",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "snapshot_date": {
+     "description": "Exact PT calendar day"
+    },
+    "snapshot_date_from": {
+     "description": "Inclusive lower bound"
+    },
+    "snapshot_date_to": {
+     "description": "Inclusive upper bound"
+    },
+    "latest_snapshot_only": {
+     "description": "If true, filter to MAX"
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2BootiesGlovesDetailScorecard",
+  "description": "[FCP Scorecard] Booties / Gloves (Detailed) - row-level phot",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "event_date_from": {
+     "description": "Inclusive lower bound on dl_date"
+    },
+    "event_date_to": {
+     "description": "Inclusive upper bound on dl_date"
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2EdemandScorecard",
+  "description": "[FCP Scorecard] eDemand - per-FC weekly rollup (eDemand%, OF",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "week_starting_date": {
+     "description": "Exact Monday of target week"
+    },
+    "week_starting_date_from": {
+     "description": "Inclusive lower bound on week Monday"
+    },
+    "week_starting_date_to": {
+     "description": "Inclusive upper bound on week Monday"
+    },
+    "current_week_only": {
+     "description": "If true, filter to the current ISO week "
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2EdemandDailyScorecard",
+  "description": "[FCP Scorecard] eDemand (Daily) - daily-grain twin of scorec",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "snapshot_date": {
+     "description": "Exact PT calendar day"
+    },
+    "snapshot_date_from": {
+     "description": "Inclusive lower bound"
+    },
+    "snapshot_date_to": {
+     "description": "Inclusive upper bound"
+    },
+    "latest_snapshot_only": {
+     "description": "If true, filter to MAX"
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2EdemandDetailScorecard",
+  "description": "[FCP Scorecard] eDemand (Detailed) - row-level eDemand detai",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "event_date_from": {
+     "description": "Inclusive lower bound on ddate"
+    },
+    "event_date_to": {
+     "description": "Inclusive upper bound on ddate"
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2FaScorecard",
+  "description": "[FCP Scorecard] First Available - per-FC × mileage-range wee",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "week_starting_date": {
+     "description": "Exact Monday of target week"
+    },
+    "week_starting_date_from": {
+     "description": "Inclusive lower bound on week Monday"
+    },
+    "week_starting_date_to": {
+     "description": "Inclusive upper bound on week Monday"
+    },
+    "current_week_only": {
+     "description": "If true, filter to the current ISO week "
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2FaDailyScorecard",
+  "description": "[FCP Scorecard] First Available (Daily) - daily-grain twin o",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "snapshot_date": {
+     "description": "Exact PT calendar day"
+    },
+    "snapshot_date_from": {
+     "description": "Inclusive lower bound"
+    },
+    "snapshot_date_to": {
+     "description": "Inclusive upper bound"
+    },
+    "latest_snapshot_only": {
+     "description": "If true, filter to MAX"
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2LeaderboardScorecard",
+  "description": "[FCP Scorecard] Leaderboard - per-FC weekly scorecard with a",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "week_starting_date": {
+     "description": "Exact Monday of target week"
+    },
+    "week_starting_date_from": {
+     "description": "Inclusive lower bound on week Monday"
+    },
+    "week_starting_date_to": {
+     "description": "Inclusive upper bound on week Monday"
+    },
+    "current_week_only": {
+     "description": "If true, filter to the current ISO week "
+    },
+    "limit": {
+     "description": "Max records per page"
+    },
+    "offset": {
+     "description": "Pagination offset"
+    },
+    "filters": {
+     "description": "Additional filters on any column",
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {
+        "description": "Allowed values: equals, not_equals, cont"
+       },
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2LeaderboardDailyScorecard",
+  "description": "[FCP Scorecard] Leaderboard (Daily) - daily-grain twin of sc",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "snapshot_date": {
+     "description": "Exact PT calendar day"
+    },
+    "snapshot_date_from": {
+     "description": "Inclusive lower bound on snapshot_date"
+    },
+    "snapshot_date_to": {
+     "description": "Inclusive upper bound on snapshot_date"
+    },
+    "latest_snapshot_only": {
+     "description": "If true, filter to MAX"
+    },
+    "limit": {
+     "description": "Max records per page"
+    },
+    "offset": {
+     "description": "Pagination offset"
+    },
+    "filters": {
+     "description": "Additional filters on any column",
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {
+        "description": "Allowed values: equals, not_equals, cont"
+       },
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2LfScorecard",
+  "description": "[FCP Scorecard] LF (Lost Freight) - per-FC weekly rollup",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "week_starting_date": {
+     "description": "Exact Monday of target week"
+    },
+    "week_starting_date_from": {
+     "description": "Inclusive lower bound on week Monday"
+    },
+    "week_starting_date_to": {
+     "description": "Inclusive upper bound on week Monday"
+    },
+    "current_week_only": {
+     "description": "If true, filter to the current ISO week "
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2LfDailyScorecard",
+  "description": "[FCP Scorecard] LF (Daily) - daily-grain twin of scorecard_l",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "snapshot_date": {
+     "description": "Exact PT calendar day"
+    },
+    "snapshot_date_from": {
+     "description": "Inclusive lower bound"
+    },
+    "snapshot_date_to": {
+     "description": "Inclusive upper bound"
+    },
+    "latest_snapshot_only": {
+     "description": "If true, filter to MAX"
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2NpsScorecard",
+  "description": "[FCP Scorecard] NPS Score - per-SP weekly rollup",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "week_starting_date": {
+     "description": "Exact Monday of target week"
+    },
+    "week_starting_date_from": {
+     "description": "Inclusive lower bound on week Monday"
+    },
+    "week_starting_date_to": {
+     "description": "Inclusive upper bound on week Monday"
+    },
+    "current_week_only": {
+     "description": "If true, filter to the current ISO week "
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2NpsDailyScorecard",
+  "description": "[FCP Scorecard] NPS (Daily) - daily-grain twin of scorecard_",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "snapshot_date": {
+     "description": "Exact PT calendar day"
+    },
+    "snapshot_date_from": {
+     "description": "Inclusive lower bound"
+    },
+    "snapshot_date_to": {
+     "description": "Inclusive upper bound"
+    },
+    "latest_snapshot_only": {
+     "description": "If true, filter to MAX"
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2NpsDetailScorecard",
+  "description": "[FCP Scorecard] NPS (Detailed) - row-level survey responses",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "event_date_from": {
+     "description": "Inclusive lower bound on event_resource_"
+    },
+    "event_date_to": {
+     "description": "Inclusive upper bound on event_resource_"
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2PerfectpartnerDetailScorecard",
+  "description": "[FCP Scorecard] Perfect Partner Report (Detailed) - row-leve",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "event_date_from": {
+     "description": "Inclusive lower bound on added_to_table"
+    },
+    "event_date_to": {
+     "description": "Inclusive upper bound on added_to_table"
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     },
+     "description": "Filterable columns: source_row_id, row_k"
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2ReschedulesScorecard",
+  "description": "[FCP Scorecard] Reschedules - per-FC weekly rollup",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "week_starting_date": {
+     "description": "Exact Monday of target week"
+    },
+    "week_starting_date_from": {
+     "description": "Inclusive lower bound on week Monday"
+    },
+    "week_starting_date_to": {
+     "description": "Inclusive upper bound on week Monday"
+    },
+    "current_week_only": {
+     "description": "If true, filter to the current ISO week "
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2ReschedulesDailyScorecard",
+  "description": "[FCP Scorecard] Reschedules (Daily) - daily-grain twin of sc",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "snapshot_date": {
+     "description": "Exact PT calendar day"
+    },
+    "snapshot_date_from": {
+     "description": "Inclusive lower bound"
+    },
+    "snapshot_date_to": {
+     "description": "Inclusive upper bound"
+    },
+    "latest_snapshot_only": {
+     "description": "If true, filter to MAX"
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2ServiceFailuresScorecard",
+  "description": "[FCP Scorecard] Service Failures - per-FC weekly rollup with",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "week_starting_date": {
+     "description": "Exact Monday of target week"
+    },
+    "week_starting_date_from": {
+     "description": "Inclusive lower bound on week Monday"
+    },
+    "week_starting_date_to": {
+     "description": "Inclusive upper bound on week Monday"
+    },
+    "current_week_only": {
+     "description": "If true, filter to the current ISO week "
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2ServiceFailuresDailyScorecard",
+  "description": "[FCP Scorecard] Service Failures (Daily) - daily-grain twin ",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "snapshot_date": {
+     "description": "Exact PT calendar day"
+    },
+    "snapshot_date_from": {
+     "description": "Inclusive lower bound"
+    },
+    "snapshot_date_to": {
+     "description": "Inclusive upper bound"
+    },
+    "latest_snapshot_only": {
+     "description": "If true, filter to MAX"
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2TimelyResourceScorecard",
+  "description": "[FCP Scorecard] Timely Resource - per-FC weekly rollup",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "week_starting_date": {
+     "description": "Exact Monday of target week"
+    },
+    "week_starting_date_from": {
+     "description": "Inclusive lower bound on week Monday"
+    },
+    "week_starting_date_to": {
+     "description": "Inclusive upper bound on week Monday"
+    },
+    "current_week_only": {
+     "description": "If true, filter to the current ISO week "
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2TimelyResourceDailyScorecard",
+  "description": "[FCP Scorecard] Timely Resource (Daily) - daily-grain twin o",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "snapshot_date": {
+     "description": "Exact PT calendar day"
+    },
+    "snapshot_date_from": {
+     "description": "Inclusive lower bound"
+    },
+    "snapshot_date_to": {
+     "description": "Inclusive upper bound"
+    },
+    "latest_snapshot_only": {
+     "description": "If true, filter to MAX"
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2TimelyResourceDetailScorecard",
+  "description": "[FCP Scorecard] Timely Resource (Detailed) - row-level order",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "event_date_from": {
+     "description": "Inclusive lower bound on scheduled_on"
+    },
+    "event_date_to": {
+     "description": "Inclusive upper bound on scheduled_on"
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2TpsScorecard",
+  "description": "[FCP Scorecard] TPS (Perfect Partner Days) - per-FC weekly r",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "week_starting_date": {
+     "description": "Exact Monday of target week"
+    },
+    "week_starting_date_from": {
+     "description": "Inclusive lower bound on week Monday"
+    },
+    "week_starting_date_to": {
+     "description": "Inclusive upper bound on week Monday"
+    },
+    "current_week_only": {
+     "description": "If true, filter to the current ISO week "
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2TpsDailyScorecard",
+  "description": "[FCP Scorecard] TPS (Daily) - daily-grain twin of scorecard_",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "snapshot_date": {
+     "description": "Exact PT calendar day"
+    },
+    "snapshot_date_from": {
+     "description": "Inclusive lower bound"
+    },
+    "snapshot_date_to": {
+     "description": "Inclusive upper bound"
+    },
+    "latest_snapshot_only": {
+     "description": "If true, filter to MAX"
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2CustomersSearch",
+  "description": "Search and filter customers/partners with pagination",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "query": {
+     "description": "Search query for customer name or ID"
+    },
+    "page": {
+     "description": "Page number for pagination",
+     "minimum": 1
+    },
+    "limit": {
+     "description": "Number of results per page",
+     "minimum": 1,
+     "maximum": 100
+    },
+    "region": {
+     "description": "Filter by region"
+    },
+    "status": {
+     "description": "Filter by customer status Allowed values"
+    },
+    "sortBy": {
+     "description": "Field to sort by"
+    },
+    "sortOrder": {
+     "description": "Sort order"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2KnowledgeBaseSearch",
+  "description": "Search the knowledge base using semantic similarity",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "query": {
+     "description": "Natural language search query"
+    },
+    "limit": {
+     "default": 5,
+     "description": "Maximum number of results to return"
+    },
+    "min_relevance": {
+     "default": 0.5,
+     "description": "Minimum relevance score"
+    },
+    "filter_tags": {
+     "items": {},
+     "description": "Optional: Filter results by tags"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2MultistopRoutesSearch",
+  "description": "Search for existing multistop routes within a date range, op",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "startDate": {
+     "description": "Start date for route search"
+    },
+    "endDate": {
+     "description": "End date for route search"
+    },
+    "shipmentType": {
+     "description": "Filter routes by shipment type"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2PlacesSearch",
+  "description": "Search for places using a text query",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "query": {
+     "description": "Search query"
+    },
+    "location": {
+     "properties": {
+      "latitude": {},
+      "longitude": {}
+     },
+     "description": "Location to bias results"
+    },
+    "radius": {
+     "description": "Search radius in meters"
+    },
+    "language": {},
+    "region": {},
+    "type": {
+     "description": "Place type"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2EmailWithAttachmentsSend",
+  "description": "Send an email with file attachments (CSV, Excel, PDF, etc",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "to": {
+     "description": "Recipient email address",
+     "items": {}
+    },
+    "subject": {
+     "description": "Email subject line"
+    },
+    "body": {
+     "description": "Email body content"
+    },
+    "attachments": {
+     "description": "Array of file attachments",
+     "items": {
+      "properties": {
+       "filename": {
+        "description": "Filename as it will appear in email"
+       },
+       "path": {
+        "description": "File path"
+       }
+      }
+     }
+    },
+    "from": {
+     "description": "From email address"
+    },
+    "cc": {
+     "description": "CC recipient",
+     "items": {}
+    },
+    "bcc": {
+     "description": "BCC recipient",
+     "items": {}
+    },
+    "isHTML": {
+     "description": "Whether body is HTML"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2MarkdownEmailSend",
+  "description": "Convert markdown report to HTML and send via email",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "to": {
+     "description": "Recipient email address",
+     "items": {}
+    },
+    "subject": {
+     "description": "Email subject line"
+    },
+    "markdown": {
+     "description": "Markdown content to convert and send"
+    },
+    "from": {
+     "description": "From email address"
+    },
+    "cc": {
+     "description": "CC recipient",
+     "items": {}
+    },
+    "bcc": {
+     "description": "BCC recipient",
+     "items": {}
+    },
+    "replyTo": {
+     "description": "Reply-to email address"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2MarkdownEmailWithAttachmentsSend",
+  "description": "Convert markdown report to HTML and send via email WITH file",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "to": {
+     "description": "Recipient email address",
+     "items": {}
+    },
+    "subject": {
+     "description": "Email subject line"
+    },
+    "markdown": {
+     "description": "Markdown content to convert and send"
+    },
+    "attachments": {
+     "description": "Array of file attachments",
+     "items": {
+      "properties": {
+       "filename": {
+        "description": "Filename as it will appear in email"
+       },
+       "path": {
+        "description": "File path"
+       }
+      }
+     }
+    },
+    "from": {
+     "description": "From email address"
+    },
+    "cc": {
+     "description": "CC recipient",
+     "items": {}
+    },
+    "bcc": {
+     "description": "BCC recipient",
+     "items": {}
+    },
+    "replyTo": {
+     "description": "Reply-to email address"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2DocumentSummarize",
+  "description": "Summarize large documents in bullets, paragraphs, or executi",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "text": {
+     "description": "Document text to summarize"
+    },
+    "format": {
+     "description": "Output format",
+     "default": "bullets"
+    },
+    "max_length": {
+     "description": "Maximum summary length in tokens",
+     "default": 1000
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2ApiCallTest",
+  "description": "Make an API request with authentication support",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "url": {
+     "description": "Full URL for the API request"
+    },
+    "method": {
+     "default": "GET",
+     "description": "HTTP method Allowed values: GET, POST, P"
+    },
+    "auth": {
+     "properties": {
+      "type": {
+       "description": "Authentication type Allowed values: bear"
+      },
+      "value": {
+       "description": "API key or token value"
+      },
+      "headerName": {
+       "description": "Header name for api_key_header type"
+      },
+      "paramName": {
+       "description": "Query param name for api_key_query type"
+      },
+      "username": {
+       "description": "Username for basic auth"
+      },
+      "password": {
+       "description": "Password for basic auth"
+      }
+     },
+     "description": "Authentication configuration"
+    },
+    "headers": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "description": "Additional headers"
+    },
+    "queryParams": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "description": "Query parameters"
+    },
+    "body": {
+     "description": "Request body"
+    },
+    "timeout": {
+     "default": 30000,
+     "description": "Request timeout in milliseconds"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2OnSiteEventsTime",
+  "description": "[Operations] Time on Site - row-level GPS validation events ",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "event_date_from": {
+     "description": "Inclusive lower bound on start_datetime"
+    },
+    "event_date_to": {
+     "description": "Inclusive upper bound on start_datetime"
+    },
+    "week_starting_date": {
+     "description": "Exact ISO-week Monday"
+    },
+    "week_starting_date_from": {
+     "description": "Inclusive lower bound on week_starting_d"
+    },
+    "week_starting_date_to": {
+     "description": "Inclusive upper bound on week_starting_d"
+    },
+    "current_week_only": {
+     "description": "Shortcut: rows whose week_starting_date "
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2OnSiteFcpSummaryTime",
+  "description": "[Operations] Time on Site - per-week FCP summary (week × mas",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "week_starting_date": {
+     "description": "Exact ISO-week Monday"
+    },
+    "week_starting_date_from": {
+     "description": "Inclusive lower bound on week_starting_d"
+    },
+    "week_starting_date_to": {
+     "description": "Inclusive upper bound on week_starting_d"
+    },
+    "current_week_only": {
+     "description": "Shortcut: rows for the week containing t"
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2OnSiteStatusBreakdownTime",
+  "description": "[Operations] Time on Site - per-week validation status break",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "week_starting_date": {
+     "description": "Exact ISO-week Monday"
+    },
+    "week_starting_date_from": {
+     "description": "Inclusive lower bound on week_starting_d"
+    },
+    "week_starting_date_to": {
+     "description": "Inclusive upper bound on week_starting_d"
+    },
+    "current_week_only": {
+     "description": "Shortcut: rows for the week containing t"
+    },
+    "limit": {},
+    "offset": {},
+    "filters": {
+     "items": {
+      "properties": {
+       "column": {},
+       "operator": {},
+       "value": {}
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "Allowed values: and, or"
+    },
+    "schema_only": {},
+    "count_only": {}
+   }
+  }
+ },
+ {
+  "name": "apiV2ArticleUpdate",
+  "description": "Update an existing knowledge base article with corrections o",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "article_id": {
+     "description": "ID of the article to update"
+    },
+    "updated_body": {
+     "description": "New complete article body in Markdown"
+    },
+    "update_reason": {
+     "description": "Explanation of what changed and why"
+    },
+    "confidence": {
+     "minimum": 0,
+     "maximum": 1,
+     "description": "Your confidence in these updates"
+    },
+    "preserve_human_edits": {
+     "default": true,
+     "description": "If true, will fail if article was edited"
+    }
+   }
+  }
+ },
+ {
+  "name": "apiV2ZoneZipcode",
+  "description": "[Financial] Zipcode-to-zone classification and distance for ",
+  "input_schema": {
+   "type": "object",
+   "properties": {
+    "limit": {
+     "description": "Maximum records to return per page"
+    },
+    "filters": {
+     "description": "Array of filter conditions",
+     "items": {
+      "properties": {
+       "column": {
+        "description": "Column name to filter"
+       },
+       "operator": {
+        "description": "Filter operator Allowed values: equals, "
+       },
+       "value": {
+        "description": "Filter value"
+       }
+      }
+     }
+    },
+    "filter_logic": {
+     "description": "How to combine multiple filters"
+    },
+    "schema_only": {
+     "description": "If true, return only schema without data"
+    },
+    "count_only": {
+     "description": "If true, only return record count"
+    },
+    "offset": {
+     "description": "Keyset cursor for pagination"
+    }
+   }
+  }
+ }
+]
