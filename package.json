@@ -1,0 +1,19 @@
+{
+  "name": "tool2code",
+  "version": "0.0.0",
+  "description": "Represent a tool catalogue as code, so a model reads it the way it reads code. Optimised for accuracy, not size.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "vitest run",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "tsx": "^4.23.1",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
+  }
+}
