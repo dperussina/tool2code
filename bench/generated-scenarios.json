@@ -1,0 +1,194 @@
+[
+ {
+  "id": "gen-active_locations",
+  "kind": "discriminate",
+  "prompt": "Before we wire this into Control Tower, can you show me just the field layout for the active sites feed — column names and types, no actual rows?",
+  "finalTool": "active_locations",
+  "trapTools": [
+   "get_active_locations"
+  ]
+ },
+ {
+  "id": "gen-customers",
+  "kind": "discriminate",
+  "prompt": "Building the Control Tower sync file — export every partner account with their COPS billing company/customer number, billing address, current and highest balance, and their dim weight factor settings.",
+  "finalTool": "customers",
+  "trapTools": [
+   "get_customer_details",
+   "search_customers"
+  ]
+ },
+ {
+  "id": "gen-get_customer_details",
+  "kind": "discriminate",
+  "prompt": "Can you pull up the full account profile for partner ID 20714 — credit status, assigned sales rep, total orders and revenue, plus their service setup?",
+  "finalTool": "get_customer_details",
+  "trapTools": [
+   "customers",
+   "search_customers"
+  ]
+ },
+ {
+  "id": "gen-search_customers",
+  "kind": "discriminate",
+  "prompt": "I'm trying to find an account, I only remember the name has \"Summit\" in it and they're in the Southeast and still active — give me the first 25 matches sorted by name.",
+  "finalTool": "search_customers",
+  "trapTools": [
+   "customers",
+   "get_customer_details"
+  ]
+ },
+ {
+  "id": "gen-fifo",
+  "kind": "discriminate",
+  "prompt": "Before we wire the on-dock freight feed into Control Tower, can you pull just the field layout — the list of columns and data types, no actual freight rows?",
+  "finalTool": "fifo",
+  "trapTools": [
+   "get_fifo_report"
+  ]
+ },
+ {
+  "id": "gen-get_fifo_report",
+  "kind": "discriminate",
+  "prompt": "Can you dump everything currently sitting on dock for the Chicago-to-Dallas lane into a CSV so I can run it through Prometheus for a DSO aging analysis?",
+  "finalTool": "get_fifo_report",
+  "trapTools": [
+   "fifo"
+  ]
+ },
+ {
+  "id": "gen-get_intransit_report",
+  "kind": "discriminate",
+  "prompt": "Can you pull together a spreadsheet of everything currently rolling on trucks for the Atlanta-to-Charlotte lane so I can drop it into our analytics tool?",
+  "finalTool": "get_intransit_report",
+  "trapTools": [
+   "intransit"
+  ]
+ },
+ {
+  "id": "gen-intransit",
+  "kind": "discriminate",
+  "prompt": "Before we wire the live on-the-road freight feed into Control Tower, I need to see exactly which fields and columns it returns — can you just show me the field layout, no actual records?",
+  "finalTool": "intransit",
+  "trapTools": [
+   "get_intransit_report"
+  ]
+ },
+ {
+  "id": "gen-get_load_details",
+  "kind": "discriminate",
+  "prompt": "Can you pull up everything we have on load 4471982 — where it started, where it's headed, who's hauling it, and whether it's a first mile or mid mile move?",
+  "finalTool": "get_load_details",
+  "trapTools": [
+   "load_report"
+  ]
+ },
+ {
+  "id": "gen-load_report",
+  "kind": "discriminate",
+  "prompt": "I need the full denormalized load-level dataset dumped to CSV so we can sync it into Control Tower — all the completed unloads with lane types and master load groupings.",
+  "finalTool": "load_report",
+  "trapTools": [
+   "get_load_details"
+  ]
+ },
+ {
+  "id": "gen-get_order_details",
+  "kind": "discriminate",
+  "prompt": "Pull up everything we have on shipment 735U2663137 — I need the notes, the load info, the photos, and any messages or faxes attached before I get on a call with the customer.",
+  "finalTool": "get_order_details",
+  "trapTools": [
+   "quick_search_orders"
+  ]
+ },
+ {
+  "id": "gen-quick_search_orders",
+  "kind": "discriminate",
+  "prompt": "Can you find which order goes with purchase order PO-88421? Just need to know if it's in the system.",
+  "finalTool": "quick_search_orders",
+  "trapTools": [
+   "get_order_details"
+  ]
+ },
+ {
+  "id": "gen-order_notes",
+  "kind": "discriminate",
+  "prompt": "I need a CSV of all order note records where notes were added between Oct 1 and Oct 31 so we can load them into Control Tower — cap it at 5000 rows for now.",
+  "finalTool": "order_notes",
+  "trapTools": [
+   "get_order_notes"
+  ]
+ },
+ {
+  "id": "gen-get_place_details",
+  "kind": "discriminate",
+  "prompt": "We've got the place reference ChIJN1t_tDeuEmsRUsoyG83frY4 saved on a venue record — can you pull the full details for it (hours, phone, website, rating) in English?",
+  "finalTool": "get_place_details",
+  "trapTools": [
+   "search_places"
+  ]
+ },
+ {
+  "id": "gen-search_places",
+  "kind": "discriminate",
+  "prompt": "Find me the sushi restaurants within about 1.5 km of our downtown Seattle office so I can pick a spot for the team dinner.",
+  "finalTool": "search_places",
+  "trapTools": [
+   "get_place_details"
+  ]
+ },
+ {
+  "id": "gen-query_all_models",
+  "kind": "discriminate",
+  "prompt": "Take this draft privacy-policy paragraph and get me a side-by-side read from every model we have access to, so I can see where they disagree on the wording.",
+  "finalTool": "query_all_models",
+  "trapTools": [
+   "query_model"
+  ]
+ },
+ {
+  "id": "gen-query_model",
+  "kind": "discriminate",
+  "prompt": "Ask Claude only to summarize our Q3 support ticket themes into five bullet points — no need for the others.",
+  "finalTool": "query_model",
+  "trapTools": [
+   "query_all_models"
+  ]
+ },
+ {
+  "id": "gen-scorecard_edemand",
+  "kind": "discriminate",
+  "prompt": "Can you pull the weekly eDemand, out-for-delivery and precall percentages by fulfillment center for this current week only?",
+  "finalTool": "scorecard_edemand",
+  "trapTools": [
+   "scorecard_edemand_detail"
+  ]
+ },
+ {
+  "id": "gen-scorecard_edemand_detail",
+  "kind": "discriminate",
+  "prompt": "I need the individual order-level delivery records (route, driver, job type, delivery window) for delivery dates March 3 through March 9.",
+  "finalTool": "scorecard_edemand_detail",
+  "trapTools": [
+   "scorecard_edemand"
+  ]
+ },
+ {
+  "id": "gen-scorecard_nps",
+  "kind": "discriminate",
+  "prompt": "Can you pull the weekly net promoter numbers for each service partner, with the promoter/passive/detractor counts, for every week we have on file?",
+  "finalTool": "scorecard_nps",
+  "trapTools": [
+   "scorecard_nps_detail"
+  ]
+ },
+ {
+  "id": "gen-scorecard_timely_resource_detail",
+  "kind": "discriminate",
+  "prompt": "I need the individual order-level timeliness records for everything scheduled between March 1 and March 15.",
+  "finalTool": "scorecard_timely_resource_detail",
+  "trapTools": [
+   "scorecard_timely_resource"
+  ]
+ }
+]

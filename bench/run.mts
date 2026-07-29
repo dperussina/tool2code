@@ -16,7 +16,7 @@ import { geminiProvider } from "./providers/gemini.js";
 import { xaiProvider } from "./providers/xai.js";
 import type { ChatMessage, Provider, ToolResult } from "./providers/types.js";
 import { schemasArm, codeArm, leanSchemasArm, hybridArm, textSlotsArm, type Arm } from "./arms.js";
-import { SCENARIOS, remap } from "./scenarios.js";
+import { SCENARIOS, remap, type Scenario } from "./scenarios.js";
 import { makeExecutor, ALL_SENTINELS, IDENTIFIER_ARG } from "./mock.js";
 import type { Tool } from "../src/types.js";
 import type { Semantics } from "../src/compile.js";
@@ -25,6 +25,8 @@ const flag = (k: string, d = "") => {
   const hit = process.argv.slice(2).find((a) => a.startsWith(`--${k}=`));
   return hit ? hit.slice(hit.indexOf("=") + 1) : d;
 };
+/** Bare switches like `--generated`, which `flag()` cannot see and silently reports as absent. */
+const has = (k: string) => process.argv.slice(2).includes(`--${k}`);
 
 const corpusPath = flag("corpus", "corpus/real-mcp-149.json");
 const semanticsPath = flag("semantics", "corpus/semantics.json");
@@ -66,7 +68,22 @@ const providers = flag("providers", "anthropic,openai,gemini,xai").split(",").fi
 const armIds = flag("arms", "schemas,tool2code").split(",").filter(Boolean);
 const only = flag("scenarios");
 const reps = Number(flag("reps", "1"));
-let scenarios = only ? SCENARIOS.filter((s) => only.split(",").includes(s.id)) : SCENARIOS;
+/**
+ * `--generated` swaps in the suite written by a model that never saw the compiled module.
+ *
+ * The hand-written suite is the project's deepest validity gap: I read the corpus, found the
+ * bulk-versus-single pattern, wrote prompts targeting it, then built a slot that states exactly
+ * that distinction. More repetitions cannot fix authorship. bench/generated-scenarios.json is
+ * produced from raw names, descriptions and parameter lists alone, with prompts rejected
+ * mechanically if they name any tool or echo the target's distinctive words.
+ */
+const pool: Scenario[] = has("generated")
+  ? (JSON.parse(readFileSync("bench/generated-scenarios.json", "utf8")) as Scenario[])
+  : SCENARIOS;
+let scenarios = only ? pool.filter((s) => only.split(",").includes(s.id)) : pool;
+// Running zero scenarios used to look exactly like a completed sweep. It cost one silent no-op run.
+if (!scenarios.length)
+  throw new Error(`no scenarios matched${only ? ` --scenarios=${only}` : ""} in the ${has("generated") ? "generated" : "hand-written"} suite`);
 // A degraded catalogue renames everything; the tasks are identical, the grading keys are not.
 if (!TOOLS.some((t) => t.name === "get_cost_of_sales")) {
   const byMangled = new Map(TOOLS.map((t) => [t.name.toLowerCase().replace(/[^a-z0-9]/g, ""), t.name]));
