@@ -58,10 +58,22 @@ export const IDENTIFIER_ARG =
  *
  * Without this the mock accepted anything, and only tool *selection* was ever measured.
  */
-export function makeExecutor(tools: { name: string; input_schema?: any; inputSchema?: any }[]) {
+export function makeExecutor(
+  tools: { name: string; input_schema?: any; inputSchema?: any }[],
+  /**
+   * Maps a live tool name back to the name the sentinel table is keyed by.
+   *
+   * Needed because a degraded catalogue renames everything. Without it, `SENTINELS` never matched
+   * on the badly-structured corpus, no producer ever handed out an identifier, and every
+   * sequencing scenario was unsatisfiable — all three arms scored 0/8 and the harness reported it
+   * as a model failure. A uniform zero across every arm is almost always the instrument.
+   */
+  canonical: (name: string) => string = (n) => n,
+) {
   const schemas = new Map(tools.map((t) => [t.name, t.input_schema ?? t.inputSchema ?? {}]));
-  return (name: string, args: Record<string, any>) => {
-    const schema = schemas.get(name);
+  return (liveName: string, args: Record<string, any>) => {
+    const name = canonical(liveName);
+    const schema = schemas.get(liveName);
     const problems = schema ? validateArgs(args ?? {}, schema) : [];
     if (problems.length) {
       return {

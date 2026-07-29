@@ -9,7 +9,7 @@ import { readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { collectShapes } from "../src/shapes.js";
 import { renderModule, renderTool } from "../src/render.js";
-import { attachInferredParams, type Semantics } from "../src/compile.js";
+import { attachInferredParams, attachReturnShape, type Semantics } from "../src/compile.js";
 import { validateArgs } from "../bench/validate.js";
 import { degrade, describeCatalogue } from "../bench/degrade.js";
 import type { Tool } from "../src/types.js";
@@ -208,5 +208,55 @@ describe("the degraded corpus is genuinely degraded", () => {
 
   it("still renders as valid Python", () => {
     expect(pythonParses(renderModule(degrade(tools, ["types", "enums", "required", "descriptions", "names"])))).toBe(true);
+  });
+});
+
+describe("return types make the module code rather than a stub", () => {
+  const orderTool = tool(
+    "get_order",
+    { id: { type: "string" } },
+    ["id"],
+    "Returns the order with its trackingNumber, status and totalCost.",
+  );
+
+  it("emits an arrow and a Result type", () => {
+    const s: Semantics = { name: "get_order", returns: "one order" };
+    attachReturnShape(s, ["=get_order | one | trackingNumber:str, status:str, totalCost:float"], orderTool);
+    const mod = renderModule([orderTool], { semantics: new Map([["get_order", s]]) });
+    expect(mod).toContain("-> GetOrderResult:");
+    expect(mod).toContain('GetOrderResult = TypedDict("GetOrderResult", {"trackingNumber": str, "status": str, "totalCost": float}, total=False)');
+    expect(pythonParses(mod)).toBe(true);
+  });
+
+  it("marks a collection as a list", () => {
+    const s: Semantics = { name: "get_order", returns: "orders" };
+    attachReturnShape(s, ["=get_order | list | trackingNumber:str"], orderTool);
+    expect(renderTool(orderTool, { semantics: new Map([["get_order", s]]) })).toContain("-> list[GetOrderResult]");
+  });
+
+  it("drops fields the description never mentions", () => {
+    // An invented return field tells a reader to index a key that does not exist.
+    const s: Semantics = { name: "get_order", returns: "one order" };
+    attachReturnShape(s, ["=get_order | one | trackingNumber:str, invoiceHash:str, secretScore:float"], orderTool);
+    expect(s.returnShape?.fields.map((f) => f.name)).toEqual(["trackingNumber"]);
+  });
+
+  it("emits nothing at all when no field survives grounding", () => {
+    const s: Semantics = { name: "get_order", returns: "one order" };
+    attachReturnShape(s, ["=get_order | one | madeUpField:str"], orderTool);
+    expect(s.returnShape).toBeUndefined();
+    expect(renderTool(orderTool, { semantics: new Map([["get_order", s]]) })).not.toContain("->");
+  });
+
+  it("ignores a return line for a different tool", () => {
+    const s: Semantics = { name: "get_order", returns: "one order" };
+    attachReturnShape(s, ["=other_tool | one | trackingNumber:str"], orderTool);
+    expect(s.returnShape).toBeUndefined();
+  });
+
+  it("falls back to Any for a type outside the vocabulary", () => {
+    const s: Semantics = { name: "get_order", returns: "one order" };
+    attachReturnShape(s, ["=get_order | one | status:VARCHAR"], orderTool);
+    expect(s.returnShape?.fields).toEqual([{ name: "status", type: "Any" }]);
   });
 });

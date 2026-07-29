@@ -59,6 +59,19 @@ export type Semantics = {
    * invention, and this project has already shipped one invented tool reference.
    */
   params?: { name: string; type?: string; enum?: string[]; required?: boolean }[];
+  /**
+   * The shape that comes back, so the signature can carry `-> Result` instead of nothing.
+   *
+   * Until this existed, the module was a typed interface with no return types at all: what a
+   * tool returns lived as prose inside a docstring, in a shorthand needing a glossary. That is
+   * the gap between a type stub and a code translation, and a model reading code expects the
+   * arrow.
+   *
+   * Grounded like everything else: a field name is kept only if it appears in the tool's own
+   * description. Almost no MCP catalogue declares an output schema, so this is inference — and
+   * inference that cannot be checked against the source is invention.
+   */
+  returnShape?: { list: boolean; fields: { name: string; type: string }[] };
 };
 
 /** Types an inference is allowed to claim. Anything else is rejected. */
@@ -97,6 +110,13 @@ For each tool, output one line:
       @<tool>.<param> | <type> | <allowed,values,if,any> | required
   <type> must be exactly one of: str int float bool list dict Any. Use Any when you genuinely
   cannot tell — that is a real answer and better than a confident wrong one.
+  In particular, for an IDENTIFIER or CURSOR parameter — anything named like an id, a number, a
+  code, a key, or a pagination cursor — answer Any unless the description shows an example value
+  or states the type outright. Measured against ground truth, every remaining type error was this:
+  "Partner/Customer ID" and "Keyset cursor for pagination" were called str when the schema says
+  number. A wrong scalar type is not a harmless miss — the module tells the model to send "4471"
+  where the API demands 4471, and the call is rejected. Any is honest and costs nothing, because
+  the value almost always arrives from another call rather than being written by hand.
   List allowed values ONLY when the parameter's own description states them; they are checked
   against it and dropped if they do not appear. Mark \`required\` only when the description or the
   tool's purpose makes the call impossible without it.
@@ -104,11 +124,23 @@ For each tool, output one line:
 - vsOTHER: when two tools in this batch are easy to confuse, EACH must say what it is not.
   Write \`vsother_tool(what that one is for)\`. This is the most valuable field you can fill:
   measured over 96 runs, every single failure was a model calling the wrong member of a
-  near-identical pair, and no other kind of failure occurred at all. The usual shape is one
-  tool being a bulk export for loading into a warehouse — date ranges, csv paths, row limits —
-  and the other answering a question about one entity by its ID. Say so on both:
-    order_notes | >bulk note rows for sync | | | vsget_order_notes(one order by tracking number)
-    get_order_notes | >notes on one order | | ?trackingNumber | vsorder_notes(bulk CSV feed for warehouse sync)
+  near-identical pair, and no other kind of failure occurred at all.
+  Find the ONE axis the pair differs on and name it on both sides. Common axes, but do not force
+  a catalogue into any of them — read the parameters, they usually give it away:
+    * scope: everything vs one record (a date range and paging on one side, an ID on the other)
+    * destination: a bulk feed or file export vs an answer returned inline
+    * depth: a summary vs a full detail record
+    * lifecycle: create vs update vs read
+    * subject: two tools about genuinely different things that merely share a word
+  Shape of the answer, in whatever domain you are given:
+    list_files | >every file in a folder with ids and mime types | | ?folderId | vsread_file(one file's contents by id)
+    read_file  | >one file's contents | | !list_files | vslist_files(finding which file, not reading it)
+- After each tool's line, add ONE return-shape line naming the fields that come back:
+      =<tool> | list OR one | field:type, field:type, ...
+  Use the field names the description actually uses — they are checked against it and dropped if
+  absent, so guessing gains nothing. \`list\` when the tool returns many records, \`one\` for a
+  single object. Types from the same vocabulary: str int float bool list dict Any. Omit the line
+  entirely if the description does not say what comes back.
 - SUPERSET is for containment ONLY, and it is directional: use it when this tool's result
   genuinely includes the other's. It cannot go both ways. Two tools returning the same subject
   at different granularity are NOT a superset pair — that is \`vs\`, not \`^\`.
@@ -305,6 +337,32 @@ export function attachInferredParams(s: Semantics, paramLines: string[], tool: T
   }
 }
 
+/**
+ * Attach `=tool | list|one | field:type, ...`, keeping only fields the description mentions.
+ *
+ * A return type a model invented is worse than no return type: it tells a reader to index a key
+ * that does not exist. So each field must appear in the tool's own text, and a shape with no
+ * surviving fields is dropped rather than emitted empty.
+ */
+export function attachReturnShape(s: Semantics, returnLines: string[], tool: Tool): void {
+  const haystack = `${tool.description ?? ""}`.toLowerCase();
+  for (const line of returnLines) {
+    const [head, cardinality, fieldCell] = line.slice(1).split("|").map((c) => c.trim());
+    if (head !== tool.name) continue;
+    const fields = (fieldCell ?? "")
+      .split(",")
+      .map((f) => f.trim())
+      .filter(Boolean)
+      .map((f) => {
+        const [name, type] = f.split(":").map((x) => x.trim());
+        return { name, type: INFERABLE_TYPES.has(type) ? type : "Any" };
+      })
+      .filter((f) => f.name && haystack.includes(f.name.toLowerCase()));
+    if (!fields.length) continue;
+    s.returnShape = { list: /^list$/i.test(cardinality ?? ""), fields };
+  }
+}
+
 /** Parse `name | >returns | ^a,b | !c` — tolerant of missing slots and stray spaces. */
 export function parseLine(line: string): Semantics | null {
   const cells = line.split("|").map((c) => c.trim());
@@ -351,8 +409,9 @@ export async function compile(
       user: roster + batch.map(describe).join("\n\n"),
     });
     const allLines = text.split("\n").map((l) => l.trim()).filter(Boolean);
-    const lines = allLines.filter((l) => !l.startsWith("@"));
+    const lines = allLines.filter((l) => !l.startsWith("@") && !l.startsWith("="));
     const paramLines = allLines.filter((l) => l.startsWith("@"));
+    const returnLines = allLines.filter((l) => l.startsWith("="));
     const failed: Rejection[] = [];
     for (const t of batch) {
       const line = lines.find((l) => l.split("|")[0].trim() === t.name);
@@ -366,6 +425,7 @@ export async function compile(
         continue;
       }
       attachInferredParams(parsed, paramLines, t);
+      attachReturnShape(parsed, returnLines, t);
       const problem = verify(parsed, tools);
       if (problem) failed.push({ name: t.name, reason: problem });
       else semantics.set(t.name, parsed);

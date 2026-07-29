@@ -69,7 +69,7 @@
      "description": "External HTTPS URL to image/document"
     },
     "analysis_type": {
-     "description": "Type of analysis: vision"
+     "description": "Type of analysis: vision Allowed values: vision, audio, document, code_execution."
     },
     "prompt": {
      "description": "Analysis instructions for Gemini"
@@ -166,7 +166,7 @@
    "type": "object",
    "properties": {
     "date_column": {
-     "description": "Column to use for date filtering"
+     "description": "Column to use for date filtering Allowed values: invoice_date, date_added."
     },
     "start_date": {
      "description": "Start date for filtering"
@@ -185,7 +185,7 @@
         "description": "Column name to filter"
        },
        "operator": {
-        "description": "Filter operator Allowed values: equals, "
+        "description": "Filter operator Allowed values: equals, not_equals, contains, greater_than, less_than, greater_or_equal, less_or_equal, in, not_in, is_empty, is_not_empty."
        },
        "value": {
         "description": "Filter value"
@@ -194,7 +194,7 @@
      }
     },
     "filter_logic": {
-     "description": "How to combine multiple filters"
+     "description": "How to combine multiple filters Allowed values: and, or."
     },
     "schema_only": {
      "description": "If true, return only schema"
@@ -428,7 +428,7 @@
      "properties": {
       "complexity": {
        "default": "medium",
-       "description": "Allowed values: low, medium, high"
+       "description": "Allowed values: low, medium, high."
       },
       "skipValidation": {
        "default": false
@@ -502,7 +502,7 @@
     },
     "equipmentType": {
      "default": "VAN",
-     "description": "Equipment type Allowed values: VAN, REEF"
+     "description": "Equipment type Allowed values: VAN, REEFER, FLATBED."
     }
    }
   }
@@ -544,11 +544,11 @@
     },
     "travelMode": {
      "default": "DRIVE",
-     "description": "Allowed values: DRIVE, BICYCLE, WALK, TW"
+     "description": "Allowed values: DRIVE, BICYCLE, WALK, TWO_WHEELER, TRANSIT."
     },
     "routingPreference": {
      "default": "TRAFFIC_AWARE",
-     "description": "Allowed values: TRAFFIC_UNAWARE, TRAFFIC"
+     "description": "Allowed values: TRAFFIC_UNAWARE, TRAFFIC_AWARE, TRAFFIC_AWARE_OPTIMAL."
     }
    }
   }
@@ -591,11 +591,11 @@
     },
     "travelMode": {
      "default": "DRIVE",
-     "description": "Allowed values: DRIVE, BICYCLE, WALK, TW"
+     "description": "Allowed values: DRIVE, BICYCLE, WALK, TWO_WHEELER, TRANSIT."
     },
     "routingPreference": {
      "default": "TRAFFIC_AWARE",
-     "description": "Allowed values: TRAFFIC_UNAWARE, TRAFFIC"
+     "description": "Allowed values: TRAFFIC_UNAWARE, TRAFFIC_AWARE, TRAFFIC_AWARE_OPTIMAL."
     },
     "intermediates": {
      "description": "Waypoints between origin and destination"
@@ -638,7 +638,7 @@
    "type": "object",
    "properties": {
     "date_column": {
-     "description": "Column to use for date filtering"
+     "description": "Column to use for date filtering Allowed values: invoice_date, delivery_actual_date, date_added, billing_submission_date."
     },
     "start_date": {
      "description": "Start date for filtering"
@@ -657,7 +657,7 @@
         "description": "Column name to filter"
        },
        "operator": {
-        "description": "Filter operator Allowed values: equals, "
+        "description": "Filter operator Allowed values: equals, not_equals, contains, greater_than, less_than, greater_or_equal, less_or_equal, in, not_in, is_empty, is_not_empty."
        },
        "value": {
         "description": "Filter value"
@@ -666,7 +666,7 @@
      }
     },
     "filter_logic": {
-     "description": "How to combine multiple filters"
+     "description": "How to combine multiple filters Allowed values: and, or."
     },
     "schema_only": {
      "description": "If true, return only schema"
@@ -754,7 +754,7 @@
         "description": "Column name to filter"
        },
        "operator": {
-        "description": "Filter operator Allowed values: equals, "
+        "description": "Filter operator Allowed values: equals, not_equals, contains, greater_than, less_than, greater_or_equal, less_or_equal, in, not_in, is_empty, is_not_empty."
        },
        "value": {
         "description": "Filter value"
@@ -763,7 +763,7 @@
      }
     },
     "filter_logic": {
-     "description": "How to combine multiple filters"
+     "description": "How to combine multiple filters Allowed values: and, or."
     },
     "schema_only": {
      "description": "If true, return only schema"
@@ -784,31 +784,31 @@
      "description": "The topic to deeply analyze through mult"
     },
     "preset": {
-     "description": "Preset consultation mode"
+     "description": "Preset consultation mode Allowed values: quick, standard, strategic, technical, risk_assessment, creative, deep_dive."
     },
     "debateStyle": {
-     "description": "How models should interact: aggressive_c"
+     "description": "How models should interact: aggressive_c Allowed values: aggressive_challenge, collaborative_building, balanced_debate, consensus_seeking, devils_advocate, socratic_exploration."
     },
     "productivityLevel": {
-     "description": "Depth level: quick"
+     "description": "Depth level: quick Allowed values: quick, standard, deep_dive, exhaustive."
     },
     "collaborationPattern": {
-     "description": "How models collaborate: iterative_buildi"
+     "description": "How models collaborate: iterative_buildi Allowed values: iterative_building, parallel_exploration, structured_debate, round_robin_refinement."
     },
     "agreementExpectation": {
-     "description": "Expected agreement level: high_agreement"
+     "description": "Expected agreement level: high_agreement Allowed values: high_agreement, moderate_disagreement, high_disagreement, natural."
     },
     "focusArea": {
-     "description": "Focus area: strategic_analysis, technica"
+     "description": "Focus area: strategic_analysis, technica Allowed values: strategic_analysis, technical_deep_dive, risk_assessment, creative_brainstorming, problem_solving, research_synthesis."
     },
     "externalResources": {
-     "description": "External resources: always_search, initi"
+     "description": "External resources: always_search, initi Allowed values: always_search, initial_research_only, no_external_resources, citation_heavy."
     },
     "customRounds": {
      "description": "Override default round count"
     },
     "responseLength": {
-     "description": "Response length: short"
+     "description": "Response length: short Allowed values: short, medium, long."
     },
     "enableSearch": {
      "description": "Enable web search/grounding for research",
@@ -840,11 +840,11 @@
     },
     "mode": {
      "default": "comprehensive",
-     "description": "Research mode: quick"
+     "description": "Research mode: quick Allowed values: quick, comprehensive, academic, financial."
     },
     "depth": {
      "default": 2,
-     "description": "Research depth: 1"
+     "description": "Research depth: 1 Allowed values: 1, 2, 3."
     },
     "sources": {
      "items": {},
@@ -961,7 +961,7 @@
      "description": "API key or token to test"
     },
     "authType": {
-     "description": "Type of authentication to test Allowed v"
+     "description": "Type of authentication to test Allowed values: bearer, basic, api_key_header, api_key_query, none."
     },
     "authHeaderName": {
      "description": "Header name for api_key_header auth"
@@ -1075,7 +1075,7 @@
         "description": "Column name to filter"
        },
        "operator": {
-        "description": "Filter operator Allowed values: equals, "
+        "description": "Filter operator Allowed values: equals, not_equals, contains, greater_than, less_than, greater_or_equal, less_or_equal, in, not_in, is_empty, is_not_empty."
        },
        "value": {
         "description": "Filter value"
@@ -1084,7 +1084,7 @@
      }
     },
     "filter_logic": {
-     "description": "How to combine multiple filters"
+     "description": "How to combine multiple filters Allowed values: and, or."
     },
     "schema_only": {
      "description": "If true, return only schema without data"
@@ -1225,7 +1225,7 @@
         "description": "Table alias for SQL"
        },
        "role": {
-        "description": "Role of this table Allowed values: enric"
+        "description": "Role of this table Allowed values: enrich, filter, lookup."
        },
        "joinHint": {
         "description": "Optional hint about join relationship"
@@ -1234,17 +1234,17 @@
      }
     },
     "mode": {
-     "description": "Analysis mode: auto"
+     "description": "Analysis mode: auto Allowed values: auto, full_analysis, pricing."
     },
     "options": {
      "properties": {
       "equipmentType": {
        "default": "VAN",
-       "description": "Allowed values: VAN, REEFER, FLATBED"
+       "description": "Allowed values: VAN, REEFER, FLATBED."
       },
       "outputFormat": {
        "default": "text",
-       "description": "Allowed values: text, voice"
+       "description": "Allowed values: text, voice."
       },
       "skipValidation": {
        "default": false
@@ -1291,11 +1291,11 @@
     },
     "mode": {
      "default": "base64",
-     "description": "Delivery mode Allowed values: inline, ba"
+     "description": "Delivery mode Allowed values: inline, base64, file."
     },
     "export_format": {
      "default": "auto",
-     "description": "Export format for Google Workspace files"
+     "description": "Export format for Google Workspace files Allowed values: auto, text, html, pdf, docx, xlsx, csv, pptx."
     },
     "file_name": {
      "description": "Optional filename when saving to disk"
@@ -1320,7 +1320,7 @@
      "default": false
     },
     "export_format": {
-     "description": "Export format for Google Workspace files",
+     "description": "Export format for Google Workspace files Allowed values: text, html, pdf, docx, xlsx, csv, auto.",
      "default": "auto"
     }
    }
@@ -1341,11 +1341,11 @@
     },
     "file_type": {
      "default": "all",
-     "description": "Allowed values: all, folder, document, s"
+     "description": "Allowed values: all, folder, document, spreadsheet, presentation, pdf, image."
     },
     "order_by": {
      "default": "modifiedTime",
-     "description": "Allowed values: name, modifiedTime, crea"
+     "description": "Allowed values: name, modifiedTime, createdTime, folder."
     }
    }
   }
@@ -1365,7 +1365,7 @@
     },
     "export_format": {
      "default": "text",
-     "description": "Allowed values: text, html, pdf, docx, x"
+     "description": "Allowed values: text, html, pdf, docx, xlsx, csv."
     }
    }
   }
@@ -1381,7 +1381,7 @@
     },
     "file_type": {
      "default": "all",
-     "description": "Allowed values: all, folder, document, s"
+     "description": "Allowed values: all, folder, document, spreadsheet, presentation, pdf, image."
     },
     "in_folder": {
      "description": "Limit search to specific folder ID"
@@ -1405,12 +1405,12 @@
      "description": "Partial file name to search for"
     },
     "match_type": {
-     "description": "How to match the name Allowed values: co",
+     "description": "How to match the name Allowed values: contains, starts_with, exact.",
      "default": "contains"
     },
     "file_type": {
      "default": "all",
-     "description": "Allowed values: all, folder, document, s"
+     "description": "Allowed values: all, folder, document, spreadsheet, presentation, pdf, image."
     },
     "case_sensitive": {
      "default": false
@@ -1441,11 +1441,11 @@
     },
     "value_input_option": {
      "default": "USER_ENTERED",
-     "description": "Allowed values: RAW, USER_ENTERED"
+     "description": "Allowed values: RAW, USER_ENTERED."
     },
     "insert_data_option": {
      "default": "INSERT_ROWS",
-     "description": "Allowed values: OVERWRITE, INSERT_ROWS"
+     "description": "Allowed values: OVERWRITE, INSERT_ROWS."
     },
     "include_values_in_response": {
      "default": false
@@ -1493,15 +1493,15 @@
     },
     "major_dimension": {
      "default": "ROWS",
-     "description": "Allowed values: ROWS, COLUMNS"
+     "description": "Allowed values: ROWS, COLUMNS."
     },
     "value_render_option": {
      "default": "FORMATTED_VALUE",
-     "description": "Allowed values: FORMATTED_VALUE, UNFORMA"
+     "description": "Allowed values: FORMATTED_VALUE, UNFORMATTED_VALUE, FORMULA."
     },
     "date_time_render_option": {
      "default": "FORMATTED_STRING",
-     "description": "Allowed values: SERIAL_NUMBER, FORMATTED"
+     "description": "Allowed values: SERIAL_NUMBER, FORMATTED_STRING."
     }
    }
   }
@@ -1538,7 +1538,7 @@
     },
     "value_input_option": {
      "default": "USER_ENTERED",
-     "description": "Allowed values: RAW, USER_ENTERED"
+     "description": "Allowed values: RAW, USER_ENTERED."
     },
     "include_values_in_response": {
      "default": false
@@ -1562,11 +1562,11 @@
      "description": "MIME type for upload"
     },
     "google_type": {
-     "description": "Create a native Google Doc/Sheet/Slide A"
+     "description": "Create a native Google Doc/Sheet/Slide Allowed values: document, spreadsheet, presentation."
     },
     "source": {
      "default": "text",
-     "description": "How content is provided Allowed values: "
+     "description": "How content is provided Allowed values: text, base64, file_path."
     },
     "text_content": {
      "description": "UTF-8 text content"
@@ -1678,7 +1678,7 @@
     },
     "equipmentType": {
      "default": "VAN",
-     "description": "Equipment type Allowed values: VAN, REEF"
+     "description": "Equipment type Allowed values: VAN, REEFER, FLATBED."
     }
    }
   }
@@ -1803,7 +1803,7 @@
      "description": "FragilePAK tracking number"
     },
     "documentType": {
-     "description": "Type of document: label"
+     "description": "Type of document: label Allowed values: label, bol, web-bol, thermal-label, zpl."
     }
    }
   }
@@ -1946,7 +1946,7 @@
    "type": "object",
    "properties": {
     "serviceLevel": {
-     "description": "Service level for the shipment Allowed v"
+     "description": "Service level for the shipment Allowed values: Unattended, Threshold, Room of Choice, White Glove, WG Install, White Glove Assembly, Dock Delivery, Outside."
     },
     "cubicFeet": {
      "description": "Total cubic feet of shipment"
@@ -2019,11 +2019,11 @@
     },
     "equipmentType": {
      "default": "VAN",
-     "description": "Equipment type Allowed values: VAN, REEF"
+     "description": "Equipment type Allowed values: VAN, REEFER, FLATBED."
     },
     "forecastPeriod": {
      "default": "35DAYS",
-     "description": "Forecast time horizon Allowed values: 8D"
+     "description": "Forecast time horizon Allowed values: 8DAYS, 35DAYS, 52WEEKS."
     }
    }
   }
@@ -2061,7 +2061,7 @@
      "description": "Data or text to analyze"
     },
     "pattern_type": {
-     "description": "Type of patterns to identify Allowed val"
+     "description": "Type of patterns to identify Allowed values: trends, anomalies, clusters, relationships."
     },
     "context": {
      "description": "Optional: Additional context about the d"
@@ -2094,7 +2094,7 @@
    "type": "object",
    "properties": {
     "date_column": {
-     "description": "Column to use for date filtering"
+     "description": "Column to use for date filtering Allowed values: completion_date, cos_earliest_invoice_date, cos_latest_invoice_date, cos_earliest_dl_actual_date, last_refreshed_utc."
     },
     "start_date": {
      "description": "Start date"
@@ -2116,7 +2116,7 @@
         "description": "Column name to filter"
        },
        "operator": {
-        "description": "Filter operator Allowed values: equals, "
+        "description": "Filter operator Allowed values: equals, not_equals, contains, greater_than, less_than, greater_or_equal, less_or_equal, in, not_in, is_empty, is_not_empty."
        },
        "value": {
         "description": "Filter value"
@@ -2125,7 +2125,7 @@
      }
     },
     "filter_logic": {
-     "description": "How to combine multiple filters"
+     "description": "How to combine multiple filters Allowed values: and, or."
     },
     "schema_only": {
      "description": "If true, return only schema without data"
@@ -2231,7 +2231,7 @@
     "openNow": {},
     "rankBy": {
      "default": "prominence",
-     "description": "Allowed values: prominence, distance"
+     "description": "Allowed values: prominence, distance."
     }
    }
   }
@@ -2262,7 +2262,7 @@
         "description": "Column name to filter"
        },
        "operator": {
-        "description": "Filter operator Allowed values: equals, "
+        "description": "Filter operator Allowed values: equals, not_equals, contains, greater_than, less_than, greater_or_equal, less_or_equal, in, not_in, is_empty, is_not_empty."
        },
        "value": {
         "description": "Filter value"
@@ -2271,7 +2271,7 @@
      }
     },
     "filter_logic": {
-     "description": "How to combine multiple filters"
+     "description": "How to combine multiple filters Allowed values: and, or."
     },
     "schema_only": {
      "description": "If true, return only schema without data"
@@ -2309,14 +2309,14 @@
       "properties": {
        "column": {},
        "operator": {
-        "description": "Allowed values: equals, not_equals, cont"
+        "description": "Allowed values: equals, not_equals, contains, greater_than, less_than, greater_or_equal, less_or_equal, in, not_in, is_empty, is_not_empty."
        },
        "value": {}
       }
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -2356,7 +2356,7 @@
        "weightLbs": {},
        "cubicFeet": {},
        "priority": {
-        "description": "Allowed values: standard, expedited, cri"
+        "description": "Allowed values: standard, expedited, critical."
        }
       }
      }
@@ -2438,7 +2438,7 @@
     },
     "travelMode": {
      "default": "DRIVE",
-     "description": "Allowed values: DRIVE, BICYCLE, WALK, TW"
+     "description": "Allowed values: DRIVE, BICYCLE, WALK, TWO_WHEELER, TRANSIT."
     },
     "roundTrip": {
      "default": false,
@@ -2454,7 +2454,7 @@
    "type": "object",
    "properties": {
     "date_column": {
-     "description": "Column to use for date filtering"
+     "description": "Column to use for date filtering Allowed values: order_created_date, note_date, delivery_date, last_refreshed_utc."
     },
     "start_date": {
      "description": "Start date"
@@ -2476,7 +2476,7 @@
         "description": "Column name to filter"
        },
        "operator": {
-        "description": "Filter operator Allowed values: equals, "
+        "description": "Filter operator Allowed values: equals, not_equals, contains, greater_than, less_than, greater_or_equal, less_or_equal, in, not_in, is_empty, is_not_empty."
        },
        "value": {
         "description": "Filter value"
@@ -2485,7 +2485,7 @@
      }
     },
     "filter_logic": {
-     "description": "How to combine multiple filters"
+     "description": "How to combine multiple filters Allowed values: and, or."
     },
     "schema_only": {
      "description": "If true, return only schema without data"
@@ -2509,7 +2509,7 @@
    "type": "object",
    "properties": {
     "date_column": {
-     "description": "Column to use for date filtering"
+     "description": "Column to use for date filtering Allowed values: activity_date, earliest_pickup_date, latest_delivery_date, last_refreshed_utc."
     },
     "start_date": {
      "description": "Start date"
@@ -2531,7 +2531,7 @@
         "description": "Column name to filter"
        },
        "operator": {
-        "description": "Filter operator Allowed values: equals, "
+        "description": "Filter operator Allowed values: equals, not_equals, contains, greater_than, less_than, greater_or_equal, less_or_equal, in, not_in, is_empty, is_not_empty."
        },
        "value": {
         "description": "Filter value"
@@ -2540,7 +2540,7 @@
      }
     },
     "filter_logic": {
-     "description": "How to combine multiple filters"
+     "description": "How to combine multiple filters Allowed values: and, or."
     },
     "schema_only": {
      "description": "If true, return only schema without data"
@@ -2564,7 +2564,7 @@
    "type": "object",
    "properties": {
     "date_column": {
-     "description": "Column to use for date filtering"
+     "description": "Column to use for date filtering Allowed values: activity_date, earliest_pickup_date, latest_delivery_date, last_refreshed_utc."
     },
     "start_date": {
      "description": "Start date"
@@ -2586,7 +2586,7 @@
         "description": "Column name to filter"
        },
        "operator": {
-        "description": "Filter operator Allowed values: equals, "
+        "description": "Filter operator Allowed values: equals, not_equals, contains, greater_than, less_than, greater_or_equal, less_or_equal, in, not_in, is_empty, is_not_empty."
        },
        "value": {
         "description": "Filter value"
@@ -2595,7 +2595,7 @@
      }
     },
     "filter_logic": {
-     "description": "How to combine multiple filters"
+     "description": "How to combine multiple filters Allowed values: and, or."
     },
     "schema_only": {
      "description": "If true, return only schema without data"
@@ -2646,7 +2646,7 @@
     },
     "method": {
      "default": "GET",
-     "description": "HTTP method to use Allowed values: GET, "
+     "description": "HTTP method to use Allowed values: GET, HEAD, OPTIONS."
     },
     "headers": {
      "additionalProperties": {
@@ -2675,7 +2675,7 @@
     },
     "profile_depth": {
      "default": "standard",
-     "description": "Level of profiling detail Allowed values"
+     "description": "Level of profiling detail Allowed values: quick, standard, deep."
     }
    }
   }
@@ -2713,7 +2713,7 @@
    "type": "object",
    "properties": {
     "model": {
-     "description": "Which AI model to query Allowed values: "
+     "description": "Which AI model to query Allowed values: grok, gemini, claude, openai."
     },
     "prompt": {
      "description": "The question or prompt to send to the mo"
@@ -2754,7 +2754,7 @@
    "type": "object",
    "properties": {
     "registrationType": {
-     "description": "1=Door-to-Door"
+     "description": "1=Door-to-Door Allowed values: 1, 2."
     },
     "salesOrder": {
      "description": "Main order identifier"
@@ -2766,7 +2766,7 @@
      "description": "Previous quote identifier"
     },
     "serviceLevel": {
-     "description": "2=Threshold, 3=WG Install, 4=White Glove"
+     "description": "2=Threshold, 3=WG Install, 4=White Glove Allowed values: 2, 3, 4, 5, 6, 7, 8, 9."
     },
     "destinationName": {
      "description": "Destination location/person name"
@@ -2861,7 +2861,7 @@
    "type": "object",
    "properties": {
     "date_column": {
-     "description": "Column to use for date filtering"
+     "description": "Column to use for date filtering Allowed values: date_added, pod_date, onboard_datetime, billing_submission_date, last_updated."
     },
     "start_date": {
      "description": "Start date for filtering"
@@ -2880,7 +2880,7 @@
         "description": "Column name to filter"
        },
        "operator": {
-        "description": "Filter operator Allowed values: equals, "
+        "description": "Filter operator Allowed values: equals, not_equals, contains, greater_than, less_than, greater_or_equal, less_or_equal, in, not_in, is_empty, is_not_empty."
        },
        "value": {
         "description": "Filter value"
@@ -2889,7 +2889,7 @@
      }
     },
     "filter_logic": {
-     "description": "How to combine multiple filters"
+     "description": "How to combine multiple filters Allowed values: and, or."
     },
     "schema_only": {
      "description": "If true, return only schema"
@@ -2972,7 +2972,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3009,7 +3009,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3040,7 +3040,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3077,7 +3077,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3114,7 +3114,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3145,7 +3145,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3182,7 +3182,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3219,7 +3219,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3256,14 +3256,14 @@
       "properties": {
        "column": {},
        "operator": {
-        "description": "Allowed values: equals, not_equals, cont"
+        "description": "Allowed values: equals, not_equals, contains, greater_than, less_than, greater_or_equal, less_or_equal, in, not_in, is_empty, is_not_empty."
        },
        "value": {}
       }
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3300,14 +3300,14 @@
       "properties": {
        "column": {},
        "operator": {
-        "description": "Allowed values: equals, not_equals, cont"
+        "description": "Allowed values: equals, not_equals, contains, greater_than, less_than, greater_or_equal, less_or_equal, in, not_in, is_empty, is_not_empty."
        },
        "value": {}
       }
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3344,7 +3344,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3381,7 +3381,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3418,7 +3418,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3455,7 +3455,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3486,7 +3486,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3518,7 +3518,7 @@
      "description": "Filterable columns: source_row_id, row_k"
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3555,7 +3555,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3592,7 +3592,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3629,7 +3629,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3666,7 +3666,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3703,7 +3703,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3740,7 +3740,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3771,7 +3771,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3808,7 +3808,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3845,7 +3845,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -3874,13 +3874,13 @@
      "description": "Filter by region"
     },
     "status": {
-     "description": "Filter by customer status Allowed values"
+     "description": "Filter by customer status Allowed values: active, hold, all."
     },
     "sortBy": {
-     "description": "Field to sort by"
+     "description": "Field to sort by Allowed values: name, id, orders, lastOrder."
     },
     "sortOrder": {
-     "description": "Sort order"
+     "description": "Sort order Allowed values: asc, desc."
     }
    }
   }
@@ -3922,7 +3922,7 @@
      "description": "End date for route search"
     },
     "shipmentType": {
-     "description": "Filter routes by shipment type"
+     "description": "Filter routes by shipment type Allowed values: cross_dock_final_mile, vendor_first_mile, both."
     }
    }
   }
@@ -4089,7 +4089,7 @@
      "description": "Document text to summarize"
     },
     "format": {
-     "description": "Output format",
+     "description": "Output format Allowed values: bullets, paragraphs, executive.",
      "default": "bullets"
     },
     "max_length": {
@@ -4110,12 +4110,12 @@
     },
     "method": {
      "default": "GET",
-     "description": "HTTP method Allowed values: GET, POST, P"
+     "description": "HTTP method Allowed values: GET, POST, PUT, PATCH, DELETE."
     },
     "auth": {
      "properties": {
       "type": {
-       "description": "Authentication type Allowed values: bear"
+       "description": "Authentication type Allowed values: bearer, basic, api_key_header, api_key_query, none."
       },
       "value": {
        "description": "API key or token value"
@@ -4193,7 +4193,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -4230,7 +4230,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -4267,7 +4267,7 @@
      }
     },
     "filter_logic": {
-     "description": "Allowed values: and, or"
+     "description": "Allowed values: and, or."
     },
     "schema_only": {},
     "count_only": {}
@@ -4318,7 +4318,7 @@
         "description": "Column name to filter"
        },
        "operator": {
-        "description": "Filter operator Allowed values: equals, "
+        "description": "Filter operator Allowed values: equals, not_equals, contains, greater_than, less_than, greater_or_equal, less_or_equal, in, not_in, is_empty, is_not_empty."
        },
        "value": {
         "description": "Filter value"
@@ -4327,7 +4327,7 @@
      }
     },
     "filter_logic": {
-     "description": "How to combine multiple filters"
+     "description": "How to combine multiple filters Allowed values: and, or."
     },
     "schema_only": {
      "description": "If true, return only schema without data"

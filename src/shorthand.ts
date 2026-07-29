@@ -70,6 +70,29 @@ const schemaOf = (t: Tool): any => (t as any).input_schema ?? (t as any).inputSc
  * says "the tracking number" where the schema says `trackingNumber`, and comparing literally
  * found zero of them.
  */
+/**
+ * Allowed values a description states in English, recovered deterministically.
+ *
+ * Badly-structured catalogues document their enums for humans: "Allowed values: a, b, c",
+ * "one of: x|y", "Options: ...". That is derivable text, so a model should never be asked for it —
+ * asking introduces the possibility of invention where a regex cannot invent anything.
+ *
+ * Returns null unless the pattern is unambiguous. Two or more values, no sentence longer than a
+ * short list, nothing that looks like prose.
+ */
+export function enumFromProse(description: string | undefined): string[] | null {
+  if (!description) return null;
+  const m = description.match(
+    /(?:allowed values|valid values|must be one of|one of|options|possible values)\s*[:=]?\s*([^.]{2,200})/i,
+  );
+  if (!m) return null;
+  const values = m[1]
+    .split(/[,|]/)
+    .map((v) => v.trim().replace(/^["'`]|["'`]$/g, ""))
+    .filter((v) => v.length > 0 && v.length < 40 && !/\s{2,}/.test(v) && v.split(/\s+/).length <= 3);
+  return values.length >= 2 ? values : null;
+}
+
 export function hoistedFormats(tools: Tool[]): Map<string, string> {
   const found = new Map<string, string>();
   for (const t of tools) {

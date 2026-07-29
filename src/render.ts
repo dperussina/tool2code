@@ -14,7 +14,7 @@
  * never in the artifact, and a tool with no semantics gets `?` rather than a guess.
  */
 import type { JsonSchema, Tool } from "./types.js";
-import { GLOSSARY, accessClass, hoistedFormats } from "./shorthand.js";
+import { GLOSSARY, accessClass, hoistedFormats, enumFromProse } from "./shorthand.js";
 import { collectShapes, shapeNameOf, type NamedShape } from "./shapes.js";
 import type { Semantics } from "./compile.js";
 
@@ -36,7 +36,14 @@ const isIdentifier = (n: string) => /^[A-Za-z_]\w*$/.test(n) && !PYTHON_KEYWORDS
 function typeOf(v: JsonSchema, alias?: string, shapes?: Map<string, NamedShape>): string {
   if (alias) return alias;
   if (v.enum) return `Literal[${v.enum.map((e) => JSON.stringify(e)).join(",")}]`;
-  const t = Array.isArray(v.type) ? v.type[0] : v.type;
+  // An enum the schema states only in English is still the schema's own claim, not a guess.
+  const prose = enumFromProse(v.description as string | undefined);
+  if (prose) return `Literal[${prose.map((e) => JSON.stringify(e)).join(",")}]`;
+  // `items` present means array, whether or not the schema bothered to say `type: "array"`.
+  // A degraded catalogue routinely omits the type and keeps the items, and the first version of
+  // this fell straight past the array branch and rendered `filters:Filter` — an object where a
+  // list belongs, which is the same class of error as `list[dict]`, just quieter.
+  const t = Array.isArray(v.type) ? v.type[0] : (v.type ?? (v.items ? "array" : undefined));
   // A named shape beats `dict` and `list[dict]`, which tell a model nothing it can act on.
   const named = shapes ? shapeNameOf(v, shapes) : null;
   if (t === "array") {
@@ -76,6 +83,15 @@ export function renderTool(
   aliases = new Map<string, string>(),
   kwAliases = new Map<string, string>(),
   shapes?: Map<string, NamedShape>,
+  /**
+   * Collects the `TypedDict` definitions this line refers to.
+   *
+   * Defaulted rather than optional-and-skipped: the first version only emitted the return
+   * annotation when a caller passed a map, so `renderTool` on its own quietly produced a
+   * signature with no `->` at all. A renderer that drops a type depending on how it was called
+   * is a trap, and a test caught it.
+   */
+  returnShapes: Map<string, string> = new Map(),
 ): string {
   const schema = schemaOf(t);
   const props = schema.properties ?? {};
@@ -98,9 +114,20 @@ export function renderTool(
   );
   for (const [name, spec] of Object.entries(props)) {
     const guess = inferred.get(name);
-    // Only where the schema is silent. A declared type always wins over an inference.
+    /**
+     * Inference is the last resort, not the first.
+     *
+     * Measured against ground truth on a degraded catalogue, the model said `dict` for eleven
+     * `filters` parameters that are truly `list` — and the degraded schema still carried
+     * `items.properties`, so the correct answer was derivable the whole time. An inference that
+     * overrides available structure is strictly worse than no inference.
+     *
+     * So a parameter is only handed to the guess when the schema says nothing usable: no type,
+     * no properties, no items.
+     */
+    const derivable = Boolean(spec.type || spec.properties || spec.items || spec.enum);
     const type =
-      !spec.type && guess
+      !derivable && guess
         ? guess.enum?.length
           ? `Literal[${guess.enum.map((e) => JSON.stringify(e)).join(",")}]`
           : guess.type ?? "Any"
@@ -138,7 +165,23 @@ export function renderTool(
     slots.push("?uncompiled");
   }
 
-  return `def ${t.name}(${positional.join(",")}):"${slots.join(" ")}"`;
+  /**
+   * The return annotation, when the compiler recovered a shape for it.
+   *
+   * Named per tool rather than pooled by structure: two tools returning `{id, name}` mean
+   * different things, and `-> OrderResult` reads better than `-> Shape7`.
+   */
+  let arrow = "";
+  if (s?.returnShape?.fields.length) {
+    const typeName = `${t.name.replace(/(^|_)([a-z])/g, (_, __, c) => c.toUpperCase())}Result`;
+    returnShapes.set(
+      typeName,
+      s.returnShape.fields.map((f) => `"${f.name}": ${f.type}`).join(", "),
+    );
+    arrow = ` -> ${s.returnShape.list ? `list[${typeName}]` : typeName}`;
+  }
+
+  return `def ${t.name}(${positional.join(",")})${arrow}:"${slots.join(" ")}"`;
 }
 
 /**
@@ -193,14 +236,19 @@ export function renderModule(tools: Tool[], options: RenderOptions = {}): string
   }
 
   const kwAliases = new Map<string, string>();
-  for (const t of tools) body.push(renderTool(t, options, aliases, kwAliases, shapes));
+  const returnShapes = new Map<string, string>();
+  for (const t of tools) body.push(renderTool(t, options, aliases, kwAliases, shapes, returnShapes));
 
   const imports: string[] = [];
   if ([...body, ...shapeLines].some((l) => /\bAny\b/.test(l))) imports.push("Any");
   if ([...body, ...shapeLines].some((l) => l.includes("Literal["))) imports.push("Literal");
-  if (kwAliases.size || shapeLines.length) imports.push("TypedDict");
+  if (kwAliases.size || shapeLines.length || returnShapes.size) imports.push("TypedDict");
   if (imports.length) lines.splice(1, 0, `from typing import ${imports.sort().join(", ")}`);
   if (shapeLines.length) lines.push("", ...shapeLines);
+  if (returnShapes.size) {
+    lines.push("");
+    for (const [name, fields] of returnShapes) lines.push(`${name} = TypedDict("${name}", {${fields}}, total=False)`);
+  }
   if (kwAliases.size) {
     lines.push("");
     for (const [alias, fields] of kwAliases) lines.push(`${alias} = TypedDict("${alias}", {${fields}}, total=False)`);

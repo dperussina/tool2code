@@ -1,6 +1,12 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { compile } from "../src/compile.js";
-const raw = JSON.parse(readFileSync("corpus/real-mcp-149.json","utf8"));
+const flag = (k: string, d: string) => {
+  const hit = process.argv.slice(2).find((a) => a.startsWith(`--${k}=`));
+  return hit ? hit.slice(hit.indexOf("=") + 1) : d;
+};
+const corpusPath = flag("corpus", "corpus/real-mcp-149.json");
+const outPath = flag("out", "corpus/semantics.json");
+const raw = JSON.parse(readFileSync(corpusPath,"utf8"));
 const tools = Array.isArray(raw)?raw:raw.tools;
 
 const complete = async ({system,user}:{system:string;user:string}) => {
@@ -24,5 +30,9 @@ const vs = [...semantics.values()].filter((s: any) => s.notThis?.length);
 console.log(`  ${vs.length} tools carry a contrast slot`);
 for (const s of vs.slice(0, 8) as any[]) console.log(`    ${s.name}: ${s.notThis.map((n: any) => `vs${n.tool}(${n.why})`).join(" ")}`);
 for (const r of rejected) console.log(`  REJECTED ${r.name}: ${r.reason}`);
-writeFileSync("corpus/semantics.json", JSON.stringify(Object.fromEntries(semantics), null, 1) + "\n");
-console.log(`wrote corpus/semantics.json (${JSON.stringify(Object.fromEntries(semantics)).length} chars)`);
+const inferred = [...semantics.values()].filter((s: any) => s.params?.length);
+const inferredParams = inferred.reduce((n, s: any) => n + s.params.length, 0);
+const withEnums = inferred.reduce((n, s: any) => n + s.params.filter((p: any) => p.enum?.length).length, 0);
+console.log(`  structure recovered: ${inferredParams} parameters on ${inferred.length} tools, ${withEnums} with grounded enum values`);
+writeFileSync(outPath, JSON.stringify(Object.fromEntries(semantics), null, 1) + "\n");
+console.log(`wrote ${outPath} (${JSON.stringify(Object.fromEntries(semantics)).length} chars)`);

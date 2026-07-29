@@ -1,0 +1,5034 @@
+{
+ "apiV2LocationsActive": {
+  "name": "apiV2LocationsActive",
+  "returns": "active customer sites and hub locations as a bulk row feed for warehouse/CRM sync, with a schema-only mode to inspect columns first",
+  "notThis": [
+   {
+    "tool": "apiV2ActiveLocationsGet",
+    "why": "one-shot lookup of current sites and hubs with coordinates"
+   }
+  ],
+  "params": [
+   {
+    "name": "schema_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2ActiveLocationsGet": {
+  "name": "apiV2ActiveLocationsGet",
+  "returns": "all currently active customer sites and hubs with names and lat/lon coordinates",
+  "notThis": [
+   {
+    "tool": "apiV2LocationsActive",
+    "why": "bulk sync export with schema inspection"
+   }
+  ]
+ },
+ "apiV2HealthCheck": {
+  "name": "apiV2HealthCheck",
+  "returns": "up/down health and status of the TagNext API",
+  "notThis": [
+   {
+    "tool": "apiV2CheckHealth",
+    "why": "health of the data-sources-mcp service instead"
+   }
+  ]
+ },
+ "apiV2CheckHealth": {
+  "name": "apiV2CheckHealth",
+  "returns": "up/down health and status of the data-sources-mcp service",
+  "notThis": [
+   {
+    "tool": "apiV2HealthCheck",
+    "why": "health of the TagNext API instead"
+   }
+  ]
+ },
+ "apiV2OfSalesCost": {
+  "name": "apiV2OfSalesCost",
+  "returns": "invoice-level cost of sales rows (freight and carrier charge lines with cost fields) for a whole date window, as a bulk feed with schema-only, count-only or streamed CSV output for loading into a warehouse",
+  "notThis": [
+   {
+    "tool": "apiV2CostOfSalesGet",
+    "why": "answers cost/freight charges for one partner, customer or invoice"
+   }
+  ],
+  "params": [
+   {
+    "name": "date_column",
+    "type": "str",
+    "enum": [
+     "invoice_date",
+     "delivery_actual_date",
+     "date_added",
+     "billing_submission_date"
+    ]
+   },
+   {
+    "name": "start_date",
+    "type": "str"
+   },
+   {
+    "name": "end_date",
+    "type": "str"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   },
+   {
+    "name": "csv_mode",
+    "type": "bool"
+   },
+   {
+    "name": "csv_path",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2CostOfSalesGet": {
+  "name": "apiV2CostOfSalesGet",
+  "returns": "detailed cost of sales per invoice — freight cost, carrier charges and margin detail — for a date range, narrowed to one partner, company, customer or invoice number",
+  "needs": [
+   "?partnerId"
+  ],
+  "notThis": [
+   {
+    "tool": "apiV2OfSalesCost",
+    "why": "bulk dated export of the same cost rows for sync/CSV loading"
+   }
+  ],
+  "params": [
+   {
+    "name": "startDate",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "endDate",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "partnerId",
+    "type": "Any"
+   },
+   {
+    "name": "companyNumber",
+    "type": "Any"
+   },
+   {
+    "name": "customerNumber",
+    "type": "Any"
+   },
+   {
+    "name": "hiInvoiceNo",
+    "type": "Any"
+   }
+  ]
+ },
+ "apiV2Customers": {
+  "name": "apiV2Customers",
+  "returns": "customer account records with billing/invoicing details, bulk rows for warehouse sync with schema and count modes",
+  "notThis": [
+   {
+    "tool": "apiV2CustomersSearch",
+    "why": "name/region/status lookup to find a partner"
+   },
+   {
+    "tool": "apiV2CustomerDetailsGet",
+    "why": "one partner's full profile by ID"
+   }
+  ],
+  "params": [
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2CustomerDetailsGet": {
+  "name": "apiV2CustomerDetailsGet",
+  "returns": "full profile of one customer/partner: account, contacts, terms and related attributes",
+  "needs": [
+   "?partnerId"
+  ],
+  "notThis": [
+   {
+    "tool": "apiV2CustomersSearch",
+    "why": "finds the partner ID by name"
+   },
+   {
+    "tool": "apiV2Customers",
+    "why": "bulk account+billing export"
+   }
+  ],
+  "params": [
+   {
+    "name": "partnerId",
+    "type": "Any",
+    "required": true
+   }
+  ]
+ },
+ "apiV2CustomersSearch": {
+  "name": "apiV2CustomersSearch",
+  "returns": "matching customer/partner list with name, ID, region, status and order recency, paged and sorted",
+  "notThis": [
+   {
+    "tool": "apiV2CustomerDetailsGet",
+    "why": "one partner in depth once you have the ID"
+   },
+   {
+    "tool": "apiV2Customers",
+    "why": "bulk sync export of billing records"
+   }
+  ],
+  "params": [
+   {
+    "name": "query",
+    "type": "str"
+   },
+   {
+    "name": "page",
+    "type": "int"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "region",
+    "type": "str"
+   },
+   {
+    "name": "status",
+    "type": "str",
+    "enum": [
+     "active",
+     "hold",
+     "all"
+    ]
+   },
+   {
+    "name": "sortBy",
+    "type": "str",
+    "enum": [
+     "name",
+     "id",
+     "orders",
+     "lastOrder"
+    ]
+   },
+   {
+    "name": "sortOrder",
+    "type": "str",
+    "enum": [
+     "asc",
+     "desc"
+    ]
+   }
+  ]
+ },
+ "apiV2Fifo": {
+  "name": "apiV2Fifo",
+  "returns": "freight aged on dock oldest-first (FIFO queue rows by service provider and lane), as a report dataset that can also be fetched as schema only",
+  "notThis": [
+   {
+    "tool": "apiV2FifoReportGet",
+    "why": "same on-dock aging answered directly for a provider/lane without schema introspection"
+   }
+  ],
+  "params": [
+   {
+    "name": "service_provider_id",
+    "type": "Any"
+   },
+   {
+    "name": "lane",
+    "type": "Any"
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2FifoReportGet": {
+  "name": "apiV2FifoReportGet",
+  "returns": "what freight is sitting on the dock and how long it has waited, oldest-in first, for a given service provider or lane",
+  "notThis": [
+   {
+    "tool": "apiV2Fifo",
+    "why": "the raw FIFO report dataset with schema-only mode"
+   }
+  ],
+  "params": [
+   {
+    "name": "serviceProviderID",
+    "type": "Any"
+   },
+   {
+    "name": "lane",
+    "type": "Any"
+   }
+  ]
+ },
+ "apiV2IntransitReportGet": {
+  "name": "apiV2IntransitReportGet",
+  "returns": "freight currently loaded and moving in transit — shipments, lanes and carriers, as a report for one service provider or lane",
+  "notThis": [
+   {
+    "tool": "apiV2Intransit",
+    "why": "bulk in-transit feed for warehouse/BI sync with schema discovery"
+   }
+  ],
+  "params": [
+   {
+    "name": "serviceProviderID",
+    "type": "Any"
+   },
+   {
+    "name": "lane",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2Intransit": {
+  "name": "apiV2Intransit",
+  "returns": "in-transit freight rows (shipments in motion by lane and carrier) as a syncable bulk dataset, optionally just the column schema",
+  "notThis": [
+   {
+    "tool": "apiV2IntransitReportGet",
+    "why": "answers what is in transit now for a given provider or lane"
+   }
+  ],
+  "params": [
+   {
+    "name": "service_provider_id",
+    "type": "Any"
+   },
+   {
+    "name": "lane",
+    "type": "str"
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2LoadDetailsGet": {
+  "name": "apiV2LoadDetailsGet",
+  "returns": "full record for one trigger-based load: stops, freight, carrier, dates, references",
+  "needs": [
+   "?loadId"
+  ],
+  "notThis": [
+   {
+    "tool": "apiV2ReportLoad",
+    "why": "bulk paginated/CSV export of load-level logistics rows for warehouse sync"
+   }
+  ],
+  "params": [
+   {
+    "name": "loadId",
+    "type": "Any",
+    "required": true
+   }
+  ]
+ },
+ "apiV2ReportLoad": {
+  "name": "apiV2ReportLoad",
+  "returns": "load-level logistics rows (shipments, lanes, carriers, dates) as a paginated feed or streamed CSV for downstream sync",
+  "notThis": [
+   {
+    "tool": "apiV2LoadDetailsGet",
+    "why": "one load looked up by its ID"
+   }
+  ],
+  "params": [
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   },
+   {
+    "name": "csv_mode",
+    "type": "bool"
+   },
+   {
+    "name": "csv_path",
+    "type": "str"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   }
+  ]
+ },
+ "apiV2OrderDetailsGet": {
+  "name": "apiV2OrderDetailsGet",
+  "returns": "full record for one order: header, partner/customer, freight and reference data, notes, status history, related child orders",
+  "supersetOf": [
+   "apiV2OrderNotesGet",
+   "apiV2OrderTimelineGet"
+  ],
+  "needs": [
+   "?trackingNumber"
+  ],
+  "notThis": [
+   {
+    "tool": "apiV2SearchOrdersQuick",
+    "why": "thin identifier lookup to find which order you mean"
+   }
+  ],
+  "params": [
+   {
+    "name": "trackingNumber",
+    "type": "Any",
+    "required": true
+   }
+  ]
+ },
+ "apiV2SearchOrdersQuick": {
+  "name": "apiV2SearchOrdersQuick",
+  "returns": "matching order stubs (tracking number, order number, customer) from an exact-match lookup on one identifier string",
+  "needs": [
+   "?query"
+  ],
+  "notThis": [
+   {
+    "tool": "apiV2OrderDetailsGet",
+    "why": "the full detail payload once you have the tracking number"
+   }
+  ],
+  "params": [
+   {
+    "name": "query",
+    "type": "Any",
+    "required": true
+   }
+  ]
+ },
+ "apiV2OrderNotesGet": {
+  "name": "apiV2OrderNotesGet",
+  "returns": "note text, author and timestamp for every note on one shipment, keyed by tracking number",
+  "needs": [
+   "?trackingNumber"
+  ],
+  "notThis": [
+   {
+    "tool": "apiV2NotesOrder",
+    "why": "bulk date-ranged note/communication feed for warehouse loading"
+   }
+  ],
+  "params": [
+   {
+    "name": "trackingNumber",
+    "type": "Any",
+    "required": true
+   }
+  ]
+ },
+ "apiV2NotesOrder": {
+  "name": "apiV2NotesOrder",
+  "returns": "bulk rows of order notes and customer communication records over a date range, filterable, paged or streamed to CSV",
+  "notThis": [
+   {
+    "tool": "apiV2OrderNotesGet",
+    "why": "all notes on a single order by its tracking number"
+   }
+  ],
+  "params": [
+   {
+    "name": "date_column",
+    "type": "str",
+    "enum": [
+     "order_created_date",
+     "note_date",
+     "delivery_date",
+     "last_refreshed_utc"
+    ]
+   },
+   {
+    "name": "start_date",
+    "type": "str"
+   },
+   {
+    "name": "end_date",
+    "type": "str"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "Any"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   },
+   {
+    "name": "csv_mode",
+    "type": "bool"
+   },
+   {
+    "name": "csv_path",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2PlaceDetailsGet": {
+  "name": "apiV2PlaceDetailsGet",
+  "returns": "full profile of one place: address, coordinates, phone, hours, ratings, website",
+  "needs": [
+   "?placeId or apiV2PlacesSearch",
+   "apiV2AutocompletePlace",
+   "apiV2SearchNearby"
+  ],
+  "notThis": [
+   {
+    "tool": "apiV2PlacesSearch",
+    "why": "finds candidate places from a text query; this expands one known place ID"
+   }
+  ],
+  "params": [
+   {
+    "name": "placeId",
+    "type": "Any",
+    "required": true
+   },
+   {
+    "name": "language",
+    "type": "str"
+   },
+   {
+    "name": "fields",
+    "type": "list"
+   }
+  ]
+ },
+ "apiV2PlacesSearch": {
+  "name": "apiV2PlacesSearch",
+  "returns": "ranked list of matching places with name, address, place ID and basic attributes for a free-text query",
+  "notThis": [
+   {
+    "tool": "apiV2PlaceDetailsGet",
+    "why": "full detail for one already-known place ID"
+   }
+  ],
+  "params": [
+   {
+    "name": "query",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "location",
+    "type": "str"
+   },
+   {
+    "name": "radius",
+    "type": "int"
+   },
+   {
+    "name": "language",
+    "type": "str"
+   },
+   {
+    "name": "region",
+    "type": "str"
+   },
+   {
+    "name": "type",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2AllModelsQuery": {
+  "name": "apiV2AllModelsQuery",
+  "returns": "side-by-side answers to one prompt from Grok, Gemini, Claude and OpenAI, run in parallel for comparison",
+  "supersetOf": [
+   "apiV2ModelQuery"
+  ],
+  "notThis": [
+   {
+    "tool": "apiV2ModelQuery",
+    "why": "one named model only, cheaper/faster"
+   }
+  ],
+  "params": [
+   {
+    "name": "prompt",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "temperature",
+    "type": "float"
+   },
+   {
+    "name": "maxTokens",
+    "type": "int"
+   },
+   {
+    "name": "enableSearch",
+    "type": "bool"
+   },
+   {
+    "name": "systemPrompt",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2ModelQuery": {
+  "name": "apiV2ModelQuery",
+  "returns": "a single AI model's text answer to a prompt, from the one of Grok/Gemini/Claude/OpenAI you pick",
+  "notThis": [
+   {
+    "tool": "apiV2AllModelsQuery",
+    "why": "fans the same prompt out to all four for comparison"
+   }
+  ],
+  "params": [
+   {
+    "name": "model",
+    "type": "str",
+    "enum": [
+     "grok",
+     "gemini",
+     "claude",
+     "openai"
+    ],
+    "required": true
+   },
+   {
+    "name": "prompt",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "temperature",
+    "type": "float"
+   },
+   {
+    "name": "maxTokens",
+    "type": "int"
+   },
+   {
+    "name": "enableSearch",
+    "type": "bool"
+   },
+   {
+    "name": "systemPrompt",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2BootiesGlovesScorecard": {
+  "name": "apiV2BootiesGlovesScorecard",
+  "returns": "weekly booties/gloves PPE compliance rates aggregated per service partner, one row per SP per week",
+  "notThis": [
+   {
+    "tool": "apiV2BootiesGlovesDetailScorecard",
+    "why": "row-level photo/event records behind the score"
+   }
+  ],
+  "params": [
+   {
+    "name": "week_starting_date",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_from",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_to",
+    "type": "str"
+   },
+   {
+    "name": "current_week_only",
+    "type": "bool"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "dict"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2BootiesGlovesDetailScorecard": {
+  "name": "apiV2BootiesGlovesDetailScorecard",
+  "returns": "individual booties/gloves photo-compliance events per delivery date, one row per checked stop/photo",
+  "notThis": [
+   {
+    "tool": "apiV2BootiesGlovesScorecard",
+    "why": "weekly per-partner compliance summary"
+   }
+  ],
+  "params": [
+   {
+    "name": "event_date_from",
+    "type": "str"
+   },
+   {
+    "name": "event_date_to",
+    "type": "str"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "dict"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2EdemandScorecard": {
+  "name": "apiV2EdemandScorecard",
+  "returns": "eDemand% and order-fulfillment metrics per fulfillment center, aggregated one row per FC per week (Monday-anchored)",
+  "notThis": [
+   {
+    "tool": "apiV2EdemandDetailScorecard",
+    "why": "individual eDemand event rows behind the rollup"
+   }
+  ],
+  "params": [
+   {
+    "name": "week_starting_date",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_from",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_to",
+    "type": "str"
+   },
+   {
+    "name": "current_week_only",
+    "type": "bool"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2EdemandDetailScorecard": {
+  "name": "apiV2EdemandDetailScorecard",
+  "returns": "row-level eDemand records dated by event day, one row per underlying order/event rather than any average",
+  "notThis": [
+   {
+    "tool": "apiV2EdemandScorecard",
+    "why": "per-FC weekly eDemand% rollup"
+   }
+  ],
+  "params": [
+   {
+    "name": "event_date_from",
+    "type": "str"
+   },
+   {
+    "name": "event_date_to",
+    "type": "str"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2NpsScorecard": {
+  "name": "apiV2NpsScorecard",
+  "returns": "Net Promoter Score per service provider, one aggregated row per SP per week (promoters/detractors/score rollup)",
+  "notThis": [
+   {
+    "tool": "apiV2NpsDetailScorecard",
+    "why": "individual survey responses behind the score"
+   }
+  ],
+  "params": [
+   {
+    "name": "week_starting_date",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_from",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_to",
+    "type": "str"
+   },
+   {
+    "name": "current_week_only",
+    "type": "bool"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "dict"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2NpsDetailScorecard": {
+  "name": "apiV2NpsDetailScorecard",
+  "returns": "individual customer NPS survey responses, one row per survey with its score, event date and resource/SP attribution",
+  "notThis": [
+   {
+    "tool": "apiV2NpsScorecard",
+    "why": "weekly per-SP NPS rollup"
+   }
+  ],
+  "params": [
+   {
+    "name": "event_date_from",
+    "type": "str"
+   },
+   {
+    "name": "event_date_to",
+    "type": "str"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "dict"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2TimelyResourceScorecard": {
+  "name": "apiV2TimelyResourceScorecard",
+  "returns": "timely-resource (on-time labor/resource availability) metrics aggregated per fulfillment center per ISO week, paged rows",
+  "notThis": [
+   {
+    "tool": "apiV2TimelyResourceDetailScorecard",
+    "why": "individual order rows behind the metric"
+   }
+  ],
+  "params": [
+   {
+    "name": "week_starting_date",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_from",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_to",
+    "type": "str"
+   },
+   {
+    "name": "current_week_only",
+    "type": "bool"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "dict"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2TimelyResourceDetailScorecard": {
+  "name": "apiV2TimelyResourceDetailScorecard",
+  "returns": "one row per scheduled order feeding the timely-resource measure, with scheduling dates and FC, filtered by scheduled_on window",
+  "notThis": [
+   {
+    "tool": "apiV2TimelyResourceScorecard",
+    "why": "weekly per-FC totals"
+   }
+  ],
+  "params": [
+   {
+    "name": "event_date_from",
+    "type": "str"
+   },
+   {
+    "name": "event_date_to",
+    "type": "str"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "dict"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2RevenueDetailsAccessorial": {
+  "name": "apiV2RevenueDetailsAccessorial",
+  "returns": "line-level accessorial charge revenue (fuel surcharge, detention, liftgate etc.) per invoice as a bulk warehouse-sync feed, optionally streamed to CSV or reduced to schema/row-count",
+  "params": [
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   },
+   {
+    "name": "csv_mode",
+    "type": "bool"
+   },
+   {
+    "name": "csv_path",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2RevenueSummaryAccessorial": {
+  "name": "apiV2RevenueSummaryAccessorial",
+  "returns": "accessorial charge revenue totalled by year for warehouse sync, optionally streamed to CSV or reduced to schema/row-count",
+  "params": [
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   },
+   {
+    "name": "csv_mode",
+    "type": "bool"
+   },
+   {
+    "name": "csv_path",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2BlobWithGeminiAnalyze": {
+  "name": "apiV2BlobWithGeminiAnalyze",
+  "returns": "Gemini's reading of one stored file — image, audio, document or code — from Azure Blob or an HTTPS URL, as free-text findings against your prompt",
+  "params": [
+   {
+    "name": "blob_container",
+    "type": "str"
+   },
+   {
+    "name": "blob_name",
+    "type": "str"
+   },
+   {
+    "name": "external_url",
+    "type": "str"
+   },
+   {
+    "name": "analysis_type",
+    "type": "str",
+    "enum": [
+     "vision",
+     "audio",
+     "document",
+     "code_execution"
+    ]
+   },
+   {
+    "name": "prompt",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "auto_cleanup",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2ConsolidationAnalyze": {
+  "name": "apiV2ConsolidationAnalyze",
+  "returns": "shipments grouped by destination with recommended consolidation opportunities and truck-fit implications",
+  "params": [
+   {
+    "name": "shipments",
+    "type": "list",
+    "required": true
+   },
+   {
+    "name": "truckSpecs",
+    "type": "dict"
+   }
+  ]
+ },
+ "apiV2DataWithGeminiAnalyze": {
+  "name": "apiV2DataWithGeminiAnalyze",
+  "returns": "findings, synthesis or structured output from a large JSON payload you supply, produced by Gemini per your instructions",
+  "params": [
+   {
+    "name": "data",
+    "type": "Any",
+    "required": true
+   },
+   {
+    "name": "analysis_instructions",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "output_schema",
+    "type": "Any"
+   },
+   {
+    "name": "context",
+    "type": "str"
+   },
+   {
+    "name": "max_output_tokens",
+    "type": "int"
+   }
+  ]
+ },
+ "apiV2UrlsWithContextAnalyze": {
+  "name": "apiV2UrlsWithContextAnalyze",
+  "returns": "extracted facts and answers pulled from the live content of specific web pages you name",
+  "params": [
+   {
+    "name": "urls",
+    "type": "list",
+    "required": true
+   },
+   {
+    "name": "analysis_goal",
+    "type": "str",
+    "required": true
+   }
+  ]
+ },
+ "apiV2ToArticleAppend": {
+  "name": "apiV2ToArticleAppend",
+  "returns": "confirmation of a new section added to the end of a knowledge base article, leaving existing text intact",
+  "needs": [
+   "apiV2KnowledgeBaseSearch",
+   "apiV2ArticlesByTagBrowse"
+  ],
+  "params": [
+   {
+    "name": "article_id",
+    "type": "Any",
+    "required": true
+   },
+   {
+    "name": "section_title",
+    "type": "str"
+   },
+   {
+    "name": "content",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "append_reason",
+    "type": "str"
+   },
+   {
+    "name": "confidence",
+    "type": "float"
+   }
+  ]
+ },
+ "apiV2SummaryAr": {
+  "name": "apiV2SummaryAr",
+  "returns": "accounts receivable aging buckets by customer/invoice (what is owed and how overdue) for warehouse sync, filterable by invoice or added date",
+  "params": [
+   {
+    "name": "date_column",
+    "type": "str",
+    "enum": [
+     "invoice_date",
+     "date_added"
+    ]
+   },
+   {
+    "name": "start_date",
+    "type": "str"
+   },
+   {
+    "name": "end_date",
+    "type": "str"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2GeocodeBatch": {
+  "name": "apiV2GeocodeBatch",
+  "returns": "latitude/longitude and normalized address for up to 100 addresses at once",
+  "supersetOf": [
+   "apiV2AddressGeocode"
+  ],
+  "params": [
+   {
+    "name": "addresses",
+    "type": "list",
+    "required": true
+   }
+  ]
+ },
+ "apiV2ArticlesByTagBrowse": {
+  "name": "apiV2ArticlesByTagBrowse",
+  "returns": "knowledge base articles carrying a given tag, listed page by page",
+  "params": [
+   {
+    "name": "tag",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "include_inactive",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2DistanceMatrixCalculate": {
+  "name": "apiV2DistanceMatrixCalculate",
+  "returns": "driving distance and travel time for every origin-destination pair in a grid of locations",
+  "params": [
+   {
+    "name": "origins",
+    "type": "list",
+    "required": true
+   },
+   {
+    "name": "destinations",
+    "type": "list",
+    "required": true
+   }
+  ]
+ },
+ "apiV2FuelCostCalculate": {
+  "name": "apiV2FuelCostCalculate",
+  "returns": "dollar fuel cost for a trip derived from miles, truck MPG and live EIA diesel prices for the state",
+  "supersetOf": [
+   "apiV2DieselPriceGet"
+  ],
+  "params": [
+   {
+    "name": "distanceMiles",
+    "type": "float",
+    "required": true
+   },
+   {
+    "name": "mpg",
+    "type": "float"
+   },
+   {
+    "name": "state",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2RouteDistanceCalculate": {
+  "name": "apiV2RouteDistanceCalculate",
+  "returns": "driving miles and drive time for one origin-destination pair, plain numbers",
+  "needs": [
+   "?origin"
+  ],
+  "params": [
+   {
+    "name": "origin",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "destination",
+    "type": "str",
+    "required": true
+   }
+  ]
+ },
+ "apiV2TripCostCalculate": {
+  "name": "apiV2TripCostCalculate",
+  "returns": "dollar breakdown of a haul: fuel, driver time/pay, per-mile and total operating cost for a given distance and load size",
+  "supersetOf": [
+   "apiV2FuelCostCalculate"
+  ],
+  "params": [
+   {
+    "name": "distanceMiles",
+    "type": "float",
+    "required": true
+   },
+   {
+    "name": "durationHours",
+    "type": "float",
+    "required": true
+   },
+   {
+    "name": "cubicFeet",
+    "type": "float"
+   },
+   {
+    "name": "truckSpecs",
+    "type": "dict"
+   }
+  ]
+ },
+ "apiV2OrderCancel": {
+  "name": "apiV2OrderCancel",
+  "returns": "cancellation confirmation and resulting status for one shipment",
+  "needs": [
+   "?trackingNumber"
+  ],
+  "params": [
+   {
+    "name": "trackingNumber",
+    "type": "Any",
+    "required": true
+   }
+  ]
+ },
+ "apiV2TaskExecuteCoding": {
+  "name": "apiV2TaskExecuteCoding",
+  "returns": "acknowledgement and task ID for a queued multi-model code-writing job",
+  "params": [
+   {
+    "name": "task",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "inputFiles",
+    "type": "list"
+   },
+   {
+    "name": "outputDir",
+    "type": "str"
+   },
+   {
+    "name": "options",
+    "type": "dict"
+   }
+  ]
+ },
+ "apiV2TaskResultCoding": {
+  "name": "apiV2TaskResultCoding",
+  "returns": "finished code, generated files and model output of a coding job",
+  "supersetOf": [
+   "apiV2TaskStatusCoding"
+  ],
+  "params": [
+   {
+    "name": "taskId",
+    "type": "Any",
+    "required": true
+   }
+  ]
+ },
+ "apiV2TaskStatusCoding": {
+  "name": "apiV2TaskStatusCoding",
+  "returns": "progress state, stage and completion flag of a coding job, no output artifacts",
+  "params": [
+   {
+    "name": "taskId",
+    "type": "Any",
+    "required": true
+   }
+  ]
+ },
+ "apiV2RatesCompare": {
+  "name": "apiV2RatesCompare",
+  "returns": "side-by-side spot market rate vs contracted rate for one lane with the cheaper option flagged",
+  "supersetOf": [
+   "apiV2SpotRateGet",
+   "apiV2ContractRateGet"
+  ],
+  "params": [
+   {
+    "name": "originPostalCode",
+    "type": "str"
+   },
+   {
+    "name": "originCity",
+    "type": "str"
+   },
+   {
+    "name": "originState",
+    "type": "str"
+   },
+   {
+    "name": "destinationPostalCode",
+    "type": "str"
+   },
+   {
+    "name": "destinationCity",
+    "type": "str"
+   },
+   {
+    "name": "destinationState",
+    "type": "str"
+   },
+   {
+    "name": "equipmentType",
+    "type": "str",
+    "enum": [
+     "VAN",
+     "REEFER",
+     "FLATBED"
+    ]
+   }
+  ]
+ },
+ "apiV2LargeTextCompress": {
+  "name": "apiV2LargeTextCompress",
+  "returns": "a shortened version of oversized text that keeps the key facts, sized to a token budget",
+  "params": [
+   {
+    "name": "text",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "target_token_count",
+    "type": "int"
+   },
+   {
+    "name": "focus",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2DistanceMatrixCompute": {
+  "name": "apiV2DistanceMatrixCompute",
+  "returns": "grid of distance and travel time for every origin-to-destination combination, traffic-aware by mode",
+  "supersetOf": [
+   "apiV2RouteDistanceCalculate"
+  ],
+  "params": [
+   {
+    "name": "origins",
+    "type": "list",
+    "required": true
+   },
+   {
+    "name": "destinations",
+    "type": "list",
+    "required": true
+   },
+   {
+    "name": "travelMode",
+    "type": "str",
+    "enum": [
+     "DRIVE",
+     "BICYCLE",
+     "WALK",
+     "TWO_WHEELER",
+     "TRANSIT"
+    ]
+   },
+   {
+    "name": "routingPreference",
+    "type": "str",
+    "enum": [
+     "TRAFFIC_UNAWARE",
+     "TRAFFIC_AWARE",
+     "TRAFFIC_AWARE_OPTIMAL"
+    ]
+   }
+  ]
+ },
+ "apiV2RouteCompute": {
+  "name": "apiV2RouteCompute",
+  "returns": "a single driving route: legs, distance, ETA, optional waypoint ordering, toll/avoid modifiers and encoded polyline for mapping",
+  "supersetOf": [
+   "apiV2RouteDistanceCalculate"
+  ],
+  "params": [
+   {
+    "name": "origin",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "destination",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "travelMode",
+    "type": "str",
+    "enum": [
+     "DRIVE",
+     "BICYCLE",
+     "WALK",
+     "TWO_WHEELER",
+     "TRANSIT"
+    ]
+   },
+   {
+    "name": "routingPreference",
+    "type": "str",
+    "enum": [
+     "TRAFFIC_UNAWARE",
+     "TRAFFIC_AWARE",
+     "TRAFFIC_AWARE_OPTIMAL"
+    ]
+   },
+   {
+    "name": "intermediates",
+    "type": "list"
+   },
+   {
+    "name": "optimizeWaypointOrder",
+    "type": "bool"
+   },
+   {
+    "name": "routeModifiers",
+    "type": "dict"
+   },
+   {
+    "name": "includePolyline",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2GoogleDriveConnect": {
+  "name": "apiV2GoogleDriveConnect",
+  "returns": "OAuth authorization link/result for linking a Google Drive account",
+  "params": [
+   {
+    "name": "scopes",
+    "type": "list"
+   }
+  ]
+ },
+ "apiV2ArticleCreate": {
+  "name": "apiV2ArticleCreate",
+  "returns": "confirmation and ID of a newly written knowledge base article",
+  "params": [
+   {
+    "name": "subject",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "body",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "tags",
+    "type": "str"
+   },
+   {
+    "name": "confidence",
+    "type": "Any"
+   },
+   {
+    "name": "source_context",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2OrderNoteCreate": {
+  "name": "apiV2OrderNoteCreate",
+  "returns": "confirmation of a note written onto an order (code, text, job type, customer/partner visibility flags)",
+  "needs": [
+   "?trackingNumber"
+  ],
+  "params": [
+   {
+    "name": "trackingNumber",
+    "type": "Any",
+    "required": true
+   },
+   {
+    "name": "noteCode",
+    "type": "Any",
+    "required": true
+   },
+   {
+    "name": "note",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "jobType",
+    "type": "Any"
+   },
+   {
+    "name": "isVisibleToCustomer",
+    "type": "bool"
+   },
+   {
+    "name": "isVisibleToServicePartner",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2ConsultationDeep": {
+  "name": "apiV2ConsultationDeep",
+  "returns": "a moderated multi-model debate on a topic: per-model positions, challenges, convergence/consensus verdict and optional full transcript",
+  "params": [
+   {
+    "name": "topic",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "preset",
+    "type": "str",
+    "enum": [
+     "quick",
+     "standard",
+     "strategic",
+     "technical",
+     "risk_assessment",
+     "creative",
+     "deep_dive"
+    ]
+   },
+   {
+    "name": "debateStyle",
+    "type": "str",
+    "enum": [
+     "aggressive_challenge",
+     "collaborative_building",
+     "balanced_debate",
+     "consensus_seeking",
+     "devils_advocate"
+    ]
+   },
+   {
+    "name": "productivityLevel",
+    "type": "str",
+    "enum": [
+     "quick",
+     "standard",
+     "deep_dive",
+     "exhaustive"
+    ]
+   },
+   {
+    "name": "collaborationPattern",
+    "type": "str",
+    "enum": [
+     "iterative_building",
+     "parallel_exploration",
+     "structured_debate",
+     "round_robin_refinement"
+    ]
+   },
+   {
+    "name": "agreementExpectation",
+    "type": "str",
+    "enum": [
+     "high_agreement",
+     "moderate_disagreement",
+     "high_disagreement",
+     "natural"
+    ]
+   },
+   {
+    "name": "focusArea",
+    "type": "str",
+    "enum": [
+     "strategic_analysis",
+     "technical_deep_dive",
+     "risk_assessment",
+     "creative_brainstorming",
+     "problem_solving"
+    ]
+   },
+   {
+    "name": "externalResources",
+    "type": "str",
+    "enum": [
+     "always_search",
+     "initial_research_only",
+     "no_external_resources",
+     "citation_heavy"
+    ]
+   },
+   {
+    "name": "customRounds",
+    "type": "int"
+   },
+   {
+    "name": "responseLength",
+    "type": "str",
+    "enum": [
+     "short",
+     "medium",
+     "long"
+    ]
+   },
+   {
+    "name": "enableSearch",
+    "type": "bool"
+   },
+   {
+    "name": "maxTokens",
+    "type": "int"
+   },
+   {
+    "name": "temperature",
+    "type": "float"
+   },
+   {
+    "name": "includeTranscript",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2ResearchDeep": {
+  "name": "apiV2ResearchDeep",
+  "returns": "a researched answer to a question with synthesized findings and cited web/academic/financial sources",
+  "params": [
+   {
+    "name": "query",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "mode",
+    "type": "str",
+    "enum": [
+     "quick",
+     "comprehensive",
+     "academic",
+     "financial"
+    ]
+   },
+   {
+    "name": "depth",
+    "type": "int",
+    "enum": [
+     "1",
+     "2",
+     "3"
+    ]
+   },
+   {
+    "name": "sources",
+    "type": "list"
+   },
+   {
+    "name": "focusAreas",
+    "type": "list"
+   },
+   {
+    "name": "excludeSources",
+    "type": "list"
+   },
+   {
+    "name": "timeRange",
+    "type": "str"
+   },
+   {
+    "name": "maxSources",
+    "type": "int"
+   },
+   {
+    "name": "location",
+    "type": "str"
+   },
+   {
+    "name": "geoResearch",
+    "type": "dict"
+   },
+   {
+    "name": "_meta",
+    "type": "dict"
+   }
+  ]
+ },
+ "apiV2AllTypesDemo": {
+  "name": "apiV2AllTypesDemo",
+  "returns": "sample/fake records illustrating every supported field and data type, for testing rendering — no real business data"
+ },
+ "apiV2GoogleDriveDisconnect": {
+  "name": "apiV2GoogleDriveDisconnect",
+  "returns": "confirmation that the linked Google Drive account has been unlinked"
+ },
+ "apiV2ApiDiscover": {
+  "name": "apiV2ApiDiscover",
+  "returns": "a profile of a third-party API found at a URL: endpoints, parameters, auth scheme and live connectivity/auth test results",
+  "needs": [
+   "?url"
+  ],
+  "params": [
+   {
+    "name": "url",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "apiKey",
+    "type": "str"
+   },
+   {
+    "name": "authType",
+    "type": "str",
+    "enum": [
+     "bearer",
+     "basic",
+     "api_key_header",
+     "api_key_query",
+     "none"
+    ]
+   },
+   {
+    "name": "authHeaderName",
+    "type": "str"
+   },
+   {
+    "name": "authParamName",
+    "type": "str"
+   },
+   {
+    "name": "skipRegistry",
+    "type": "bool"
+   },
+   {
+    "name": "skipConnectivityTest",
+    "type": "bool"
+   },
+   {
+    "name": "offloadToPrometheus",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2ReportExecute": {
+  "name": "apiV2ReportExecute",
+  "returns": "the result rows of a saved report run with your parameter values",
+  "params": [
+   {
+    "name": "reportId",
+    "type": "Any",
+    "required": true
+   },
+   {
+    "name": "parameters",
+    "type": "dict"
+   }
+  ]
+ },
+ "apiV2StructuredDataExtract": {
+  "name": "apiV2StructuredDataExtract",
+  "returns": "fields pulled out of free text and returned as JSON matching the schema you defined",
+  "params": [
+   {
+    "name": "text",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "extraction_schema",
+    "type": "dict",
+    "required": true
+   },
+   {
+    "name": "instructions",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2CoverageByZipcodeFcp": {
+  "name": "apiV2CoverageByZipcodeFcp",
+  "returns": "which zipcodes each FCP service provider covers, as a full sync dump (optionally just the schema or a row count)",
+  "params": [
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2PayChartsFcp": {
+  "name": "apiV2PayChartsFcp",
+  "returns": "FCP pay-rate bands per service provider, paged with filters for warehouse sync (or schema/count only)",
+  "params": [
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   },
+   {
+    "name": "offset",
+    "type": "Any"
+   }
+  ]
+ },
+ "apiV2OptimalTruckFind": {
+  "name": "apiV2OptimalTruckFind",
+  "returns": "the smallest truck from your fleet list that fits the given shipments, with fit/capacity reasoning",
+  "params": [
+   {
+    "name": "shipments",
+    "type": "list",
+    "required": true
+   },
+   {
+    "name": "availableTrucks",
+    "type": "list"
+   }
+  ]
+ },
+ "apiV2AnalysisFreight": {
+  "name": "apiV2AnalysisFreight",
+  "returns": "freight pricing and lane rate analysis: cost/rate breakdowns, load plans and recommendations from a natural-language question over lanes, shipments or warehouse tables, written as raw analysis output files",
+  "params": [
+   {
+    "name": "query",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "lanes",
+    "type": "list"
+   },
+   {
+    "name": "shipments",
+    "type": "list"
+   },
+   {
+    "name": "duckdbSource",
+    "type": "str"
+   },
+   {
+    "name": "viewSource",
+    "type": "str"
+   },
+   {
+    "name": "primaryTable",
+    "type": "str"
+   },
+   {
+    "name": "referenceTables",
+    "type": "list"
+   },
+   {
+    "name": "mode",
+    "type": "str",
+    "enum": [
+     "auto",
+     "full_analysis",
+     "pricing"
+    ]
+   },
+   {
+    "name": "options",
+    "type": "dict"
+   },
+   {
+    "name": "outputDir",
+    "type": "str"
+   },
+   {
+    "name": "_meta",
+    "type": "dict"
+   }
+  ]
+ },
+ "apiV2ConnectionStatusGdrive": {
+  "name": "apiV2ConnectionStatusGdrive",
+  "returns": "whether a Google Drive account is linked, with the connected account and granted scopes"
+ },
+ "apiV2DownloadFileGdrive": {
+  "name": "apiV2DownloadFileGdrive",
+  "returns": "the actual bytes/text of one Drive file, returned inline, base64-encoded, or saved to a shared output path, converting Google Docs/Sheets/Slides to the requested format",
+  "params": [
+   {
+    "name": "file_id",
+    "type": "Any",
+    "required": true
+   },
+   {
+    "name": "mode",
+    "type": "str",
+    "enum": [
+     "inline",
+     "base64",
+     "file"
+    ]
+   },
+   {
+    "name": "export_format",
+    "type": "str",
+    "enum": [
+     "auto",
+     "text",
+     "html",
+     "pdf",
+     "docx",
+     "xlsx",
+     "csv",
+     "pptx"
+    ]
+   },
+   {
+    "name": "file_name",
+    "type": "str"
+   },
+   {
+    "name": "output_dir",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2FromLinkGdrive": {
+  "name": "apiV2FromLinkGdrive",
+  "returns": "the file identified by a pasted Drive/Docs/Sheets/Slides URL: its ID and metadata, plus its content if asked",
+  "needs": [
+   "?url"
+  ],
+  "params": [
+   {
+    "name": "url",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "include_content",
+    "type": "bool"
+   },
+   {
+    "name": "export_format",
+    "type": "str",
+    "enum": [
+     "text",
+     "html",
+     "pdf",
+     "docx",
+     "xlsx",
+     "csv",
+     "auto"
+    ]
+   }
+  ]
+ },
+ "apiV2ListFilesGdrive": {
+  "name": "apiV2ListFilesGdrive",
+  "returns": "a directory listing of files and folders in one Drive folder: names, IDs, types, timestamps, sorted and page-limited",
+  "params": [
+   {
+    "name": "folder_id",
+    "type": "Any"
+   },
+   {
+    "name": "page_size",
+    "type": "int"
+   },
+   {
+    "name": "file_type",
+    "type": "str",
+    "enum": [
+     "all",
+     "folder",
+     "document",
+     "spreadsheet",
+     "presentation",
+     "pdf",
+     "image"
+    ]
+   },
+   {
+    "name": "order_by",
+    "type": "str",
+    "enum": [
+     "name",
+     "modifiedTime",
+     "createdTime",
+     "folder"
+    ]
+   }
+  ]
+ },
+ "apiV2ReadFileGdrive": {
+  "name": "apiV2ReadFileGdrive",
+  "returns": "full metadata for one Drive file — name, MIME type, size, owners, timestamps — and optionally its text content",
+  "params": [
+   {
+    "name": "file_id",
+    "type": "Any",
+    "required": true
+   },
+   {
+    "name": "include_content",
+    "type": "bool"
+   },
+   {
+    "name": "export_format",
+    "type": "str",
+    "enum": [
+     "text",
+     "html",
+     "pdf",
+     "docx",
+     "xlsx",
+     "csv"
+    ]
+   }
+  ]
+ },
+ "apiV2SearchGdrive": {
+  "name": "apiV2SearchGdrive",
+  "returns": "Drive files matching a query on name, full-text content or properties, filtered by type, folder and modified date, as a list of file IDs and metadata",
+  "supersetOf": [
+   "apiV2SearchByNameGdrive"
+  ],
+  "params": [
+   {
+    "name": "query",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "file_type",
+    "type": "str",
+    "enum": [
+     "all",
+     "folder",
+     "document",
+     "spreadsheet",
+     "presentation",
+     "pdf",
+     "image"
+    ]
+   },
+   {
+    "name": "in_folder",
+    "type": "Any"
+   },
+   {
+    "name": "modified_after",
+    "type": "str"
+   },
+   {
+    "name": "page_size",
+    "type": "int"
+   }
+  ]
+ },
+ "apiV2SearchByNameGdrive": {
+  "name": "apiV2SearchByNameGdrive",
+  "returns": "Drive files whose filename contains, starts with or exactly equals a string, with IDs and metadata",
+  "params": [
+   {
+    "name": "name",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "match_type",
+    "type": "str",
+    "enum": [
+     "contains",
+     "starts_with",
+     "exact"
+    ]
+   },
+   {
+    "name": "file_type",
+    "type": "str",
+    "enum": [
+     "all",
+     "folder",
+     "document",
+     "spreadsheet",
+     "presentation",
+     "pdf",
+     "image"
+    ]
+   },
+   {
+    "name": "case_sensitive",
+    "type": "bool"
+   },
+   {
+    "name": "page_size",
+    "type": "int"
+   }
+  ]
+ },
+ "apiV2SheetsAppendRowsGdrive": {
+  "name": "apiV2SheetsAppendRowsGdrive",
+  "returns": "w confirmation of rows added to the end of a sheet or table: updated range, row and cell counts, optionally the written values",
+  "params": [
+   {
+    "name": "spreadsheet_id",
+    "type": "Any",
+    "required": true
+   },
+   {
+    "name": "range",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "values",
+    "type": "list",
+    "required": true
+   },
+   {
+    "name": "value_input_option",
+    "type": "str",
+    "enum": [
+     "RAW",
+     "USER_ENTERED"
+    ]
+   },
+   {
+    "name": "insert_data_option",
+    "type": "str",
+    "enum": [
+     "OVERWRITE",
+     "INSERT_ROWS"
+    ]
+   },
+   {
+    "name": "include_values_in_response",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2SheetsBatchUpdateGdrive": {
+  "name": "apiV2SheetsBatchUpdateGdrive",
+  "returns": "w results of structural spreadsheet operations — creating/deleting/renaming tabs, formatting, merges, charts, conditional rules — with replies per request and optionally the whole spreadsheet",
+  "params": [
+   {
+    "name": "spreadsheet_id",
+    "type": "Any",
+    "required": true
+   },
+   {
+    "name": "requests",
+    "type": "list",
+    "required": true
+   },
+   {
+    "name": "include_spreadsheet_in_response",
+    "type": "bool"
+   },
+   {
+    "name": "response_ranges",
+    "type": "list"
+   },
+   {
+    "name": "response_include_grid_data",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2SheetsGetRangeGdrive": {
+  "name": "apiV2SheetsGetRangeGdrive",
+  "returns": "r cell values from an A1-notation range of a spreadsheet, as formatted text, raw values or formulas, row- or column-major",
+  "params": [
+   {
+    "name": "spreadsheet_id",
+    "type": "Any",
+    "required": true
+   },
+   {
+    "name": "range",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "major_dimension",
+    "type": "str",
+    "enum": [
+     "ROWS",
+     "COLUMNS"
+    ]
+   },
+   {
+    "name": "value_render_option",
+    "type": "str",
+    "enum": [
+     "FORMATTED_VALUE",
+     "UNFORMATTED_VALUE",
+     "FORMULA"
+    ]
+   },
+   {
+    "name": "date_time_render_option",
+    "type": "str",
+    "enum": [
+     "SERIAL_NUMBER",
+     "FORMATTED_STRING"
+    ]
+   }
+  ]
+ },
+ "apiV2SheetsListTabsGdrive": {
+  "name": "apiV2SheetsListTabsGdrive",
+  "returns": "the tabs inside a spreadsheet: sheet names, sheet IDs, index, grid dimensions and properties",
+  "needs": [
+   "?spreadsheet_id"
+  ],
+  "params": [
+   {
+    "name": "spreadsheet_id",
+    "type": "Any",
+    "required": true
+   }
+  ]
+ },
+ "apiV2SheetsUpdateRangeGdrive": {
+  "name": "apiV2SheetsUpdateRangeGdrive",
+  "returns": "confirmation of cells overwritten in a spreadsheet range (updated row/column counts, optionally the new values)",
+  "params": [
+   {
+    "name": "spreadsheet_id",
+    "type": "Any",
+    "required": true
+   },
+   {
+    "name": "range",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "values",
+    "type": "list",
+    "required": true
+   },
+   {
+    "name": "value_input_option",
+    "type": "str",
+    "enum": [
+     "RAW",
+     "USER_ENTERED"
+    ]
+   },
+   {
+    "name": "include_values_in_response",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2UploadFileGdrive": {
+  "name": "apiV2UploadFileGdrive",
+  "returns": "the new Drive file's ID, name, link and type after creating it from inline text, base64 bytes or a local path (including native Docs/Sheets/Slides)",
+  "params": [
+   {
+    "name": "file_name",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "folder_id",
+    "type": "Any"
+   },
+   {
+    "name": "mime_type",
+    "type": "str"
+   },
+   {
+    "name": "google_type",
+    "type": "str",
+    "enum": [
+     "document",
+     "spreadsheet",
+     "presentation"
+    ]
+   },
+   {
+    "name": "source",
+    "type": "str",
+    "enum": [
+     "text",
+     "base64",
+     "file_path"
+    ]
+   },
+   {
+    "name": "text_content",
+    "type": "str"
+   },
+   {
+    "name": "base64_content",
+    "type": "str"
+   },
+   {
+    "name": "file_path",
+    "type": "str"
+   },
+   {
+    "name": "description",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2AddressGeocode": {
+  "name": "apiV2AddressGeocode",
+  "returns": "latitude/longitude, formatted address and address components for one written address",
+  "params": [
+   {
+    "name": "address",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "region",
+    "type": "str"
+   },
+   {
+    "name": "language",
+    "type": "str"
+   },
+   {
+    "name": "componentFilters",
+    "type": "dict"
+   }
+  ]
+ },
+ "apiV2ArticleByIdGet": {
+  "name": "apiV2ArticleByIdGet",
+  "returns": "full body text of one knowledge base article, plus tags and AI metadata if asked",
+  "params": [
+   {
+    "name": "article_id",
+    "type": "Any",
+    "required": true
+   },
+   {
+    "name": "include_metadata",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2CallRecordingsGet": {
+  "name": "apiV2CallRecordingsGet",
+  "returns": "phone call recordings (audio links, timestamps, participants) logged against one order",
+  "needs": [
+   "?orderId"
+  ],
+  "params": [
+   {
+    "name": "orderId",
+    "type": "Any",
+    "required": true
+   }
+  ]
+ },
+ "apiV2ContractRateGet": {
+  "name": "apiV2ContractRateGet",
+  "returns": "52-week DAT contract freight rate for an origin-destination lane by equipment type",
+  "params": [
+   {
+    "name": "originPostalCode",
+    "type": "str"
+   },
+   {
+    "name": "originCity",
+    "type": "str"
+   },
+   {
+    "name": "originState",
+    "type": "str"
+   },
+   {
+    "name": "destinationPostalCode",
+    "type": "str"
+   },
+   {
+    "name": "destinationCity",
+    "type": "str"
+   },
+   {
+    "name": "destinationState",
+    "type": "str"
+   },
+   {
+    "name": "equipmentType",
+    "type": "str",
+    "enum": [
+     "VAN",
+     "REEFER",
+     "FLATBED"
+    ]
+   }
+  ]
+ },
+ "apiV2CustomerExceptionsGet": {
+  "name": "apiV2CustomerExceptionsGet",
+  "returns": "counts and breakdown of service exceptions/problem orders for one customer over a lookback window",
+  "needs": [
+   "?partnerId"
+  ],
+  "params": [
+   {
+    "name": "partnerId",
+    "type": "Any",
+    "required": true
+   },
+   {
+    "name": "days",
+    "type": "int"
+   }
+  ]
+ },
+ "apiV2CustomerScorecardGet": {
+  "name": "apiV2CustomerScorecardGet",
+  "returns": "customer performance dashboard for a date range: volumes, on-time, damages, NPS and other KPIs per partner",
+  "needs": [
+   "?partnerId"
+  ],
+  "params": [
+   {
+    "name": "startDate",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "endDate",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "partnerId",
+    "type": "Any"
+   },
+   {
+    "name": "partnerIds",
+    "type": "list"
+   }
+  ]
+ },
+ "apiV2DieselPriceGet": {
+  "name": "apiV2DieselPriceGet",
+  "returns": "recent U.S. diesel fuel price points, nationally or for one state",
+  "params": [
+   {
+    "name": "state",
+    "type": "str"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   }
+  ]
+ },
+ "apiV2DockLocationGet": {
+  "name": "apiV2DockLocationGet",
+  "returns": "the final mile dock/facility serving a delivery zip, with its address and coverage info",
+  "params": [
+   {
+    "name": "zipCode",
+    "type": "str",
+    "required": true
+   }
+  ]
+ },
+ "apiV2DocumentGet": {
+  "name": "apiV2DocumentGet",
+  "returns": "download URLs for an order's printable paperwork — shipping label, BOL, web BOL, thermal label or ZPL",
+  "needs": [
+   "?trackingNumber"
+  ],
+  "params": [
+   {
+    "name": "trackingNumber",
+    "type": "Any",
+    "required": true
+   },
+   {
+    "name": "documentType",
+    "type": "str",
+    "enum": [
+     "label",
+     "bol",
+     "web-bol",
+     "thermal-label",
+     "zpl"
+    ]
+   }
+  ]
+ },
+ "apiV2FreightItemsGet": {
+  "name": "apiV2FreightItemsGet",
+  "returns": "the packages/products on an order — descriptions, quantities, weights and dimensions",
+  "needs": [
+   "?trackingNumber"
+  ],
+  "params": [
+   {
+    "name": "trackingNumber",
+    "type": "Any",
+    "required": true
+   }
+  ]
+ },
+ "apiV2LabelDataGet": {
+  "name": "apiV2LabelDataGet",
+  "returns": "electronic shipping-label content for one order (addresses, barcodes, service marks) ready to render a custom label",
+  "needs": [
+   "?trackingNumber"
+  ],
+  "params": [
+   {
+    "name": "trackingNumber",
+    "type": "Any",
+    "required": true
+   }
+  ]
+ },
+ "apiV2OrderTimelineGet": {
+  "name": "apiV2OrderTimelineGet",
+  "returns": "chronological event history of one shipment: movements, status changes, milestones in order",
+  "needs": [
+   "?trackingNumber"
+  ],
+  "params": [
+   {
+    "name": "trackingNumber",
+    "type": "Any",
+    "required": true
+   }
+  ]
+ },
+ "apiV2OrderTrackingGet": {
+  "name": "apiV2OrderTrackingGet",
+  "returns": "current tracking status and EDI scan events (delivery progress, exceptions) for one shipment",
+  "needs": [
+   "?trackingNumber"
+  ],
+  "params": [
+   {
+    "name": "trackingNumber",
+    "type": "Any",
+    "required": true
+   }
+  ]
+ },
+ "apiV2QuoteGet": {
+  "name": "apiV2QuoteGet",
+  "returns": "priced freight quote: linehaul, accessorials, surcharges and total for a lane, service level, weight/cube and declared value",
+  "params": [
+   {
+    "name": "serviceLevel",
+    "type": "str",
+    "enum": [
+     "Unattended",
+     "Threshold",
+     "Room of Choice",
+     "White Glove",
+     "WG Install",
+     "White Glove Assembly",
+     "Dock Delivery",
+     "Outside"
+    ],
+    "required": true
+   },
+   {
+    "name": "cubicFeet",
+    "type": "float",
+    "required": true
+   },
+   {
+    "name": "weight",
+    "type": "float",
+    "required": true
+   },
+   {
+    "name": "originZip",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "destinationZip",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "value",
+    "type": "float"
+   },
+   {
+    "name": "pieceCount",
+    "type": "int"
+   }
+  ]
+ },
+ "apiV2SchedulingOptionsGet": {
+  "name": "apiV2SchedulingOptionsGet",
+  "returns": "bookable delivery date/time slots with resource capacity for a given order and delivery zip",
+  "needs": [
+   "?orderIdentifier"
+  ],
+  "params": [
+   {
+    "name": "orderIdentifier",
+    "type": "Any",
+    "required": true
+   },
+   {
+    "name": "zipCode",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "numberOfResources",
+    "type": "int"
+   }
+  ]
+ },
+ "apiV2SpotRateGet": {
+  "name": "apiV2SpotRateGet",
+  "returns": "DAT market spot rate per mile/total for a lane by equipment type, with forecast horizon",
+  "params": [
+   {
+    "name": "originPostalCode",
+    "type": "str"
+   },
+   {
+    "name": "originCity",
+    "type": "str"
+   },
+   {
+    "name": "originState",
+    "type": "str"
+   },
+   {
+    "name": "destinationPostalCode",
+    "type": "str"
+   },
+   {
+    "name": "destinationCity",
+    "type": "str"
+   },
+   {
+    "name": "destinationState",
+    "type": "str"
+   },
+   {
+    "name": "equipmentType",
+    "type": "str",
+    "enum": [
+     "VAN",
+     "REEFER",
+     "FLATBED"
+    ]
+   },
+   {
+    "name": "forecastPeriod",
+    "type": "str",
+    "enum": [
+     "8DAYS",
+     "35DAYS",
+     "52WEEKS"
+    ]
+   }
+  ]
+ },
+ "apiV2TransitTimeGet": {
+  "name": "apiV2TransitTimeGet",
+  "returns": "expected transit duration in days between two zip codes",
+  "params": [
+   {
+    "name": "fromZip",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "toZip",
+    "type": "str",
+    "required": true
+   }
+  ]
+ },
+ "apiV2PatternsIdentify": {
+  "name": "apiV2PatternsIdentify",
+  "returns": "analytic findings over supplied data: trends, anomalies, clusters or relationships with explanations",
+  "params": [
+   {
+    "name": "text",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "pattern_type",
+    "type": "str",
+    "enum": [
+     "trends",
+     "anomalies",
+     "clusters",
+     "relationships"
+    ]
+   },
+   {
+    "name": "context",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2FinancialJob": {
+  "name": "apiV2FinancialJob",
+  "returns": "residential pickup & delivery job-level financial rows (revenue, cost and invoice dates) for a date range, paged by keyset cursor or streamed to CSV for warehouse loading",
+  "params": [
+   {
+    "name": "date_column",
+    "type": "str",
+    "enum": [
+     "completion_date",
+     "cos_earliest_invoice_date",
+     "cos_latest_invoice_date",
+     "cos_earliest_dl_actual_date"
+    ],
+    "required": true
+   },
+   {
+    "name": "start_date",
+    "type": "str"
+   },
+   {
+    "name": "end_date",
+    "type": "str"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "Any"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   },
+   {
+    "name": "csv_mode",
+    "type": "bool"
+   },
+   {
+    "name": "csv_path",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2ReportsList": {
+  "name": "apiV2ReportsList",
+  "returns": "catalogue of available reports with names, descriptions, parameters and active/favorite flags",
+  "params": [
+   {
+    "name": "activeOnly",
+    "type": "bool"
+   },
+   {
+    "name": "favoritesOnly",
+    "type": "bool"
+   },
+   {
+    "name": "search",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2DeliveriesLovesac": {
+  "name": "apiV2DeliveriesLovesac",
+  "returns": "LoveSac delivery rows straight from the stored procedure, optionally just the column schema or a row count",
+  "params": [
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2SearchNearby": {
+  "name": "apiV2SearchNearby",
+  "returns": "nearby places (businesses, landmarks) around a point with name, address, rating and price level, ranked by prominence or distance",
+  "params": [
+   {
+    "name": "location",
+    "type": "Any",
+    "required": true
+   },
+   {
+    "name": "radius",
+    "type": "int"
+   },
+   {
+    "name": "type",
+    "type": "str"
+   },
+   {
+    "name": "keyword",
+    "type": "str"
+   },
+   {
+    "name": "language",
+    "type": "str"
+   },
+   {
+    "name": "minPrice",
+    "type": "int"
+   },
+   {
+    "name": "maxPrice",
+    "type": "int"
+   },
+   {
+    "name": "openNow",
+    "type": "bool"
+   },
+   {
+    "name": "rankBy",
+    "type": "str",
+    "enum": [
+     "prominence",
+     "distance"
+    ]
+   }
+  ]
+ },
+ "apiV2SurveyNps": {
+  "name": "apiV2SurveyNps",
+  "returns": "NPS survey responses (scores, comments, respondent/order refs) as paged rows for warehouse sync",
+  "params": [
+   {
+    "name": "date_column",
+    "type": "str"
+   },
+   {
+    "name": "start_date",
+    "type": "str"
+   },
+   {
+    "name": "end_date",
+    "type": "str"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   },
+   {
+    "name": "offset",
+    "type": "Any"
+   }
+  ]
+ },
+ "apiV2OrdersNsd": {
+  "name": "apiV2OrdersNsd",
+  "returns": "order-level network summary rows (partner order refs, dates, status) paged by DateAdded window",
+  "params": [
+   {
+    "name": "date_added_from",
+    "type": "str"
+   },
+   {
+    "name": "date_added_to",
+    "type": "str"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "Any"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2OrdersOpen": {
+  "name": "apiV2OrdersOpen",
+  "returns": "every currently open order in the system, written out as a CSV file",
+  "params": [
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "csv_mode",
+    "type": "bool"
+   },
+   {
+    "name": "csv_path",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2LoadOptimize": {
+  "name": "apiV2LoadOptimize",
+  "returns": "truck loading plan for a set of shipments: item placement, cube/weight utilization percentages and loading recommendations",
+  "params": [
+   {
+    "name": "shipments",
+    "type": "list",
+    "required": true
+   },
+   {
+    "name": "truckSpecs",
+    "type": "dict"
+   },
+   {
+    "name": "origin",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2MultiStopRouteOptimize": {
+  "name": "apiV2MultiStopRouteOptimize",
+  "returns": "optimized delivery route across many stops: reordered stop sequence, leg distances and durations from Google Maps",
+  "params": [
+   {
+    "name": "origin",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "destination",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "waypoints",
+    "type": "list",
+    "required": true
+   },
+   {
+    "name": "optimizeOrder",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2WaypointsOptimize": {
+  "name": "apiV2WaypointsOptimize",
+  "returns": "best visiting order for a list of waypoints with travel time/distance savings, per travel mode and optional return to start",
+  "params": [
+   {
+    "name": "start",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "end",
+    "type": "str"
+   },
+   {
+    "name": "waypoints",
+    "type": "list",
+    "required": true
+   },
+   {
+    "name": "travelMode",
+    "type": "str",
+    "enum": [
+     "DRIVE",
+     "BICYCLE",
+     "WALK",
+     "TWO_WHEELER",
+     "TRANSIT"
+    ]
+   },
+   {
+    "name": "roundTrip",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2PathOrder": {
+  "name": "apiV2PathOrder",
+  "returns": "network-planning order path rows: pickup/delivery windows, lanes and activity dates per order, paged or streamed to CSV",
+  "params": [
+   {
+    "name": "date_column",
+    "type": "str",
+    "enum": [
+     "activity_date",
+     "earliest_pickup_date",
+     "latest_delivery_date",
+     "last_refreshed_utc"
+    ]
+   },
+   {
+    "name": "start_date",
+    "type": "str"
+   },
+   {
+    "name": "end_date",
+    "type": "str"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "Any"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   },
+   {
+    "name": "csv_mode",
+    "type": "bool"
+   },
+   {
+    "name": "csv_path",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2PathFinancialOrder": {
+  "name": "apiV2PathFinancialOrder",
+  "returns": "order path rows with financial columns — revenue, cost and margin per lane/leg — paged or streamed to CSV",
+  "supersetOf": [
+   "apiV2PathOrder"
+  ],
+  "params": [
+   {
+    "name": "date_column",
+    "type": "str",
+    "enum": [
+     "activity_date",
+     "earliest_pickup_date",
+     "latest_delivery_date",
+     "last_refreshed_utc"
+    ]
+   },
+   {
+    "name": "start_date",
+    "type": "str"
+   },
+   {
+    "name": "end_date",
+    "type": "str"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "Any"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   },
+   {
+    "name": "csv_mode",
+    "type": "bool"
+   },
+   {
+    "name": "csv_path",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2AutocompletePlace": {
+  "name": "apiV2AutocompletePlace",
+  "returns": "as-you-type place name/address predictions with place IDs for a partial input string",
+  "params": [
+   {
+    "name": "input",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "location",
+    "type": "str"
+   },
+   {
+    "name": "radius",
+    "type": "int"
+   },
+   {
+    "name": "language",
+    "type": "str"
+   },
+   {
+    "name": "types",
+    "type": "list"
+   },
+   {
+    "name": "components",
+    "type": "str"
+   },
+   {
+    "name": "strictBounds",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2UrlProbe": {
+  "name": "apiV2UrlProbe",
+  "returns": "HTTP status code, response headers, redirect chain and timing for a URL, without parsing its content",
+  "params": [
+   {
+    "name": "url",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "method",
+    "type": "str",
+    "enum": [
+     "GET",
+     "HEAD",
+     "OPTIONS"
+    ]
+   },
+   {
+    "name": "headers",
+    "type": "dict"
+   },
+   {
+    "name": "followRedirects",
+    "type": "bool"
+   },
+   {
+    "name": "timeout",
+    "type": "int"
+   }
+  ]
+ },
+ "apiV2FileProfile": {
+  "name": "apiV2FileProfile",
+  "returns": "structure of a data file: columns, types, row counts, null/value stats and a data-quality snapshot",
+  "needs": [
+   "?filepath"
+  ],
+  "params": [
+   {
+    "name": "filepath",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "profile_depth",
+    "type": "str",
+    "enum": [
+     "quick",
+     "standard",
+     "deep"
+    ]
+   }
+  ]
+ },
+ "apiV2OrderRegister": {
+  "name": "apiV2OrderRegister",
+  "returns": "confirmation of a newly created FragilePAK order with its assigned order/tracking identifiers",
+  "needs": [
+   "?salesOrder"
+  ],
+  "params": [
+   {
+    "name": "registrationType",
+    "type": "Any",
+    "enum": [
+     "1",
+     "2"
+    ],
+    "required": true
+   },
+   {
+    "name": "salesOrder",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "purchaseOrder",
+    "type": "str"
+   },
+   {
+    "name": "quoteId",
+    "type": "Any"
+   },
+   {
+    "name": "serviceLevel",
+    "type": "Any",
+    "enum": [
+     "2",
+     "3",
+     "4",
+     "5",
+     "6",
+     "7",
+     "8",
+     "9"
+    ],
+    "required": true
+   },
+   {
+    "name": "destinationName",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "destinationAddress",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "destinationCity",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "destinationState",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "destinationZipCode",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "destinationPhone",
+    "type": "str"
+   },
+   {
+    "name": "freightItems",
+    "type": "list",
+    "required": true
+   }
+  ]
+ },
+ "apiV2ArticleReplace": {
+  "name": "apiV2ArticleReplace",
+  "returns": "confirmation of a knowledge-base article fully overwritten with new title, Markdown body and tags, with replacement reason and revision metadata",
+  "needs": [
+   "?article_id"
+  ],
+  "params": [
+   {
+    "name": "article_id",
+    "type": "Any",
+    "required": true
+   },
+   {
+    "name": "new_body",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "new_subject",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "new_tags",
+    "type": "str"
+   },
+   {
+    "name": "reason",
+    "type": "str"
+   },
+   {
+    "name": "confidence",
+    "type": "float"
+   }
+  ]
+ },
+ "apiV2WithGoogleSearchResearch": {
+  "name": "apiV2WithGoogleSearchResearch",
+  "returns": "answers to factual/current-events questions grounded in live Google Search results, with source URLs and citations",
+  "params": [
+   {
+    "name": "query",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "focus",
+    "type": "str"
+   },
+   {
+    "name": "max_sources",
+    "type": "int"
+   }
+  ]
+ },
+ "apiV2AndCostsRevenue": {
+  "name": "apiV2AndCostsRevenue",
+  "returns": "order-level revenue, charges and cost amounts with margin per order over a date range, as bulk filterable rows for warehouse/BI sync (schema or row-count only modes available)",
+  "params": [
+   {
+    "name": "date_column",
+    "type": "str",
+    "enum": [
+     "date_added",
+     "pod_date",
+     "onboard_datetime",
+     "billing_submission_date",
+     "last_updated"
+    ]
+   },
+   {
+    "name": "start_date",
+    "type": "str"
+   },
+   {
+    "name": "end_date",
+    "type": "str"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2GeocodeReverse": {
+  "name": "apiV2GeocodeReverse",
+  "returns": "street address, locality and place components for a latitude/longitude pair",
+  "params": [
+   {
+    "name": "latitude",
+    "type": "float",
+    "required": true
+   },
+   {
+    "name": "longitude",
+    "type": "float",
+    "required": true
+   },
+   {
+    "name": "resultType",
+    "type": "str"
+   },
+   {
+    "name": "locationType",
+    "type": "str"
+   },
+   {
+    "name": "language",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2OrderSchedule": {
+  "name": "apiV2OrderSchedule",
+  "returns": "booking confirmation for a delivery appointment on an order: assigned date/window, resource and updated order status",
+  "params": [
+   {
+    "name": "orderIdentifier",
+    "type": "Any",
+    "required": true
+   },
+   {
+    "name": "resourceId",
+    "type": "Any",
+    "required": true
+   },
+   {
+    "name": "zipCode",
+    "type": "Any"
+   }
+  ]
+ },
+ "apiV2BootiesGlovesDailyScorecard": {
+  "name": "apiV2BootiesGlovesDailyScorecard",
+  "returns": "booties/gloves compliance metrics per FC at one-row-per-calendar-day snapshot grain, paged and filterable",
+  "params": [
+   {
+    "name": "snapshot_date",
+    "type": "str"
+   },
+   {
+    "name": "snapshot_date_from",
+    "type": "str"
+   },
+   {
+    "name": "snapshot_date_to",
+    "type": "str"
+   },
+   {
+    "name": "latest_snapshot_only",
+    "type": "bool"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2EdemandDailyScorecard": {
+  "name": "apiV2EdemandDailyScorecard",
+  "returns": "eDemand acceptance/fulfillment metrics per FC at daily snapshot grain, paged and filterable",
+  "params": [
+   {
+    "name": "snapshot_date",
+    "type": "str"
+   },
+   {
+    "name": "snapshot_date_from",
+    "type": "str"
+   },
+   {
+    "name": "snapshot_date_to",
+    "type": "str"
+   },
+   {
+    "name": "latest_snapshot_only",
+    "type": "bool"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2FaScorecard": {
+  "name": "apiV2FaScorecard",
+  "returns": "First Available delivery-date performance per FC broken out by mileage range, one row per FC per week (Monday-starting)",
+  "params": [
+   {
+    "name": "week_starting_date",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_from",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_to",
+    "type": "str"
+   },
+   {
+    "name": "current_week_only",
+    "type": "bool"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2FaDailyScorecard": {
+  "name": "apiV2FaDailyScorecard",
+  "returns": "First Available delivery-date performance per FC at daily snapshot grain, paged and filterable",
+  "params": [
+   {
+    "name": "snapshot_date",
+    "type": "str"
+   },
+   {
+    "name": "snapshot_date_from",
+    "type": "str"
+   },
+   {
+    "name": "snapshot_date_to",
+    "type": "str"
+   },
+   {
+    "name": "latest_snapshot_only",
+    "type": "bool"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2LeaderboardScorecard": {
+  "name": "apiV2LeaderboardScorecard",
+  "returns": "combined weekly FC ranking: composite score plus the headline metric from each scorecard category, one row per FC per week",
+  "params": [
+   {
+    "name": "week_starting_date",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_from",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_to",
+    "type": "str"
+   },
+   {
+    "name": "current_week_only",
+    "type": "bool"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2LeaderboardDailyScorecard": {
+  "name": "apiV2LeaderboardDailyScorecard",
+  "returns": "combined FC ranking and composite scores at daily snapshot grain, paged and filterable",
+  "params": [
+   {
+    "name": "snapshot_date",
+    "type": "str"
+   },
+   {
+    "name": "snapshot_date_from",
+    "type": "str"
+   },
+   {
+    "name": "snapshot_date_to",
+    "type": "str"
+   },
+   {
+    "name": "latest_snapshot_only",
+    "type": "bool"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2LfScorecard": {
+  "name": "apiV2LfScorecard",
+  "returns": "lost/damaged freight counts and rates per FC, one row per FC per week (Monday-starting)",
+  "params": [
+   {
+    "name": "week_starting_date",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_from",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_to",
+    "type": "str"
+   },
+   {
+    "name": "current_week_only",
+    "type": "bool"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2LfDailyScorecard": {
+  "name": "apiV2LfDailyScorecard",
+  "returns": "LF metric values per fulfillment center at one-row-per-day snapshot grain, paginated",
+  "params": [
+   {
+    "name": "snapshot_date",
+    "type": "str"
+   },
+   {
+    "name": "snapshot_date_from",
+    "type": "str"
+   },
+   {
+    "name": "snapshot_date_to",
+    "type": "str"
+   },
+   {
+    "name": "latest_snapshot_only",
+    "type": "bool"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "dict"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2NpsDailyScorecard": {
+  "name": "apiV2NpsDailyScorecard",
+  "returns": "net promoter score results per fulfillment center at one-row-per-day snapshot grain, paginated",
+  "params": [
+   {
+    "name": "snapshot_date",
+    "type": "str"
+   },
+   {
+    "name": "snapshot_date_from",
+    "type": "str"
+   },
+   {
+    "name": "snapshot_date_to",
+    "type": "str"
+   },
+   {
+    "name": "latest_snapshot_only",
+    "type": "bool"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "dict"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2PerfectpartnerDetailScorecard": {
+  "name": "apiV2PerfectpartnerDetailScorecard",
+  "returns": "individual Perfect Partner report records, one row per qualifying event with source row keys, filtered by the date it was added to the table",
+  "params": [
+   {
+    "name": "event_date_from",
+    "type": "str"
+   },
+   {
+    "name": "event_date_to",
+    "type": "str"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "dict"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2ReschedulesScorecard": {
+  "name": "apiV2ReschedulesScorecard",
+  "returns": "reschedule counts and rates per fulfillment center, one row per FC per week starting Monday",
+  "params": [
+   {
+    "name": "week_starting_date",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_from",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_to",
+    "type": "str"
+   },
+   {
+    "name": "current_week_only",
+    "type": "bool"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "dict"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2ReschedulesDailyScorecard": {
+  "name": "apiV2ReschedulesDailyScorecard",
+  "returns": "reschedule counts and rates per fulfillment center at one-row-per-day snapshot grain",
+  "params": [
+   {
+    "name": "snapshot_date",
+    "type": "str"
+   },
+   {
+    "name": "snapshot_date_from",
+    "type": "str"
+   },
+   {
+    "name": "snapshot_date_to",
+    "type": "str"
+   },
+   {
+    "name": "latest_snapshot_only",
+    "type": "bool"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "dict"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2ServiceFailuresScorecard": {
+  "name": "apiV2ServiceFailuresScorecard",
+  "returns": "service failure counts and rates per fulfillment center, one row per FC per week starting Monday",
+  "params": [
+   {
+    "name": "week_starting_date",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_from",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_to",
+    "type": "str"
+   },
+   {
+    "name": "current_week_only",
+    "type": "bool"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "dict"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2ServiceFailuresDailyScorecard": {
+  "name": "apiV2ServiceFailuresDailyScorecard",
+  "returns": "service failure counts and rates per fulfillment center at one-row-per-day snapshot grain",
+  "params": [
+   {
+    "name": "snapshot_date",
+    "type": "str"
+   },
+   {
+    "name": "snapshot_date_from",
+    "type": "str"
+   },
+   {
+    "name": "snapshot_date_to",
+    "type": "str"
+   },
+   {
+    "name": "latest_snapshot_only",
+    "type": "bool"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "dict"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2TimelyResourceDailyScorecard": {
+  "name": "apiV2TimelyResourceDailyScorecard",
+  "returns": "timely resourcing / crew-staffing attainment per fulfillment center at one-row-per-day snapshot grain",
+  "params": [
+   {
+    "name": "snapshot_date",
+    "type": "str"
+   },
+   {
+    "name": "snapshot_date_from",
+    "type": "str"
+   },
+   {
+    "name": "snapshot_date_to",
+    "type": "str"
+   },
+   {
+    "name": "latest_snapshot_only",
+    "type": "bool"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "dict"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2TpsScorecard": {
+  "name": "apiV2TpsScorecard",
+  "returns": "TPS / perfect partner day counts per fulfillment center, one row per FC per week starting Monday",
+  "params": [
+   {
+    "name": "week_starting_date",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_from",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_to",
+    "type": "str"
+   },
+   {
+    "name": "current_week_only",
+    "type": "bool"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "dict"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2TpsDailyScorecard": {
+  "name": "apiV2TpsDailyScorecard",
+  "returns": "TPS / perfect partner day attainment per fulfillment center at one-row-per-day snapshot grain",
+  "params": [
+   {
+    "name": "snapshot_date",
+    "type": "str"
+   },
+   {
+    "name": "snapshot_date_from",
+    "type": "str"
+   },
+   {
+    "name": "snapshot_date_to",
+    "type": "str"
+   },
+   {
+    "name": "latest_snapshot_only",
+    "type": "bool"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "dict"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2KnowledgeBaseSearch": {
+  "name": "apiV2KnowledgeBaseSearch",
+  "returns": "knowledge base / help articles matching a plain-language question, ranked by semantic relevance score",
+  "params": [
+   {
+    "name": "query",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "min_relevance",
+    "type": "float"
+   },
+   {
+    "name": "filter_tags",
+    "type": "list"
+   }
+  ]
+ },
+ "apiV2MultistopRoutesSearch": {
+  "name": "apiV2MultistopRoutesSearch",
+  "returns": "already-built multistop routes with their stops falling in a date window, optionally narrowed to cross-dock final mile or vendor first mile",
+  "params": [
+   {
+    "name": "startDate",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "endDate",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "shipmentType",
+    "type": "str",
+    "enum": [
+     "cross_dock_final_mile",
+     "vendor_first_mile",
+     "both"
+    ]
+   }
+  ]
+ },
+ "apiV2EmailWithAttachmentsSend": {
+  "name": "apiV2EmailWithAttachmentsSend",
+  "returns": "send confirmation for an email whose body is plain text or raw HTML and which carries CSV/Excel/PDF file attachments",
+  "params": [
+   {
+    "name": "to",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "subject",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "body",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "attachments",
+    "type": "list",
+    "required": true
+   },
+   {
+    "name": "from",
+    "type": "str"
+   },
+   {
+    "name": "cc",
+    "type": "str"
+   },
+   {
+    "name": "bcc",
+    "type": "str"
+   },
+   {
+    "name": "isHTML",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2MarkdownEmailSend": {
+  "name": "apiV2MarkdownEmailSend",
+  "returns": "send confirmation for a markdown report rendered to styled HTML and mailed as the message body, no files attached",
+  "params": [
+   {
+    "name": "to",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "subject",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "markdown",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "from",
+    "type": "str"
+   },
+   {
+    "name": "cc",
+    "type": "str"
+   },
+   {
+    "name": "bcc",
+    "type": "str"
+   },
+   {
+    "name": "replyTo",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2MarkdownEmailWithAttachmentsSend": {
+  "name": "apiV2MarkdownEmailWithAttachmentsSend",
+  "returns": "send confirmation for a markdown report rendered to styled HTML as the body together with CSV/Excel/PDF attachments",
+  "params": [
+   {
+    "name": "to",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "subject",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "markdown",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "attachments",
+    "type": "list",
+    "required": true
+   },
+   {
+    "name": "from",
+    "type": "str"
+   },
+   {
+    "name": "cc",
+    "type": "str"
+   },
+   {
+    "name": "bcc",
+    "type": "str"
+   },
+   {
+    "name": "replyTo",
+    "type": "str"
+   }
+  ]
+ },
+ "apiV2DocumentSummarize": {
+  "name": "apiV2DocumentSummarize",
+  "returns": "condensed summary text of supplied document content, shaped as bullet points, prose paragraphs or an executive brief",
+  "params": [
+   {
+    "name": "text",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "format",
+    "type": "str",
+    "enum": [
+     "bullets",
+     "paragraphs",
+     "executive"
+    ]
+   },
+   {
+    "name": "max_length",
+    "type": "int"
+   }
+  ]
+ },
+ "apiV2ApiCallTest": {
+  "name": "apiV2ApiCallTest",
+  "returns": "raw HTTP response (status, headers, body) from an arbitrary external endpoint you specify, with auth applied",
+  "needs": [
+   "?url"
+  ],
+  "params": [
+   {
+    "name": "url",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "method",
+    "type": "str",
+    "enum": [
+     "GET",
+     "POST",
+     "PUT",
+     "PATCH",
+     "DELETE"
+    ]
+   },
+   {
+    "name": "auth",
+    "type": "dict"
+   },
+   {
+    "name": "headers",
+    "type": "dict"
+   },
+   {
+    "name": "queryParams",
+    "type": "dict"
+   },
+   {
+    "name": "body",
+    "type": "Any"
+   },
+   {
+    "name": "timeout",
+    "type": "int"
+   }
+  ]
+ },
+ "apiV2OnSiteEventsTime": {
+  "name": "apiV2OnSiteEventsTime",
+  "returns": "individual GPS arrival/departure validation events for driver time spent on site, one row per event with start datetime, filterable and paged",
+  "params": [
+   {
+    "name": "event_date_from",
+    "type": "str"
+   },
+   {
+    "name": "event_date_to",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_from",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_to",
+    "type": "str"
+   },
+   {
+    "name": "current_week_only",
+    "type": "bool"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "Any"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2OnSiteFcpSummaryTime": {
+  "name": "apiV2OnSiteFcpSummaryTime",
+  "returns": "time-on-site aggregates per week and per FCP/market (dwell totals and averages), one row per week × facility",
+  "params": [
+   {
+    "name": "week_starting_date",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_from",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_to",
+    "type": "str"
+   },
+   {
+    "name": "current_week_only",
+    "type": "bool"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "Any"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2OnSiteStatusBreakdownTime": {
+  "name": "apiV2OnSiteStatusBreakdownTime",
+  "returns": "counts of on-site GPS validations by validation status (validated, failed, missing) per week",
+  "params": [
+   {
+    "name": "week_starting_date",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_from",
+    "type": "str"
+   },
+   {
+    "name": "week_starting_date_to",
+    "type": "str"
+   },
+   {
+    "name": "current_week_only",
+    "type": "bool"
+   },
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "offset",
+    "type": "Any"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2ArticleUpdate": {
+  "name": "apiV2ArticleUpdate",
+  "returns": "revision confirmation for a knowledge base article whose body was corrected, with the stored change reason and human-edit guard result",
+  "params": [
+   {
+    "name": "article_id",
+    "type": "Any",
+    "required": true
+   },
+   {
+    "name": "updated_body",
+    "type": "str",
+    "required": true
+   },
+   {
+    "name": "update_reason",
+    "type": "str"
+   },
+   {
+    "name": "confidence",
+    "type": "float"
+   },
+   {
+    "name": "preserve_human_edits",
+    "type": "bool"
+   }
+  ]
+ },
+ "apiV2ZoneZipcode": {
+  "name": "apiV2ZoneZipcode",
+  "returns": "zipcode-to-delivery-zone assignments with mileage/distance per zipcode used for financial zone pricing, filterable and keyset-paged",
+  "params": [
+   {
+    "name": "limit",
+    "type": "int"
+   },
+   {
+    "name": "filters",
+    "type": "list"
+   },
+   {
+    "name": "filter_logic",
+    "type": "str",
+    "enum": [
+     "and",
+     "or"
+    ]
+   },
+   {
+    "name": "schema_only",
+    "type": "bool"
+   },
+   {
+    "name": "count_only",
+    "type": "bool"
+   },
+   {
+    "name": "offset",
+    "type": "Any"
+   }
+  ]
+ }
+}

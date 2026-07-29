@@ -9,14 +9,14 @@
  *   npx tsx bench/run.mts --providers=anthropic,openai,gemini,xai --arms=schemas,tool2code --reps=1
  *   npx tsx bench/run.mts --providers=anthropic --scenarios=order-notes --reps=1
  */
-import { readFileSync, appendFileSync } from "node:fs";
+import { readFileSync, appendFileSync, existsSync } from "node:fs";
 import { anthropicProvider } from "./providers/anthropic.js";
 import { openaiProvider } from "./providers/openai.js";
 import { geminiProvider } from "./providers/gemini.js";
 import { xaiProvider } from "./providers/xai.js";
 import type { ChatMessage, Provider, ToolResult } from "./providers/types.js";
-import { schemasArm, codeArm, leanSchemasArm, hybridArm, type Arm } from "./arms.js";
-import { SCENARIOS } from "./scenarios.js";
+import { schemasArm, codeArm, leanSchemasArm, hybridArm, textSlotsArm, type Arm } from "./arms.js";
+import { SCENARIOS, remap } from "./scenarios.js";
 import { makeExecutor, ALL_SENTINELS, IDENTIFIER_ARG } from "./mock.js";
 import type { Tool } from "../src/types.js";
 import type { Semantics } from "../src/compile.js";
@@ -26,10 +26,12 @@ const flag = (k: string, d = "") => {
   return hit ? hit.slice(hit.indexOf("=") + 1) : d;
 };
 
-const raw = JSON.parse(readFileSync("corpus/real-mcp-149.json", "utf8"));
+const corpusPath = flag("corpus", "corpus/real-mcp-149.json");
+const semanticsPath = flag("semantics", "corpus/semantics.json");
+const raw = JSON.parse(readFileSync(corpusPath, "utf8"));
 const TOOLS: Tool[] = Array.isArray(raw) ? raw : raw.tools;
 const semantics = new Map<string, Semantics>(
-  Object.entries(JSON.parse(readFileSync("corpus/semantics.json", "utf8"))) as [string, Semantics][],
+  Object.entries(JSON.parse(readFileSync(semanticsPath, "utf8"))) as [string, Semantics][],
 );
 /**
  * The previous artifact, kept so a prompt change can be measured instead of assumed.
@@ -37,9 +39,11 @@ const semantics = new Map<string, Semantics>(
  * Comparing two artifacts across two sweeps is exactly the pooling this project forbids: the
  * scenario set, the providers and the day would all differ. Both go in one sweep as two arms.
  */
-const semanticsPrev = new Map<string, Semantics>(
-  Object.entries(JSON.parse(readFileSync("corpus/semantics-prev.json", "utf8"))) as [string, Semantics][],
-);
+const semanticsPrev = existsSync("corpus/semantics-prev.json")
+  ? new Map<string, Semantics>(
+      Object.entries(JSON.parse(readFileSync("corpus/semantics-prev.json", "utf8"))) as [string, Semantics][],
+    )
+  : new Map<string, Semantics>();
 
 const ALL_PROVIDERS: Record<string, Provider> = {
   anthropic: anthropicProvider,
@@ -55,16 +59,43 @@ const ARMS: Record<string, () => Arm> = {
   tool2code: () => codeArm(TOOLS, semantics),
   code_no_slots: () => codeArm(TOOLS, undefined, "code_no_slots"),
   tool2code_prev: () => codeArm(TOOLS, semanticsPrev, "tool2code_prev"),
+  text_slots: () => textSlotsArm(TOOLS, semantics),
 };
 
 const providers = flag("providers", "anthropic,openai,gemini,xai").split(",").filter(Boolean);
 const armIds = flag("arms", "schemas,tool2code").split(",").filter(Boolean);
 const only = flag("scenarios");
 const reps = Number(flag("reps", "1"));
-const scenarios = only ? SCENARIOS.filter((s) => only.split(",").includes(s.id)) : SCENARIOS;
+let scenarios = only ? SCENARIOS.filter((s) => only.split(",").includes(s.id)) : SCENARIOS;
+// A degraded catalogue renames everything; the tasks are identical, the grading keys are not.
+if (!TOOLS.some((t) => t.name === "get_cost_of_sales")) {
+  const byMangled = new Map(TOOLS.map((t) => [t.name.toLowerCase().replace(/[^a-z0-9]/g, ""), t.name]));
+  const rename = (n: string) => {
+    const parts = n.split(/[^A-Za-z0-9]+/).filter(Boolean);
+    const key = `apiv2${parts.slice(1).join("")}${parts[0]}`.toLowerCase();
+    return byMangled.get(key) ?? n;
+  };
+  scenarios = remap(scenarios, rename);
+  const unresolvedKeys = scenarios.filter((s) => s.finalTool && !TOOLS.some((t) => t.name === s.finalTool));
+  if (unresolvedKeys.length) throw new Error(`scenario keys not found in ${corpusPath}: ${unresolvedKeys.map((s) => s.finalTool).join(", ")}`);
+}
 const sweep = flag("sweep") || new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
 const MAX_TURNS = 8;
-const execute = makeExecutor(TOOLS as any);
+/**
+ * Exact mangled→original mapping, read from a sidecar written when the corpus was degraded.
+ *
+ * An earlier version inverted the mangling by rule — take the last camel segment as the verb —
+ * and it was wrong on names like `gdrive_search_by_name`, which does not round-trip. Guessing at
+ * an inverse when the forward mapping is known and cheap to record is how a harness acquires a
+ * silent bug, and this one had already produced 24 unsatisfiable runs.
+ */
+const aliasPath = corpusPath.replace(/\.json$/, "-aliases.json");
+const aliases: Record<string, string> = existsSync(aliasPath)
+  ? JSON.parse(readFileSync(aliasPath, "utf8"))
+  : {};
+const canonicalName = (name: string): string => aliases[name] ?? name;
+
+const execute = makeExecutor(TOOLS as any, canonicalName);
 
 const SYSTEM =
   "You are a logistics and operations assistant with access to a large internal tool catalogue. " +
@@ -194,7 +225,7 @@ for (const pid of providers) {
         }
 
         const row = {
-          sweep, provider: pid, model: provider.model, arm: armId, scenario: scenario.id, rep,
+          sweep, corpus: corpusPath, provider: pid, model: provider.model, arm: armId, scenario: scenario.id, rep,
           kind: scenario.kind,
           correct, fabricated, outOfOrder,
           trapped,

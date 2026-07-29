@@ -48,6 +48,22 @@ export type Scenario = {
   requireArg?: string;
 };
 
+/**
+ * Rewrite a scenario's tool references for a degraded catalogue.
+ *
+ * The prompts are unchanged — a person asks for the same thing whether or not the catalogue is
+ * well built — but `get_cost_of_sales` is called `apiV2CostOfSalesGet` there, so the grading keys
+ * have to follow. Nothing about the task changes; only the names it is graded against.
+ */
+export function remap(scenarios: Scenario[], rename: (n: string) => string): Scenario[] {
+  return scenarios.map((s) => ({
+    ...s,
+    finalTool: s.finalTool ? rename(s.finalTool) : undefined,
+    producers: s.producers?.map(rename),
+    trapTools: s.trapTools?.map(rename),
+  }));
+}
+
 export const SCENARIOS: Scenario[] = [
   // ---- discrimination: bulk export vs single-entity lookup ----
   {

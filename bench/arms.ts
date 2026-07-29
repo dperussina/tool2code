@@ -114,6 +114,70 @@ The module above is your guide to choosing between these tools: what each return
   };
 }
 
+/**
+ * The same facts, in plain English instead of Python. The experiment that decides whether this
+ * project is about code at all.
+ *
+ * Everything measured so far says the gain comes from the compiled semantics, not the code:
+ * `code_no_slots` — the identical Python module with the semantics stripped — scored *exactly*
+ * the raw-schema baseline, 40/48 against 40/48. So the honest question is whether Python is
+ * doing anything, or whether it is a container for prose that would work as well anywhere.
+ *
+ * This arm holds everything constant except the format. Same dispatcher, same one `call` tool,
+ * same compiled semantics, same derived parameter list — rendered as an indented English list
+ * with no `def`, no type annotations, no TypedDicts and no glossary to decode.
+ *
+ * If it matches `tool2code`, the Python framing is decoration and the product is compiled
+ * contrastive semantics that could ship in any format. If it loses, the code form is doing work
+ * that prose cannot.
+ */
+export function textSlotsArm(tools: Tool[], semantics: Map<string, Semantics> | undefined, id = "text_slots"): Arm {
+  const known = new Set(tools.map((t) => t.name));
+  const lines: string[] = [
+    "The tools available to you, what each returns, and what each must not be confused with:",
+    "",
+  ];
+  for (const t of tools) {
+    const schema: any = (t as any).input_schema ?? (t as any).inputSchema ?? {};
+    const required = new Set<string>(schema.required ?? []);
+    const params = Object.keys(schema.properties ?? {})
+      .map((p) => (required.has(p) ? p : `${p} (optional)`))
+      .join(", ");
+    const s = semantics?.get(t.name);
+    lines.push(`${t.name}`);
+    lines.push(`  takes: ${params || "no parameters"}`);
+    lines.push(`  ${accessWord(t.name)}; returns ${s?.returns ?? "(not compiled)"}`);
+    for (const n of s?.notThis ?? []) lines.push(`  do not confuse with ${n.tool}, which is for ${n.why}`);
+    if (s?.supersetOf?.length) lines.push(`  its results already include those of ${s.supersetOf.join(", ")}`);
+    for (const n of s?.needs ?? [])
+      lines.push(n.startsWith("?") ? `  you must already have ${n.slice(1)}` : `  call ${n} first to obtain an argument`);
+    lines.push("");
+  }
+  return {
+    id,
+    tools: [CALL_TOOL],
+    systemPreamble:
+      lines.join("\n") +
+      "\nTo use one, call the `call` tool with its name and an object of arguments.",
+    resolve: (c) => {
+      if (c.name !== "call") return null;
+      const name = String(c.args?.name ?? "");
+      if (!known.has(name)) return null;
+      const args = c.args?.args;
+      return { name, args: args && typeof args === "object" ? args : {} };
+    },
+  };
+}
+
+const WRITE_WORDS = ["create", "update", "append", "add", "register", "schedule", "upload", "submit", "send", "execute", "replace", "batch", "set", "write", "insert", "start", "post"];
+const DESTRUCTIVE_WORDS = ["delete", "remove", "clear", "drop", "purge", "cancel"];
+function accessWord(name: string): string {
+  const w = name.replace(/([a-z0-9])([A-Z])/g, "$1 $2").toLowerCase().split(/[^a-z0-9]+/);
+  if (w.some((x) => DESTRUCTIVE_WORDS.includes(x))) return "destructive";
+  if (w.some((x) => WRITE_WORDS.includes(x))) return "writes";
+  return "read-only";
+}
+
 export function schemasArm(tools: Tool[]): Arm {
   return {
     id: "schemas",

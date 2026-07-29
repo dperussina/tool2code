@@ -42,17 +42,21 @@ function mangle(name: string): string {
 function degradeProperty(v: JsonSchema, apply: Set<Degradation>): JsonSchema {
   const out: JsonSchema = { ...v };
 
+  // Truncation happens BEFORE the enum is demoted, or the demotion is deleted by it.
+  //
+  // The first version did these the other way round, so on a catalogue with both degradations the
+  // allowed values were appended and then truncated away — 50 of 101 enums became unrecoverable by
+  // anything, and the suite reported that as a failure of recovery rather than of the fixture.
+  // "Demoted to prose" has to mean the prose is still there.
+  if (apply.has("descriptions") && out.description) {
+    out.description = String(out.description).split(/[.;(]/)[0].trim().slice(0, 40);
+  }
   if (apply.has("enums") && Array.isArray(out.enum)) {
     const values = out.enum.map(String).join(", ");
-    // The constraint survives only as English, which is exactly the real failure mode: a human
-    // wrote it down for a human, and no tool can enforce or derive it.
     out.description = `${out.description ?? ""}${out.description ? " " : ""}Allowed values: ${values}.`.trim();
     delete out.enum;
   }
   if (apply.has("types")) delete out.type;
-  if (apply.has("descriptions") && out.description) {
-    out.description = String(out.description).split(/[.;(]/)[0].trim().slice(0, 40);
-  }
   if (out.properties) {
     out.properties = Object.fromEntries(
       Object.entries(out.properties).map(([k, spec]) => [k, degradeProperty(spec as JsonSchema, apply)]),
