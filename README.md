@@ -7,23 +7,37 @@ The goal is accuracy, not compression. The baseline to beat is raw JSON Schema p
 to the provider, which is what every agent does today and which keeps the provider's own
 constrained decoding — a real advantage this approach gives up and therefore has to earn back.
 
-**Status: 97.9% against a raw-JSON-Schema baseline's 83.3%**, over 192 live runs on four
-frontier providers (sweep `2026-07-28T22-29-40`). 100% on Anthropic, Gemini and OpenAI.
+> **The name overclaims, and the measurements say so.** Rendering a catalogue as code is worth
+> **0.0 points** of accuracy. What is worth **+12.5 points** is compiling each tool's purpose and,
+> above all, what it must not be confused with. See Round 5 in [`docs/RESULTS.md`](docs/RESULTS.md).
 
-| arm | completed | trap calls | prompt tokens (Anthropic) |
-|---|--:|--:|--:|
-| raw JSON Schema (baseline) | 83.3% | 7 | 224,894 |
-| **tool2code** | **97.9%** | **1** | **83,445** |
-| tool2code, semantics stripped | 83.3% | 8 | 60,845 |
+**Status: measured over five rounds, ~800 live runs, four frontier providers.**
 
-The third row is the one to read: the same module with the model-written semantics removed scores
-exactly the baseline. **The code shape is worth nothing on its own** — the gain is the compiled
-semantics, above all `vsX(why)`, which states what a tool is *not*.
+On a deliberately **badly-structured** catalogue — no declared types, no enums, no `required`
+markers, names like `apiV2CostOfSalesGet` (sweep `messy2-2026-07-29T00-40-15`):
 
-Argument construction and sequencing are saturated for every arm including the baseline, so the
-whole difference is disambiguation between near-duplicate tools. Full numbers, the prediction that
-was made and confirmed, and the five measurement bugs found along the way are in
-[`docs/RESULTS.md`](docs/RESULTS.md).
+| arm | completed | trap calls |
+|---|--:|--:|
+| raw JSON Schema (baseline) | 83.3% | 7 |
+| **compiled semantics, as a Python module** | **95.8%** | 2 |
+| **compiled semantics, as plain English** | **95.8%** | 2 |
+| Python module, semantics stripped | 83.3% | 8 |
+
+Rows 2 and 3 are the finding: **the format does not matter.** Rows 1 and 4 are the other half:
+**a typed code module with nothing compiled into it scores exactly the baseline.** All of the gain
+comes from a strong model reading the catalogue once, offline, and writing down what each tool
+returns and what it is not — every claim verified against the source before it ships.
+
+What the code form still earns, on grounds other than accuracy: it is parsed by a real Python
+parser in CI (which caught two `SyntaxError`s prose never would have), its types are derived from
+the schema rather than paraphrased, and it is deterministic and diffable.
+
+**Repair**, for catalogues that need it: 101 of 101 enums recovered from English prose
+deterministically with zero false positives, and 90.2% of inferred types exactly right against
+ground truth — with `Any` where the evidence is absent rather than a confident guess.
+
+Run `diagnose()` against your catalogue first; it tells you whether either value proposition
+applies to you, or that neither does.
 
 ## Why not just "put the schemas in a code block"
 

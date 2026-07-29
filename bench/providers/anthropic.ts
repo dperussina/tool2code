@@ -18,7 +18,19 @@ import type {
  * Model is the frontier tier. Weak models are explicitly out of scope for the
  * cross-provider comparison.
  */
-const MODEL = "claude-opus-5";
+/**
+ * Overridable so a second, weaker tier can run as its own provider row.
+ *
+ * The goal this project serves claims that models "really great at coding" leverage a typed
+ * interface better. That is a claim about *coding strength being the mechanism*, and it cannot be
+ * tested with four frontier models alone — they are all strong, so a constant advantage across
+ * them is equally consistent with the advantage having nothing to do with code.
+ *
+ * Running a materially weaker tier separates the two: if the gain is larger there, the
+ * representation is compensating for capability; if it is the same or smaller, coding strength is
+ * not what the mechanism rests on.
+ */
+const MODEL = process.env.ANTHROPIC_MODEL ?? "claude-opus-5";
 
 const client = new Anthropic();
 

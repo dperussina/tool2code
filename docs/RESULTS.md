@@ -6,6 +6,81 @@ never edited in place.
 
 ---
 
+## Round 5 — the code form contributes nothing; the semantics contribute everything
+
+Sweep `messy2-2026-07-29T00-40-15`. 192 runs on the **badly-structured** corpus: 0 declared
+types, 0 declared enums, 0 `required` markers, names like `apiV2CostOfSalesGet`.
+
+`text_slots` is the experiment this project needed and had been avoiding: the **same compiled
+semantics**, the same dispatcher, the same one `call` tool, rendered as an indented English list
+with no `def`, no type annotations, no `TypedDict`, and no glossary to decode.
+
+| arm | n | completed | discriminate | arguments | trap calls | trap first |
+|---|--:|--:|--:|--:|--:|--:|
+| `schemas` (baseline) | 48 | 83.3% (40/48) | 21/28 | 11/12 | 7 | 2 |
+| `tool2code` (Python) | 48 | **95.8% (46/48)** | 26/28 | 12/12 | 2 | 0 |
+| `text_slots` (English) | 48 | **95.8% (46/48)** | 26/28 | 12/12 | 2 | 0 |
+| `code_no_slots` (Python, no semantics) | 48 | 83.3% (40/48) | 20/28 | 12/12 | 8 | 2 |
+
+**Compiled semantics: +12.5 points. The code form: 0.0 points.**
+
+The two are identical on every axis, and they do not even fail on the same runs — `tool2code` lost
+`xai/disc-notes-single` and `xai/disc-cust-find`, `text_slots` lost `anthropic/disc-notes-single`
+and `xai/disc-cust-find`. One overlap out of two apiece is noise in both directions, not a
+concealed advantage.
+
+From the other side, `code_no_slots` — a fully typed Python module with the semantics stripped —
+scores **exactly** the raw-schema baseline for the third sweep running, and on this corpus its
+discrimination is marginally *worse* (20/28 against 21/28).
+
+### What this means for the thesis
+
+The founding claim was that **a tool catalogue expressed as code is called more accurately than
+the same catalogue expressed as JSON Schema.** That claim is now falsified in its own terms. What
+is true is narrower and different:
+
+> A catalogue whose tools have been **read once by a strong model and annotated with what each
+> returns and what it must not be confused with** is called more accurately. The format those
+> annotations arrive in does not matter.
+
+The project is a **compiled-disambiguation** product. Python is one delivery format.
+
+### What the code form is still worth, on grounds other than accuracy
+
+None of this is an argument for deleting the renderer, but the reasons are now honest ones:
+
+- **It is verifiable.** The output is parsed with a real Python parser in the test suite, which
+  caught two defects prose never would have: a required parameter emitted after an optional one,
+  and `def f(**{"from":None})`, which is a `SyntaxError` despite `**{...}` being legal in a call.
+- **Types are derived rather than described.** `filters:list[Filter]` with an eleven-value
+  operator enum comes from the schema; the English rendering has to spell the same thing out in
+  prose, which is exactly where a model would be tempted to paraphrase.
+- **It is deterministic and diffable**, so a compiled artifact can be reviewed and cached.
+- **The repair pipeline feeds both.** The semantics `text_slots` uses were compiled by a model that
+  could see recovered types, nested shapes and prose-recovered enums. Strip that and both arms get
+  worse — the shape work is upstream of the win, not an alternative to it.
+
+### What genuinely moved on the badly-structured corpus
+
+Against the same suite on the clean corpus, the baseline fell from 97.9%-competitive to 83.3%,
+while `tool2code` held at 95.8%. Repair is doing real work: **101 of 101 enums recovered from
+English prose, deterministically, with zero false positives**, and 90.2% of inferred types exactly
+right against ground truth with 9.2% honest `Any` and 0.6% wrong.
+
+Argument construction finally separated, if barely — 11/12 for the baseline against 12/12 for
+every arm carrying recovered structure.
+
+### Still open
+
+- **Coding strength as the mechanism is untested.** Four frontier models cannot distinguish
+  "code helps coding-strong models" from "code does nothing", because they are all strong. A
+  weaker tier is now runnable via `ANTHROPIC_MODEL`.
+- **One rep per cell.** 46/48 against 40/48 is a 6-run gap; 46 against 46 is a tie that more reps
+  could still separate, though nothing suggests they would.
+- **One corpus, and its degraded twin.** Both descend from the same 149 tools.
+
+---
+
 ## Round 4 — a diagnosis, a prediction, and a confirmation
 
 Sweep `2026-07-28T22-29-40`. 192 runs: 4 providers × 4 arms × 12 scenarios × 1 rep.
