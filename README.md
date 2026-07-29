@@ -39,6 +39,55 @@ ground truth — with `Any` where the evidence is absent rather than a confident
 Run `diagnose()` against your catalogue first; it tells you whether either value proposition
 applies to you, or that neither does.
 
+## Install and use
+
+```bash
+npm i tool2code
+```
+
+```bash
+# 1. Will this help my catalogue at all? No model, no network, no cost.
+npx tool2code diagnose --tools ./tools.json
+
+# 2. Read every tool once with a strong model. Your key, your provider.
+npx tool2code compile --tools ./tools.json --out ./semantics.json
+
+# 3. Emit the interface for your system prompt.
+npx tool2code render --tools ./tools.json --semantics ./semantics.json > catalogue.py
+```
+
+`diagnose` comes first deliberately — it tells you whether either value proposition applies to
+you, or that neither does:
+
+```
+149 tools, 799 parameters
+  confusable groups   15 covering 31 tools
+  untyped parameters  700
+  enums               0 declared, 101 stated only in prose
+  nested shapes       10
+
+31 of 149 tools (21%) sit in a confusable group. This is the case the contrast slot is for,
+and where the measured gain came from.
+```
+
+From code, with your own model so the library never imports an SDK or sees a key:
+
+```ts
+import { diagnose, compileTools, renderModule, renderText } from "tool2code";
+
+const { semantics } = await compileTools(tools, {
+  complete: async ({ system, user }) => callYourModel(system, user),
+});
+
+const forSystemPrompt = renderModule(tools, { semantics });   // typed Python
+const orAsProse       = renderText(tools, { semantics });     // identical accuracy
+```
+
+Both renderers ship because they measured **identically** — 46/48 each. Choose Python when you
+want the artifact parsed, diffed and type-checked in CI; text when prose suits the consumer.
+
+Accepts a bare array, `{ tools }`, or MCP's `{ result: { tools } }`. Zero runtime dependencies.
+
 ## Why not just "put the schemas in a code block"
 
 Because that was measured, and it lost. A predecessor project compiled catalogues into

@@ -390,7 +390,7 @@ export type CompileResult = {
   contradictions: [string, string][];
 };
 
-export async function compile(
+export async function compileTools(
   tools: Tool[],
   opts: { complete: Completion; batchSize?: number; retryDropped?: boolean },
 ): Promise<CompileResult> {

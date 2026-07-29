@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync } from "node:fs";
-import { compile } from "../src/compile.js";
+import { compileTools } from "../src/compile.js";
 const flag = (k: string, d: string) => {
   const hit = process.argv.slice(2).find((a) => a.startsWith(`--${k}=`));
   return hit ? hit.slice(hit.indexOf("=") + 1) : d;
@@ -23,7 +23,7 @@ const complete = async ({system,user}:{system:string;user:string}) => {
 };
 
 const t0 = Number(process.env.T0 ?? 0);
-const { semantics, rejected, contradictions } = await compile(tools, { complete, batchSize: 12 });
+const { semantics, rejected, contradictions } = await compileTools(tools, { complete, batchSize: 12 });
 console.log(`compiled ${semantics.size}/${tools.length}`);
 for (const [a, b] of contradictions) console.log(`  DROPPED contradictory superset: ${a} <-> ${b}`);
 const vs = [...semantics.values()].filter((s: any) => s.notThis?.length);

@@ -6,6 +6,74 @@ never edited in place.
 
 ---
 
+## Round 6 — the weak-model question, and the seventh instrument bug
+
+Sweep `weak2-haiku`. 48 runs, Haiku 4.5, badly-structured corpus, same twelve scenarios.
+
+The goal this project serves claims models "really great at coding" leverage a typed interface
+better. Four frontier providers cannot test that — they are all strong, so a constant advantage
+across them is equally consistent with the code form doing nothing. A materially weaker tier
+separates the two.
+
+| arm | completed | discriminate | arguments | sequence |
+|---|--:|--:|--:|--:|
+| `schemas` | 11/12 | 6/7 | 3/3 | 2/2 |
+| `tool2code` | 12/12 | 7/7 | 3/3 | 2/2 |
+| `text_slots` | 11/12 | 6/7 | 3/3 | 2/2 |
+| `code_no_slots` | 11/12 | 6/7 | 3/3 | 2/2 |
+
+**Underpowered, not answered.** All four arms sit within one run. And the suite cannot settle the
+question at all, because it does not discriminate by capability: **Haiku scored 11/12 on raw
+schemas where Opus scored 10/12.** Every arm saturates. Answering the coding-strength claim needs
+a harder suite, not more repetitions of this one.
+
+### The finding this round nearly produced
+
+The first attempt reported Haiku at 8/12 with the Python module against 12/12 with the same
+semantics in English, and **0/2 on sequencing**. That is a clean story with a plausible mechanism:
+a compressed shorthand needs decoding capacity a small model lacks. It was wrong.
+
+Both arms called the identical tools in the identical order. The raw provider payload, which the
+harness had not been recording, shows the difference:
+
+```
+tool2code   call(name, placeId, fields)   <- flattened beside `name`
+text_slots  call(name, args)              <- nested
+```
+
+`resolve()` read `args.args`, found nothing, and recorded an argument-free call. The model supplied
+`placeId` correctly and the harness discarded it. Four such runs turned a 12/12 into an 8/12.
+
+Worse, the two arms' instructions differed — `text_slots` said "an object of arguments",
+`tool2code` said "its function name and arguments" — so the comparison was between two phrasings
+of my own prompt.
+
+Three fixes, one of which is a real feature rather than a benchmark repair:
+
+- **`readArgs()` treats any key that is not `name` as an argument.** A dispatcher in production
+  meets flattened arguments too, and silently dropping a correct call is the worst available
+  behaviour. Seen on 2 of 57 calls in the corrected sweep — rare, and decisive when it happens.
+- The code arm's instruction now names `name` and `args` explicitly.
+- **`rawCallShapes` is recorded on every run**, so "the model sent nothing" and "the harness
+  dropped it" can never look identical in a results table again.
+
+Also fixed: `output_config.effort` is sent only to models that accept it. Haiku returns
+`400 This model does not support the effort parameter` and every run died at turn 0 — a
+provider-config error wearing the costume of a model failure, the same shape as Gemini's fake 0/6
+in Round 1.
+
+### Seven instrument bugs, all mine
+
+Gemini's missing dependency. Prompts that named the answer. An unsatisfiable `restraint` category.
+A string sentinel against a numeric schema. Prompt-supplied identifiers scored as fabricated.
+Sentinels invisible after renaming. A resolver discarding real arguments.
+
+Every one was found by refusing to accept a number that looked like a model failure. The +12.5
+point semantics result survived that same scrutiny across five sweeps, once against a prediction
+stated in advance, which is the reason to believe it and not the others.
+
+---
+
 ## Round 5 — the code form contributes nothing; the semantics contribute everything
 
 Sweep `messy2-2026-07-29T00-40-15`. 192 runs on the **badly-structured** corpus: 0 declared
