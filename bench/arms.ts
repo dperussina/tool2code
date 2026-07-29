@@ -43,10 +43,30 @@ const CALL_TOOL: WireTool = {
   },
 };
 
+/**
+ * Read the arguments a model meant, not only the arguments it nested correctly.
+ *
+ * Measured: Haiku 4.5 called `call(name, placeId, fields)` — the parameters beside `name` rather
+ * than inside `args`. The first resolver read `args.args`, found nothing, and recorded an
+ * argument-free call, so a run where the model did everything right was graded a failure. Four
+ * such runs turned a 12/12 into an 8/12 and produced a "weak models cannot read the code form"
+ * conclusion that was entirely an artifact of this function.
+ *
+ * A dispatcher in production faces the same thing, so tolerating it is a feature rather than a
+ * concession to the benchmark: any key that is not `name` is an argument.
+ */
+function readArgs(payload: any): Record<string, any> {
+  const nested = payload?.args;
+  if (nested && typeof nested === "object" && !Array.isArray(nested)) return nested;
+  const { name: _drop, ...rest } = payload ?? {};
+  return rest && typeof rest === "object" ? rest : {};
+}
+
 const HOW_TO_CALL = `
 Every tool available to you is defined in the Python module above. To use one, call the \`call\`
-tool with its function name and arguments. The signatures are authoritative: parameter names,
-types and allowed values are generated from the real schemas, so match them exactly.`;
+tool with \`name\` set to the function name and \`args\` set to an object of its arguments. The
+signatures are authoritative: parameter names, types and allowed values are generated from the real
+schemas, so match them exactly.`;
 
 /**
  * Strip every `description`, keep every constraint.
@@ -163,8 +183,7 @@ export function textSlotsArm(tools: Tool[], semantics: Map<string, Semantics> | 
       if (c.name !== "call") return null;
       const name = String(c.args?.name ?? "");
       if (!known.has(name)) return null;
-      const args = c.args?.args;
-      return { name, args: args && typeof args === "object" ? args : {} };
+      return { name, args: readArgs(c.args) };
     },
   };
 }
@@ -201,8 +220,7 @@ export function codeArm(tools: Tool[], semantics: Map<string, Semantics> | undef
       if (c.name !== "call") return null;
       const name = String(c.args?.name ?? "");
       if (!known.has(name)) return null;
-      const args = c.args?.args;
-      return { name, args: args && typeof args === "object" ? args : {} };
+      return { name, args: readArgs(c.args) };
     },
   };
 }

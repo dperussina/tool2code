@@ -119,6 +119,8 @@ for (const pid of providers) {
         const resultBodies: string[] = [];
         /** Every schema violation the run committed, across all calls. */
         const malformed: string[] = [];
+        /** Provider-level calls exactly as returned, for diagnosing harness-versus-model. */
+        const rawCalls: { name: string; keys: string[]; args: unknown }[] = [];
         let turns = 0;
         let unresolved = 0;
         let error: string | null = null;
@@ -141,6 +143,16 @@ for (const pid of providers) {
             messages.push({ role: "assistant", toolCalls: res.toolCalls, text: res.text, raw: res.raw });
             const results: ToolResult[] = [];
             for (const c of res.toolCalls) {
+              /**
+               * Keep what the model actually sent, before the arm interprets it.
+               *
+               * A dispatcher arm reads arguments out of `args.args`. If a model puts them beside
+               * `name` instead of inside `args`, the arm sees an empty object and the run is graded
+               * as an argument-free call — indistinguishable, in the results, from a model that
+               * supplied nothing. That is the difference between a model failure and the harness
+               * discarding the answer, and it has to be visible.
+               */
+              rawCalls.push({ name: c.name, keys: Object.keys(c.args ?? {}), args: c.args });
               const resolved = arm.resolve(c);
               if (!resolved) {
                 unresolved++;
@@ -234,6 +246,7 @@ for (const pid of providers) {
           sequence: called.map((c) => c.name),
           // The arguments of the graded call, so a failure can be diagnosed without a rerun.
           finalArgs: called.filter((c) => c.name === scenario.finalTool).map((c) => c.args),
+          rawCallShapes: rawCalls.map((c) => `${c.name}(${c.keys.join(",")})`),
           malformedCalls: malformed.length,
           malformedFirst: malformed[0] ?? null,
           turns, unresolved, promptTokens, outputTokens, error,

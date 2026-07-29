@@ -31,6 +31,7 @@ import type {
  * not what the mechanism rests on.
  */
 const MODEL = process.env.ANTHROPIC_MODEL ?? "claude-opus-5";
+const SUPPORTS_EFFORT = !/haiku/i.test(MODEL);
 
 const client = new Anthropic();
 
@@ -102,7 +103,15 @@ export const anthropicProvider: Provider = {
     const resp: any = await client.messages.create({
       model: MODEL,
       max_tokens: req.maxTokens,
-      output_config: { effort: "high" } as any,
+      /**
+       * Only the models that accept it.
+       *
+       * `output_config.effort` is an Opus/Sonnet-tier control; Haiku returns
+       * `400 This model does not support the effort parameter` and every run in the sweep died at
+       * turn 0. Pinning effort matters for comparability *within* a tier, so it stays on where it
+       * is supported rather than being dropped everywhere.
+       */
+      ...(SUPPORTS_EFFORT ? { output_config: { effort: "high" } as any } : {}),
       system: systemBlocks(req),
       tools: req.tools as any,
       messages: toAnthropicMessages(req),
