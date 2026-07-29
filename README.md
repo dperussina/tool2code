@@ -7,37 +7,29 @@ The goal is accuracy, not compression. The baseline to beat is raw JSON Schema p
 to the provider, which is what every agent does today and which keeps the provider's own
 constrained decoding — a real advantage this approach gives up and therefore has to earn back.
 
-> **The name overclaims, and the measurements say so.** Rendering a catalogue as code is worth
-> **0.0 points** of accuracy. What is worth **+12.5 points** is compiling each tool's purpose and,
-> above all, what it must not be confused with. See Round 5 in [`docs/RESULTS.md`](docs/RESULTS.md).
+> **Read this before the numbers.** Two claims this project made are withdrawn.
+>
+> **1. Rendering as code is worth nothing.** Measured directly: the same compiled semantics as
+> Python and as plain English scored 46/48 each. A typed module with the annotations stripped scores
+> the raw-schema baseline.
+>
+> **2. The headline accuracy gain was carried by a grading rule, and it did not replicate.** Every
+> sweep failed a run for touching a lookalike tool at all, even when the right tool was called first
+> and the task completed. Graded on task completion instead, the annotation-stripped arm ties the
+> full one (46/48 vs 46/48), and on a suite written by a model that had never seen this library, the
+> **baseline wins** (73/84 vs 72/84). See Round 7 in [`docs/RESULTS.md`](docs/RESULTS.md).
 
-**Status: measured over five rounds, ~800 live runs, four frontier providers.**
+**What survives, stated narrowly:** compiled contrast annotations **reduce unnecessary and wrong
+extra tool calls** on catalogues containing confusable pairs. On the clean corpus, runs where a model
+reached for the wrong sibling *first* fell from 4 to 0, and total lookalike touches from 7 to 2. That
+matters — accidentally triggering a warehouse-scale CSV export is expensive — but it is not the same
+as models completing more tasks, and the evidence for it comes from a suite whose author also built
+the mechanism.
 
-On a deliberately **badly-structured** catalogue — no declared types, no enums, no `required`
-markers, names like `apiV2CostOfSalesGet` (sweep `messy2-2026-07-29T00-40-15`):
-
-| arm | completed | trap calls |
-|---|--:|--:|
-| raw JSON Schema (baseline) | 83.3% | 7 |
-| **compiled semantics, as a Python module** | **95.8%** | 2 |
-| **compiled semantics, as plain English** | **95.8%** | 2 |
-| Python module, semantics stripped | 83.3% | 8 |
-
-Rows 2 and 3 are the finding: **the format does not matter.** Rows 1 and 4 are the other half:
-**a typed code module with nothing compiled into it scores exactly the baseline.** All of the gain
-comes from a strong model reading the catalogue once, offline, and writing down what each tool
-returns and what it is not — every claim verified against the source before it ships.
-
-What the code form still earns, on grounds other than accuracy: it is parsed by a real Python
-parser in CI (which caught two `SyntaxError`s prose never would have), its types are derived from
-the schema rather than paraphrased, and it is deterministic and diffable.
-
-**Repair**, for catalogues that need it: 101 of 101 enums recovered from English prose
-deterministically with zero false positives, and 90.2% of inferred types exactly right against
-ground truth — with `Any` where the evidence is absent rather than a confident guess.
-
-Run `diagnose()` against your catalogue first; it tells you whether either value proposition
-applies to you, or that neither does.
+**What is solid, because it needs no model and is checkable against ground truth:** structure repair.
+On a catalogue with zero declared types, **101 of 101 enums recovered from English prose with zero
+false positives**, 90.2% of inferred types exactly right, and `Any` rather than a guess where the
+evidence is absent. That part is deterministic, verified, and independent of any accuracy claim.
 
 ## Install and use
 

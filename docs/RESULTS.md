@@ -6,6 +6,89 @@ never edited in place.
 
 ---
 
+## Round 7 — the gain does not replicate, and the grading rule was carrying it
+
+Sweep `gen-2026-07-29T01-48-55`. 252 runs on the badly-structured corpus, using **21 scenarios
+written by a model that never saw the compiled module, the glossary, or any arm** — generated from
+raw names, descriptions and parameter lists, with prompts rejected mechanically if they named a tool
+or echoed the target's distinctive words. Five of 26 were rejected that way; one pair the generator
+declined as genuinely indistinguishable.
+
+| arm | n | completed | trap calls |
+|---|--:|--:|--:|
+| `schemas` | 84 | 58.3% (49/84) | 26 |
+| `tool2code` | 84 | 60.7% (51/84) | 25 |
+| `text_slots` | 84 | 59.5% (50/84) | 24 |
+
+**Two runs apart.** On the hand-written suite the same comparison was 46/48 against 40/48 with trap
+calls of 2 against 7. Here there is no difference in either.
+
+### The grading rule was doing the work
+
+Every sweep is graded strictly: touching a lookalike tool at any point fails the run, even if the
+right tool was called first and the task completed. Scoring both ways changes the conclusion.
+
+| sweep | arm | strict | lenient (task done, nothing fabricated) |
+|---|---|--:|--:|
+| clean `2026-07-28T22-29-40` | `schemas` | 40/48 | 42/48 |
+| | `tool2code` | **47/48** | 46/48 |
+| | `code_no_slots` | 40/48 | **46/48** |
+| messy `messy2-2026-07-29T00-40-15` | `schemas` | 40/48 | 43/48 |
+| | `tool2code` | **46/48** | 46/48 |
+| | `code_no_slots` | 40/48 | **46/48** |
+| independent (this round) | `schemas` | 49/84 | **73/84** |
+| | `tool2code` | 51/84 | 72/84 |
+| | `text_slots` | 50/84 | 66/84 |
+
+`code_no_slots` is the module with every compiled annotation stripped. Strictly it scores 40/48;
+leniently it scores **46/48, the same as the full arm**. It completed the same tasks. What it did
+more of was touch the bulk-export sibling on the way.
+
+So the honest reading of the earlier rounds is:
+
+> Compiled contrast annotations **reduce unnecessary and wrong extra calls.** They do not measurably
+> increase task completion.
+
+That is a real benefit — accidentally invoking a warehouse-scale CSV export in production is
+expensive, and "trap first" fell from 4 to 0 on the clean sweep — but it is **not** "models
+understand these tools significantly better". Round 2 hinted at this: lenient grading flattened all
+arms to 31/31/32, and it was recorded and then not pursued. It should have been pursued.
+
+### The independent suite is itself weak, so this is a failure to replicate rather than a refutation
+
+Of 21 scenarios: **10 are 12/12 for every arm** (saturated), **4 are 0/12 for every arm**, and only
+7 discriminate at all. On those 7: `schemas` 9/28, `tool2code` 11/28, `text_slots` 10/28.
+
+Two of the four unpassable scenarios are **my grading, not model failures** — the model called the
+correct tool first and then also touched a trap:
+
+```
+gen-get_order_details   seq=[apiV2OrderDetailsGet > ...]  calledFinal=true  trapped=[apiV2SearchOrdersQuick]
+```
+
+And in that case the "trap" label is questionable: the user supplied shipment 735U2663137, so
+looking it up first is defensible behaviour, not an error. A third scenario got **no calls at all**
+from any provider, and the fourth is an obscure scorecard-detail tool nobody selected.
+
+So: the suite that was supposed to validate the claim cannot support much weight either. What can be
+said is that **the large advantage did not reproduce once someone else wrote the questions**, and
+that the mechanism which does survive is narrower than advertised.
+
+### What this changes
+
+- The README's headline figure is withdrawn and replaced with both gradings.
+- The claim that survives: fewer wrong extra calls, on catalogues with confusable pairs, measured on
+  a suite whose author also built the mechanism.
+- The claim that does not: that any of this makes models complete more tasks.
+
+### What would settle it
+
+A suite that is neither saturated nor broken — built by someone with no stake, with every scenario
+sanity-checked to have exactly one defensible answer, and graded on task completion rather than on a
+rule chosen by the person hoping for a result.
+
+---
+
 ## Round 6 — the weak-model question, and the seventh instrument bug
 
 Sweep `weak2-haiku`. 48 runs, Haiku 4.5, badly-structured corpus, same twelve scenarios.
